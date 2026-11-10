@@ -1,4 +1,4 @@
-import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase2c-20261110';
+import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase2d-20261110';
 // Validate before changing any live editor state. Legacy V1 remains readable.
 export function validateProject(data){
  if(!data||typeof data!=='object'||![undefined,1,2].includes(data.version)||!Array.isArray(data.elements)||data.elements.length>500)throw Error('Formato o número de capas inválido');

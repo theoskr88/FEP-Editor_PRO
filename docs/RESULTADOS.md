@@ -1,43 +1,32 @@
-# Resultados · Fase 2C
+# Resultados · Fase 2D
 
-Base Fase 2B `a8d6dcd`, rama existente `desarrollo/interfaz-fase2b`. Node 24, Python 3 y Chromium Linux con WebGL SwiftShader. Se prueba escritorio y móvil emulado; no dispositivos físicos. No se ha desplegado.
+Base `fadca4c` · rama `desarrollo/interfaz-fase2b`. Chromium Linux, WebGL SwiftShader y móvil emulado. Sin despliegue.
 
-**El error comunicado de exportación `applyGlitterPreset` se reprodujo exactamente y el paquete corregido se prueba localmente. La desaparición del error en las URLs públicas está pendiente: el proxy del entorno bloquea ambos dominios antes de alcanzar Cloudflare.** Véanse diagnóstico y reversión en [FASE2C.md](FASE2C.md).
+| Comando | Aprobadas |
+|---|---:|
+| `npm test` | 50 |
+| `npm run test:boot` | 8 escenarios positivos; 4 fallos reproducidos intencionalmente |
+| `npm run test:regressions` | 3 |
+| `npm run test:browser` | 29 |
+| `npm run test:reliability` | 16 |
+| `npm run test:glitter` | 33 recorridos + 3 archivos descargados y decodificados |
+| `npm run test:interface` | 24 |
+| `npm run test:stickers` | 27 |
+| `npm run test:consolidation` | 5 |
+| `npm run test:package` | 16 comprobaciones del ZIP extraído |
 
-| Prueba | Resultado | Evidencia / alcance |
-|---|---:|---|
-| `npm test` | 50 aprobadas | Validación, glitter, proyectos, geometría y catálogo de 60 vectores |
-| `npm run test:boot` | 8 escenarios positivos y 4 fallos reproducidos | [boot.json](evidence/fase2c/boot.json): escritorio, móvil, caché glitter antiguo sin revisión, APIs antiguas, módulo 3D inválido, biblioteca UI ausente, IndexedDB bloqueado y 2D durante carga 3D |
-| `npm run test:regressions` | 3 aprobadas | Arrastre, glitter físico excluido y glitter imprimible incluido |
-| `npm run test:browser` | 29 escenarios | [Compatibilidad](evidence/fase2c/compat/browser.json): texto, imagen, capas, importación, plancha, WebGL/táctil/sin WebGL |
-| `npm run test:reliability` | 16 escenarios | Recuperación, archivos inválidos, espejo, medidas, mockup y video 360° decodificado con holográfico |
-| `npm run test:glitter` | 33 UI + 3 archivos | Controles, recetas, color libre y PNG/JPEG/PDF normal/reflejado realmente descargados y decodificados |
-| `npm run test:interface` | 24 escenarios | Seis pestañas, ambos visores en escritorio, panel móvil, miniaturas y plancha |
-| `npm run test:stickers` | 27 escenarios | [stickers-browser.json](evidence/fase2c/stickers-browser.json): 9 en escritorio, 9 móvil emulado y 9 sin WebGL |
-| `npm run test:package` | 16 comprobaciones aprobadas | ZIP Pages extraído, sin sondas inyectadas; arranque, 3D, pestañas, 60 stickers, persistencia y edición móvil |
+Evidencias completas: [fase2d](evidence/fase2d/), incluido `tasks.txt`, JSON de cada suite, `consolidation-log.txt` y `package-log.txt`. Las cantidades no son una certificación de impresión comercial.
 
-Las cantidades mezclan unidades y escenarios, no son una certificación comercial. Las degradaciones sin WebGL y los módulos ausentes son fallos provocados deliberadamente, con 2D y diagnóstico disponibles; no se cuentan como errores inesperados aprobados.
+Las pruebas de regresión verifican los ocho productos, pestañas, texto/imagen/stickers, glitter imprimible y físico separados, historia, medidas, 270°, autoguardado y respaldo, importación atómica, espejo real, PNG/JPEG/PDF a 300 ppp, plancha y video 360° con decodificación. La prueba del paquete sirve archivos reales extraídos, sin inyección de código de diagnóstico.
 
-## Comprobaciones de stickers
+## Hallazgos
 
-Los 60 paths producen píxeles reales en Canvas, además de la vista previa SVG. Se inserta al menos uno por categoría, cambia color/contorno/sombra, escala en cm, gira, voltea y edita texto asociado. Duplicar, ordenar, ocultar, bloquear, opacidad, borrar e historial conservan la independencia de capas.
+- Se reprodujo una lista de capas con **altura cero a 1024×600**. Se compactó el inspector y se reservó un área desplazable mínima; el recorrido de 75 capas comprueba ese tamaño además de escritorio grande y móvil.
+- El tirador permitía dimensiones mayores que las admitidas por JSON. Se limitó el gesto conservando proporción; el proyecto resultante pasa el validador.
+- La selección desde lienzo y tras ordenar se revela dentro de la lista sin modificar el scroll en redibujos corrientes. Los nombres largos ya no expanden el inspector.
+- Se ajustó la captura móvil para esperar a que finalice la transición CSS del panel; una captura previa mostraba el panel todavía fuera de pantalla. No se ocultó ni forzó el DOM para tomar la captura.
+- La restauración de respaldo espera al renderizador de stickers antes de sustituir el documento.
 
-La nube con HOLA se descarga y se compara con el reflejo del raster completo. Se comprueban actualización real de píxeles 3D, archivos PNG/JPEG/PDF y entrada en plancha con medidas. JSON y autoguardado recuperan el sticker y su texto; la importación inválida mantiene el documento. En escritorio se genera video 360° con stickers; la suite de fiabilidad también decodifica el video con material holográfico. El material físico no cambia el arte, y la capa glitter queda bajo los stickers.
+[Escritorio con 75 capas](evidence/fase2d/desktop-layers-75.png) · [1024×600](evidence/fase2d/compact-layers-75.png) · [Móvil](evidence/fase2d/mobile-layers-75.png).
 
-## Fallos encontrados y corregidos durante el trabajo
-
-- La primera aserción del catálogo exigía paths de más de 10 caracteres y rechazaba tallos válidos (`M60 83V10`, `M60 77V89`). Se sustituyó por validación de inicio de path y comprobación de píxeles de los 60 vectores en navegador.
-- El servidor de reproducción de la base tenía un límite de buffer de git-show menor que Three.js y devolvía 404 artificial. Se aumentó a 8 MiB y se esperó el evento real pageerror. Las excepciones documentadas son las observadas tras corregir el servidor de pruebas.
-- La revisión visual encontró una diagonal en el bocadillo redondo. Se corrigió el trazado integrado de su cola y se repitieron catálogo y pruebas.
-- El usuario aportó posteriormente la excepción exacta de glitter. Se añadió su reproducción específica y un escenario de caché antigua; las referencias coherentes de revisión corrigen ese caso sin retirar acabados.
-
-## Capturas
-
-- [Escritorio: nube con texto](evidence/fase2c/desktop-cloud-hola.png)
-- [Móvil emulado: herramientas](evidence/fase2c/mobile-cloud-hola.png)
-- [Catálogo de 60 vectores](evidence/fase2c/catalog-60.png)
-- [Transformaciones de stickers](evidence/fase2c/desktop-stickers.png)
-- [Edición sin WebGL](evidence/fase2c/noWebGL-cloud-hola.png)
-- Pruebas de pestañas, capas y plancha: [directorio de capturas de interfaz](evidence/fase2c/interface/).
-
-Los límites de impresión física, dispositivos reales, persistencia de plancha, calibración comercial y verificación pública siguen documentados en FASE2C.md. Se conserva el informe anterior en [RESULTADOS_FASE2B.md](RESULTADOS_FASE2B.md).
+Pendientes: inspección de los dominios públicos (bloqueados por el proxy del entorno), impresión física y dispositivos reales. No se declara realizada ninguna de esas pruebas. [Cambios y reversión](CONSOLIDACION_FASE2D.md).

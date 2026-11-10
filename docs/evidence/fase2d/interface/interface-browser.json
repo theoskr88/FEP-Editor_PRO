@@ -1,0 +1,125 @@
+{
+  "passed": 24,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "six real tabs, one tool panel, keyboard navigation and responsive workspaces",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "text and image tools use accordions and update document without duplicate controls",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "layer thumbnails, selection, ordering, visibility, lock and history work through the new panel",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "four presets separate printable drafts from physical material and iridescence",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "JSON and local recovery retain layers and recipes across the reorganized controls",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "print sheet is docked, keeps desktop previews visible and exports a real file",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "mobile drawer closes with Escape and 360 controls or fallback remain reachable",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "no JavaScript, shader errors or remote service dependencies",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "six real tabs, one tool panel, keyboard navigation and responsive workspaces",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "text and image tools use accordions and update document without duplicate controls",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "layer thumbnails, selection, ordering, visibility, lock and history work through the new panel",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "four presets separate printable drafts from physical material and iridescence",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "JSON and local recovery retain layers and recipes across the reorganized controls",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "print sheet is docked, keeps desktop previews visible and exports a real file",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "mobile drawer closes with Escape and 360 controls or fallback remain reachable",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "no JavaScript, shader errors or remote service dependencies",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "six real tabs, one tool panel, keyboard navigation and responsive workspaces",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "text and image tools use accordions and update document without duplicate controls",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "layer thumbnails, selection, ordering, visibility, lock and history work through the new panel",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "four presets separate printable drafts from physical material and iridescence",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "JSON and local recovery retain layers and recipes across the reorganized controls",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "print sheet is docked, keeps desktop previews visible and exports a real file",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "mobile drawer closes with Escape and 360 controls or fallback remain reachable",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "no JavaScript, shader errors or remote service dependencies",
+      "passed": true
+    }
+  ]
+}

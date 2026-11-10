@@ -1,0 +1,20 @@
+{
+  "criticalGate": "passed locally",
+  "base": "fadca4c",
+  "suiteReports": {
+    "compat/regressions.json": 3,
+    "compat/browser.json": 29,
+    "compat/reliability.json": 16,
+    "compat/glitter/glitter-browser.json": 33,
+    "compat/glitter/print-files.json": 3,
+    "interface/interface-browser.json": 24,
+    "stickers-browser.json": 27,
+    "consolidation.json": 5
+  },
+  "units": 50,
+  "bootPositive": 8,
+  "packageChecks": 16,
+  "testedRuntimeSha256": "f06626f2e2f10991a0d81dc30328e53e7ce31e341a563d039d21c3cb351589a5",
+  "productionVerified": false,
+  "deployed": false
+}

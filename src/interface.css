@@ -16,3 +16,11 @@
 textarea{font:inherit;color:inherit;background:#101b28;border:1px solid #394a60;border-radius:8px;padding:9px;resize:vertical;min-width:0}.sticker-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;max-height:200px;overflow:auto;overscroll-behavior:contain}.sticker-tile{padding:4px;min-height:58px;background:#23364a}.sticker-tile svg{display:block;width:100%;height:48px}.sticker-tile[aria-pressed=true]{border-color:#76e4c4;background:#36595b}.sticker-quick{display:flex;align-items:center;gap:12px;font-size:11px}.sticker-quick>div{width:70px;flex:none}.sticker-quick svg{width:70px;height:53px}#stickerTextFields{gap:9px}#stickerTextFields textarea{width:100%}#stickerFlipX[aria-pressed=true],#stickerFlipY[aria-pressed=true]{border-color:#76e4c4}
 
 .live-badge[data-state=loading]>i{background:#d6c579}
+
+/* Keep selection details from consuming the scrolling layer list. */
+#panel-layers>.panel-heading,#panel-layers>.layer-heading,.layer-inspector{flex-shrink:0}
+#layerSelectionSummary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#layerList{grid-auto-rows:min-content;overflow-anchor:none}
+.layer-row{min-height:58px}
+#layerList{min-height:96px}
+@media(min-width:901px) and (max-height:700px){#panel-layers>.panel-heading .eyebrow,#panel-layers>.panel-heading p,.layer-inspector>.text-action{display:none}#panel-layers>.panel-heading h2{margin:0;font-size:15px}.layer-inspector{gap:8px;padding-top:8px}#panel-layers{gap:9px}}

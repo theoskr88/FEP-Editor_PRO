@@ -1,4 +1,4 @@
-import {glitterSettings,palettes,glitterPresets,applyGlitterPreset} from './glitter.js?v=fase2c-20261110';
+import {glitterSettings,palettes,glitterPresets,applyGlitterPreset} from './glitter.js?v=fase2d-20261110';
 export function createGlitterControls({get=id=>document.getElementById(id),preview,onMaterialChange=()=>{},onDraftChange=()=>{}}={}){
  let material=glitterSettings(),draft=glitterSettings(),mode='print';
  const ids=[['glitterPalette','palette'],['glitterColor','color'],['glitterSize','size'],['glitterIntensity','intensity'],['glitterFinish','finish']];

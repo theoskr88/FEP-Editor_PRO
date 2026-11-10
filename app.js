@@ -1,14 +1,14 @@
-import {validateStickerLayer} from './src/project.js?v=fase2c-20261110';
-import {createLayerList,layerName} from './src/layer-ui.js?v=fase2c-20261110';
-import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fase2c-20261110';
-import {createGlitterCache} from './src/glitter-cache.js?v=fase2c-20261110';
-import {createGlitterControls} from './src/glitter-controls.js?v=fase2c-20261110';
-import {prepareProject} from './src/imports.js?v=fase2c-20261110';
-import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js?v=fase2c-20261110';
-import {openDocumentStore,createAutosave} from './src/persistence.js?v=fase2c-20261110';
+import {validateStickerLayer} from './src/project.js?v=fase2d-20261110';
+import {createLayerList,layerName} from './src/layer-ui.js?v=fase2d-20261110';
+import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fase2d-20261110';
+import {createGlitterCache} from './src/glitter-cache.js?v=fase2d-20261110';
+import {createGlitterControls} from './src/glitter-controls.js?v=fase2d-20261110';
+import {prepareProject} from './src/imports.js?v=fase2d-20261110';
+import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js?v=fase2d-20261110';
+import {openDocumentStore,createAutosave} from './src/persistence.js?v=fase2d-20261110';
 let THREE,OrbitControls;
 let recovering=true,stickerController,stickerPainter,stickerGeometry,stickerReady;
-if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fase2c-20261110')).initInterface()}catch{}}
+if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fase2d-20261110')).initInterface()}catch{}}
 const ui=window.__fepUI||{refresh(){}};
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 let dragStart=null,gestureHistory=false,importGeneration=0;
@@ -142,7 +142,7 @@ canvas.addEventListener('pointermove',ev=>{
     const e=elements[selected];const old=resizeStart;
     let w=Math.max(8,old.w+2*(p.x-old.x));let h=Math.max(8,old.h+2*(p.y-old.y));
     if($('keepImageRatio').checked){const factor=Math.max(.02,w/old.w);w=old.w*factor;h=old.h*factor}
-    e.widthFrac=w/canvas.width;e.heightFrac=h/canvas.height;delete e.scale;
+    const limit=Math.min(1,3*canvas.width/w,3*canvas.height/h);e.widthFrac=w*limit/canvas.width;e.heightFrac=h*limit/canvas.height;delete e.scale;
     draw();updateImageControls();return;
   }
   if(!dragging||selected<0)return;
@@ -674,7 +674,7 @@ $('addGlitterLayer').onclick=()=>{if(elements.length>=500){notify('Máximo 500 c
 function refreshLayers(){
  const list=$('layerList');if(!list)return;renderLayerList(elements,selected);
  const count=elements.length+' '+(elements.length===1?'capa':'capas');$('layerCount').textContent=$('canvasLayerCount').textContent=count;$('emptyLayers').hidden=elements.length>0;$('emptyDesignHint').hidden=elements.length>0;
- $('layerSelectionSummary').textContent=elements[selected]?layerName(elements[selected])+(elements[selected].locked?' · bloqueada':' · seleccionada'):'Selecciona una capa para editarla.';
+ $('layerSelectionSummary').title=elements[selected]?layerName(elements[selected]):'';$('layerSelectionSummary').textContent=elements[selected]?layerName(elements[selected])+(elements[selected].locked?' · bloqueada':' · seleccionada'):'Selecciona una capa para editarla.';
  $('layerOpacity').value=String(Math.round((elements[selected]?.opacity??1)*100));ui.refresh();
 }
 $('layerOpacity').onchange=ev=>{const e=elements[selected];if(!e||e.locked)return;addHistory();e.opacity=Number(ev.target.value)/100;draw()};
@@ -698,7 +698,7 @@ try{
  const assetIDs=new WeakMap();let nextID=0;const fingerprint=()=>{const state=projectSnapshot();state.elements=elements.map(({img,data,...e})=>{if(img&&!assetIDs.has(img))assetIDs.set(img,++nextID);return {...e,asset:img?assetIDs.get(img):null}});return JSON.stringify(state)};let observed=fingerprint();queueAutosave=()=>{const next=fingerprint();if(next!==observed){observed=next;autosave.schedule()}};
  for(const event of ['input','change','click'])document.addEventListener(event,()=>queueMicrotask(queueAutosave));
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autosave.flush()});window.addEventListener('pagehide',()=>autosave.flush());
- $('restorePrevious').onclick=async()=>{try{const old=await documentStore.read('previous');if(!old){notify('Todavía no hay una versión anterior.');return}const before=JSON.stringify(projectSnapshot()),prepared=await prepareProject(old.document);if(before!==JSON.stringify(projectSnapshot()))throw Error('El documento cambió; vuelve a intentarlo');applyPreparedProject(prepared);await autosave.flush();notify('Versión anterior restaurada; la versión reemplazada queda como respaldo.')}catch(error){notify('No se pudo restaurar: '+error.message)}};
+ $('restorePrevious').onclick=async()=>{try{const old=await documentStore.read('previous');if(!old){notify('Todavía no hay una versión anterior.');return}const before=JSON.stringify(projectSnapshot()),prepared=await prepareProject(old.document);if(prepared.data.elements.some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(before!==JSON.stringify(projectSnapshot()))throw Error('El documento cambió; vuelve a intentarlo');applyPreparedProject(prepared);await autosave.flush();notify('Versión anterior restaurada; la versión reemplazada queda como respaldo.')}catch(error){notify('No se pudo restaurar: '+error.message)}};
 }catch(error){window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);$('restorePrevious').title='Almacenamiento local no disponible'}
 finally{recovering=false;startupControls.forEach(([node,disabled])=>node.disabled=disabled);if(!autosave)$('restorePrevious').disabled=true;updateImageControls();glitterControls.switchMode(glitterControls.mode());update3DControls();stickerController?.sync();if(!stickerController&&$('stickerInsert'))$('stickerInsert').disabled=true}
 
@@ -706,7 +706,7 @@ function deadline(promise,ms,message){let timer;return Promise.race([promise,new
 
 async function loadStickers(){
  try{
-  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fase2c-20261110'),import('./src/sticker-renderer.js?v=fase2c-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fase2c-20261110');
+  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fase2d-20261110'),import('./src/sticker-renderer.js?v=fase2d-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fase2d-20261110');
   stickerController=uiModule.createStickerControls({selected:()=>elements[selected],dimensions:cmPrint,busy:()=>recovering,notify,insert:definition=>{
    if(recovering)return;if(elements.length>=500){notify('Máximo 500 capas');return}
    const layer={type:'sticker',stickerId:definition.id,stickerName:definition.name,x:.5,y:.5,widthFrac:.28,heightFrac:.28*canvas.width/canvas.height*.75,color:'#e6eef9',outlineColor:'#52697e',outlineWidth:definition.shapes[0].stroke?1.5:0,rotation:0,flipX:false,flipY:false,shadow:false,...(definition.textBox?{label:{text:'',size:14,color:'#172b4d'}}:{})};validateStickerLayer(layer);addHistory();elements.push(layer);selected=elements.length-1;loadSelectedTextIntoInputs();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Sticker añadido: '+definition.name)

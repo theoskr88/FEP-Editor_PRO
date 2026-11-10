@@ -14,7 +14,8 @@
     "test:glitter": "node tests/glitter-browser.mjs && node tests/print-files.mjs",
     "test:interface": "node tests/interface-browser.mjs",
     "test:boot": "node tests/boot.mjs",
-    "test:stickers": "node tests/stickers-browser.mjs"
+    "test:stickers": "node tests/stickers-browser.mjs",
+    "test:consolidation": "node tests/consolidation-browser.mjs"
   },
   "dependencies": {
     "three": "0.170.0"
