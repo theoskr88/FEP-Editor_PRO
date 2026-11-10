@@ -1,0 +1,15 @@
+export function createCreativeControls({state,apply,template,notify}){
+ const get=id=>document.getElementById(id);let last;
+ const run=fn=>{try{fn()}catch(error){notify(error.message)}};
+ get('creativeRepeat').onchange=()=>get('repeatOptions').hidden=!get('creativeRepeat').checked;get('creativeGradientOn').onchange=()=>get('gradientOptions').hidden=!get('creativeGradientOn').checked;
+ get('creativeApply').onclick=()=>run(()=>{const s=state(),e=s.elements[s.selected];if(!e)throw Error('Selecciona una capa');const patch={};if(['text','shape','vector'].includes(e.type))patch.gradient=get('creativeGradientOn').checked?{to:get('creativeGradientTo').value,angle:Number(get('creativeGradientAngle').value)}:null;
+  if(e.type==='text')patch.typography={font:get('creativeFont').value,weight:get('creativeWeight').value,tracking:Number(get('creativeTracking').value),arc:Number(get('creativeArc').value),strokeWidth:Number(get('creativeStroke').value),strokeColor:get('creativeStrokeColor').value,shadow:get('creativeShadow').checked};
+  if(e.type==='image'){patch.mask=get('creativeMask').value;patch.crop=['cropX','cropY','cropW','cropH'].map(id=>Number(get(id).value)/100);patch.repeat=get('creativeRepeat').checked?{tileCm:Number(get('repeatSize').value),gapCm:Number(get('repeatGap').value),angle:Number(get('repeatAngle').value),layout:get('repeatLayout').value}:null;if(patch.repeat&&!e.repeat)Object.assign(patch,{x:.5,y:.5,widthFrac:1,heightFrac:1});}apply(patch);notify('Efectos aplicados a la capa seleccionada')});
+ get('creativeAddTemplate').onclick=()=>run(()=>template(get('creativeTemplate').value));
+ function sync(){const s=state(),e=s.elements[s.selected],valid=e&&['text','image','shape','vector'].includes(e.type)&&e.role!=='cut';get('creativeApply').disabled=!valid||!!e?.locked;get('creativeText').hidden=e?.type!=='text';get('creativeImage').hidden=e?.type!=='image';get('creativeGradient').hidden=!valid||e.type==='image';get('creativeStatus').textContent=!valid?'Selecciona texto, imagen, figura o trazado imprimible.':e.locked?'Capa bloqueada':`Capa ${s.selected+1} · efectos no destructivos`;
+  if(e===last)return;last=e;if(!e)return;const t=e.typography||{},r=e.repeat||{},c=e.crop||[0,0,1,1];
+  const values={creativeFont:t.font||'Arial',creativeWeight:t.weight||'bold',creativeTracking:t.tracking||0,creativeArc:t.arc||0,creativeStroke:t.strokeWidth||0,creativeStrokeColor:t.strokeColor||'#163b62',creativeGradientTo:e.gradient?.to||'#e889bc',creativeGradientAngle:e.gradient?.angle||0,creativeMask:e.mask||'none',cropX:c[0]*100,cropY:c[1]*100,cropW:c[2]*100,cropH:c[3]*100,repeatSize:r.tileCm||2,repeatGap:r.gapCm??.3,repeatAngle:r.angle||0,repeatLayout:r.layout||'grid'};
+  for(const[id,value]of Object.entries(values))get(id).value=value;get('creativeShadow').checked=!!t.shadow;get('creativeGradientOn').checked=!!e.gradient;get('creativeRepeat').checked=!!e.repeat;get('repeatOptions').hidden=!e.repeat;get('gradientOptions').hidden=!e.gradient;
+ }
+ return{sync};
+}

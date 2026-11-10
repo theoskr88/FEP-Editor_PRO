@@ -1,0 +1,30 @@
+{
+  "passed": 5,
+  "tool": "Inkscape 1.4 (e7c3feb100, 2024-10-09)",
+  "checks": [
+    "actual SVG imports successfully",
+    "200\u00d790 mm physical page retained",
+    "cut has paths only, no raster or live text",
+    "2 mm offset gives 44.1\u00d740.1 mm stroke bounds",
+    "mirror geometry matches about 200 mm page"
+  ],
+  "normalBoundsMm": [
+    57.9501,
+    24.949996666666664,
+    44.09995624999999,
+    40.09998541666666
+  ],
+  "mirroredBoundsMm": [
+    97.95007291666666,
+    24.949996666666664,
+    44.09995624999999,
+    40.09998541666666
+  ],
+  "inputSha256": {
+    "cut.svg": "63929f727b8eb722412cf29b0ee5fc235304bd0354333162c47949ba0aa60b36",
+    "cut-mirror.svg": "143649fe518e3c7840eaf4fe4487a2ba4ab7c1cdd6d05a66a57da434f7595296",
+    "print.svg": "f6c15870bd9ba41760428f0b269c42c350a703cff6446954990f66c4c6eaee10"
+  },
+  "hardwarePlotterTested": false,
+  "universalCompatibilityClaimed": false
+}

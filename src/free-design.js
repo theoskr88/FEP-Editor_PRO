@@ -1,3 +1,4 @@
+import {gradientFill} from './creative.js?v=fase3d-20261110';
 // Shared physical units and native vector primitives. No alternate editor or raster SVG export.
 export const PAGE_PRESETS={A4:[21,29.7],A3:[29.7,42],Carta:[21.59,27.94]};
 export const UNIT_CM={cm:1,mm:.1,in:2.54};
@@ -31,7 +32,7 @@ export function paintShape(ctx,e,width,height){
  else if(e.shape==='triangle'){ctx.moveTo(0,-45);ctx.lineTo(60,45);ctx.lineTo(-60,45);ctx.closePath()}
  else if(e.shape==='star'){for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?.44:1;const x=Math.cos(a)*60*r,y=Math.sin(a)*45*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.closePath()}
  else ctx.rect(-60,-45,120,90);
- ctx.fillStyle=e.color;ctx.fill();if(e.outlineWidth>0){ctx.strokeStyle=e.outlineColor;ctx.lineWidth=e.outlineWidth;ctx.lineJoin='round';ctx.stroke()}ctx.restore();
+ ctx.fillStyle=gradientFill(ctx,e,120,90);ctx.fill();if(e.outlineWidth>0){ctx.strokeStyle=e.outlineColor;ctx.lineWidth=e.outlineWidth;ctx.lineJoin='round';ctx.stroke()}ctx.restore();
 }
 export function alignedPosition(bounds,width,height,action){
  const dx=action==='left'?-bounds.x:action==='centerX'?width/2-bounds.x-bounds.w/2:action==='right'?width-bounds.x-bounds.w:0;

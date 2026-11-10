@@ -1,5 +1,6 @@
-import {paintVector} from './vector.js?v=fase3c-20261110';
-import {paintShape,SHAPE_NAMES} from './free-design.js?v=fase3c-20261110';
+import {paintCreativeText,paintCreativeImage} from './creative.js?v=fase3d-20261110';
+import {paintVector} from './vector.js?v=fase3d-20261110';
+import {paintShape,SHAPE_NAMES} from './free-design.js?v=fase3d-20261110';
 // Layer presentation, reusing rows and small canvas thumbnails. Document actions
 // stay in app.js; selecting or painting a thumbnail never modifies the design.
 export function layerName(layer){return layer.type==='text'?(layer.text||'Texto vacío'):layer.type==='vector'?(layer.role==='cut'?'Contorno de corte':'Trazado editable'):layer.type==='shape'?(SHAPE_NAMES[layer.shape]||'Figura'):layer.type==='glitter'?'Glitter imprimible':layer.type==='sticker'?(layer.stickerName||'Sticker'):'Imagen'}
@@ -7,7 +8,9 @@ export function paintLayerThumbnail(canvas,layer,{image,tile,stickerPaint}={}){
  const ctx=canvas.getContext('2d'),size=48;canvas.width=canvas.height=size;
  for(let y=0;y<size;y+=8)for(let x=0;x<size;x+=8){ctx.fillStyle=(x/8+y/8)%2?'#dbe3e9':'#f5f8fb';ctx.fillRect(x,y,8,8)}
  ctx.save();ctx.globalAlpha=layer.opacity??1;
- if(layer.type==='vector')paintVector(ctx,{...layer,x:.5,y:.5,widthFrac:.8,heightFrac:.8},48,48,{cutPreview:true});
+ if(layer.type==='text'&&(layer.typography||layer.gradient))paintCreativeText(ctx,{...layer,x:.5,y:.5,size:18},48,48,48);
+ else if(layer.type==='image'&&(layer.crop||layer.mask||layer.repeat)&&image?.naturalWidth)paintCreativeImage(ctx,{...layer,x:.5,y:.5},image,48,48,10,.9,.9);
+ else if(layer.type==='vector')paintVector(ctx,{...layer,x:.5,y:.5,widthFrac:.8,heightFrac:.8},48,48,{cutPreview:true});
  else if(layer.type==='shape')paintShape(ctx,{...layer,x:.5,y:.5,widthFrac:.8,heightFrac:.75},48,48);
  else if(layer.type==='sticker'&&stickerPaint){stickerPaint(ctx,{...layer,x:.5,y:.5,widthFrac:.9,heightFrac:.68,rotation:0,shadow:false},48,48)}
  else if(layer.type==='glitter'&&tile)ctx.drawImage(tile,0,0,size,size);
@@ -24,7 +27,7 @@ export function createLayerList({list,getImage,getGlitterTile,onSelect,onToggle,
  for(const [key,title,path]of [['visible','Visible','M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0'],['locked','Bloquear','M6 10h12v11H6zM8 10V6a4 4 0 0 1 8 0v4']]){const label=document.createElement('label');label.className='layer-toggle';label.title=title;const check=document.createElement('input');check.type='checkbox';check.dataset.key=key;label.append(check);label.insertAdjacentHTML('beforeend',svg(path));row.append(label)}return row}
  return function render(elements,selected){if(elements[selected]!==lastSelection||selected!==lastIndex){lastSelection=elements[selected];lastIndex=selected;pendingReveal=selected>=0;}while(list.children.length>elements.length)list.lastElementChild.remove();for(let position=0;position<elements.length;position++){
   const index=elements.length-1-position,layer=elements[index],row=list.children[position]||list.appendChild(newRow()),button=row.querySelector('button'),canvas=button.querySelector('canvas'),name=layerName(layer),image=layer.type==='image'?getImage(layer):null;
-  if(image&&!imageIDs.has(image))imageIDs.set(image,++imageID);const signature=JSON.stringify({type:layer.type,paths:layer.paths,role:layer.role,shape:layer.shape,outline:layer.outlineColor,line:layer.outlineWidth,rotation:layer.rotation,text:layer.text,color:layer.color,opacity:layer.opacity,glitter:layer.glitter,sticker:layer.type==='sticker'?{id:layer.stickerId,fill:layer.color,outline:layer.outlineColor,line:layer.outlineWidth,label:layer.label,flipX:layer.flipX,flipY:layer.flipY}:null,image:image?imageIDs.get(image):0,width:image?.naturalWidth||0});
+  if(image&&!imageIDs.has(image))imageIDs.set(image,++imageID);const signature=JSON.stringify({type:layer.type,gradient:layer.gradient,typography:layer.typography,crop:layer.crop,mask:layer.mask,repeat:layer.repeat,paths:layer.paths,role:layer.role,shape:layer.shape,outline:layer.outlineColor,line:layer.outlineWidth,rotation:layer.rotation,text:layer.text,color:layer.color,opacity:layer.opacity,glitter:layer.glitter,sticker:layer.type==='sticker'?{id:layer.stickerId,fill:layer.color,outline:layer.outlineColor,line:layer.outlineWidth,label:layer.label,flipX:layer.flipX,flipY:layer.flipY}:null,image:image?imageIDs.get(image):0,width:image?.naturalWidth||0});
   if(row.dataset.preview!==signature){paintLayerThumbnail(canvas,layer,{image,tile:layer.type==='glitter'?getGlitterTile(layer.glitter):null,stickerPaint:getStickerRenderer()});row.dataset.preview=signature}
   row.dataset.selected=String(index===selected);row.dataset.visible=String(layer.visible!==false);button.setAttribute('aria-pressed',String(index===selected));button.setAttribute('aria-label','Seleccionar capa '+name);button.querySelector('strong').textContent=name;button.querySelector('small').textContent=(layer.type==='text'?'Texto':layer.type==='image'?'Imagen':layer.type==='shape'?'Figura':layer.type==='sticker'?'Sticker vectorial':'Base imprimible')+(layer.locked?' · bloqueada':'');button.onclick=()=>onSelect(index);
   for(const input of row.querySelectorAll('input')){const key=input.dataset.key;input.checked=key==='visible'?layer.visible!==false:!!layer.locked;input.setAttribute('aria-label',(key==='visible'?'Visible ':'Bloquear ')+index);input.onchange=()=>onToggle(index,key,input.checked)}

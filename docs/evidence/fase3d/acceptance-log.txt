@@ -1,0 +1,121 @@
+
+> fep-editor-pro@0.9.5 test:acceptance
+> node tests/acceptance-browser.mjs
+
+PASS acceptance desktop startup, six tabs and all product profiles render
+PASS acceptance desktop text, photo and sticker update artwork and actual 3D pixels
+PASS acceptance desktop layers preserve duplicate, opacity, lock, visibility, order and undo
+PASS acceptance desktop physical glitter is excluded from print while printable glitter is included
+PASS acceptance desktop autosave and JSON recover the same project
+PASS acceptance desktop PNG, JPEG, PDF and real horizontal mirror preserve physical dimensions
+PASS acceptance desktop print sheet preserves centimetres and downloads real sheet
+PASS acceptance desktop vector cut SVG remains paths only and excludes photographs
+PASS acceptance desktop 360 video generates, decodes and leaves editor responsive
+PASS acceptance desktop free design keeps all layers, physical units, guides and transparent export
+PASS acceptance mobile startup, six tabs and all product profiles render
+PASS acceptance mobile text, photo and sticker update artwork and actual 3D pixels
+PASS acceptance mobile layers preserve duplicate, opacity, lock, visibility, order and undo
+PASS acceptance mobile physical glitter is excluded from print while printable glitter is included
+PASS acceptance mobile autosave and JSON recover the same project
+PASS acceptance mobile PNG, JPEG, PDF and real horizontal mirror preserve physical dimensions
+PASS acceptance mobile print sheet preserves centimetres and downloads real sheet
+PASS acceptance mobile vector cut SVG remains paths only and excludes photographs
+PASS acceptance mobile 360 video generates, decodes and leaves editor responsive
+PASS acceptance mobile free design keeps all layers, physical units, guides and transparent export
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:stickers
+> node tests/stickers-browser.mjs
+
+PASS stickers desktop all 80 local vector definitions actually render nonempty pixels
+PASS stickers desktop search, filtered categories and insertion produce independent layers
+PASS stickers desktop resize, rotate, flip, fill, outline, shadow and associated text persist
+PASS stickers desktop layers duplicate, order, block, hide, opacity, delete and undo do not mutate originals
+PASS stickers desktop stickers move on canvas, update actual 3D pixels, and export PNG/JPEG/PDF
+PASS stickers desktop final mirror reflects all pixels of transformed sticker plus contained HOLA
+PASS stickers desktop JSON, automatic recovery and rejected unknown sticker remain atomic
+PASS stickers desktop stickers join print sheet at original cm and 360 video remains usable
+PASS stickers desktop physical glitter never enters sticker artwork; printable glitter stays below every sticker
+PASS stickers mobile all 80 local vector definitions actually render nonempty pixels
+PASS stickers mobile search, filtered categories and insertion produce independent layers
+PASS stickers mobile resize, rotate, flip, fill, outline, shadow and associated text persist
+PASS stickers mobile layers duplicate, order, block, hide, opacity, delete and undo do not mutate originals
+PASS stickers mobile stickers move on canvas, update actual 3D pixels, and export PNG/JPEG/PDF
+PASS stickers mobile final mirror reflects all pixels of transformed sticker plus contained HOLA
+PASS stickers mobile JSON, automatic recovery and rejected unknown sticker remain atomic
+PASS stickers mobile stickers join print sheet at original cm and 360 video remains usable
+PASS stickers mobile physical glitter never enters sticker artwork; printable glitter stays below every sticker
+PASS stickers noWebGL all 80 local vector definitions actually render nonempty pixels
+PASS stickers noWebGL search, filtered categories and insertion produce independent layers
+PASS stickers noWebGL resize, rotate, flip, fill, outline, shadow and associated text persist
+PASS stickers noWebGL layers duplicate, order, block, hide, opacity, delete and undo do not mutate originals
+PASS stickers noWebGL stickers move on canvas, update actual 3D pixels, and export PNG/JPEG/PDF
+PASS stickers noWebGL final mirror reflects all pixels of transformed sticker plus contained HOLA
+PASS stickers noWebGL JSON, automatic recovery and rejected unknown sticker remain atomic
+PASS stickers noWebGL stickers join print sheet at original cm and 360 video remains usable
+PASS stickers noWebGL physical glitter never enters sticker artwork; printable glitter stays below every sticker
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:vector
+> node tests/vector-browser.mjs
+
+PASS vector desktop shape conversion, node edit, subdivision and undo are real document operations
+PASS vector desktop union, difference and intersection preserve operands and physical dimensions
+PASS vector desktop cut offset never enters PNG or 3D art, and SVG separates raster print data
+PASS vector desktop local font becomes editable paths; missing glyph never fabricates a cut
+PASS vector desktop vector project autosave/recovery is atomic and retains cut roles and nodes
+PASS vector mobile shape conversion, node edit, subdivision and undo are real document operations
+PASS vector mobile union, difference and intersection preserve operands and physical dimensions
+PASS vector mobile cut offset never enters PNG or 3D art, and SVG separates raster print data
+PASS vector mobile local font becomes editable paths; missing glyph never fabricates a cut
+PASS vector mobile vector project autosave/recovery is atomic and retains cut roles and nodes
+PASS vector noWebGL shape conversion, node edit, subdivision and undo are real document operations
+PASS vector noWebGL union, difference and intersection preserve operands and physical dimensions
+PASS vector noWebGL cut offset never enters PNG or 3D art, and SVG separates raster print data
+PASS vector noWebGL local font becomes editable paths; missing glyph never fabricates a cut
+PASS vector noWebGL vector project autosave/recovery is atomic and retains cut roles and nodes
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+PASS Inkscape: import, physical units, offset, mirror and plain SVG re-export
+
+> fep-editor-pro@0.9.5 test:profiles
+> node tests/profiles-browser.mjs
+
+[
+  {
+    mode: 'desktop',
+    passed: true,
+    name: 'GLB, live texture, variants, colour, physical height, recovery and rapid switching'
+  },
+  {
+    mode: 'mobile',
+    passed: true,
+    name: 'GLB, live texture, variants, colour, physical height, recovery and rapid switching'
+  },
+  {
+    mode: 'gltf',
+    passed: true,
+    name: 'JSON glTF with embedded buffer loads when binary GLB is unavailable'
+  },
+  {
+    mode: 'fault',
+    passed: true,
+    name: 'invalid GLB keeps 2D editing and permits return to original product'
+  }
+]
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

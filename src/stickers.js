@@ -70,6 +70,28 @@ add('label','shield','Escudo','M17 12H103V45Q103 67 60 84Q17 67 17 45Z',{x:31,y:
 add('label','pennant','Banderín','M21 8H99V66L60 84L21 66Z',{x:32,y:24,w:56,h:32});
 add('label','double','Marco doble',[path(round,'none'),path('M28 23H92Q102 23 102 33V56Q102 66 92 66H28Q18 66 18 56V33Q18 23 28 23Z','none')],{x:27,y:31,w:66,h:25});
 add('label','capsule','Etiqueta cápsula','M35 19H85A26 26 0 0 1 85 71H35A26 26 0 0 1 35 19Z',{x:29,y:29,w:62,h:31});
+
+// Twenty additional original motifs, retaining every earlier stable ID.
+add('cloud','puffy-border','Nube de cuatro lóbulos','M20 68C1 54 11 31 29 34C24 9 59 7 65 28C82 9 106 30 98 46C119 59 98 80 80 69C62 84 45 71 36 74Z',box);
+add('cloud','tiny-thought','Pensamiento compacto','M29 61C9 50 24 24 42 30C47 8 75 17 78 34C100 29 111 56 90 67H37ZM20 72A5 5 0 1 0 21 72ZM12 82A2 2 0 1 0 13 82Z',box);
+add('cloud','lightning','Nube con rayo',[path(cloud),path('M57 47L44 68H58L49 87L77 59H62L70 47Z','#f5c95f',false)]);
+add('cloud','drizzle','Nube de llovizna',[path('M22 51C5 45 12 26 29 29C30 8 62 8 67 28C85 15 108 34 95 51Z'),path('M28 62L22 77M49 59L43 74M70 62L64 77M91 59L85 74','none')]);
+add('bubble','pixel','Bocadillo pixel','M14 15H101V63H69L53 80V63H14Z',box);
+add('bubble','oval-tail','Diálogo oval con cola','M20 19Q60 -2 102 23Q123 54 84 65H48L23 82L29 63Q2 51 20 19Z',box);
+add('bubble','ribbon-talk','Diálogo cinta','M12 22H105V66H53L32 82V66H12Z',box);
+add('bubble','burst-talk','Exclamación angular','M10 28L29 24L28 8L47 19L62 5L70 23L96 10L92 31L113 42L94 53L105 76L78 69L63 87L51 69L22 80L27 57L7 51L22 42Z',box);
+add('decor','rays','Destellos radiales',[path(star(60,45,15,7)),path('M60 5V19M60 71V85M17 45H32M88 45H103M28 13L39 25M82 64L94 77M28 77L40 65M82 25L94 13','none')]);
+add('decor','heart-double','Corazones enlazados',[path('M42 70C21 57 8 39 18 25C29 13 42 25 43 32C49 15 70 18 72 34C76 50 53 65 42 70Z'),path('M77 72C60 61 51 46 60 35C67 26 78 32 79 39C84 24 103 30 104 43C105 57 88 67 77 72Z','accent')]);
+add('decor','bow','Lazo decorativo',[path('M58 40C36 10 8 12 14 36C16 51 36 55 56 49L37 79L59 65L80 80L66 48C88 54 108 46 106 29C104 12 83 17 64 40Z'),path('M57 38H66V53H57Z','accent')]);
+add('decor','wave','Onda ornamental',[path('M10 46Q23 16 39 46Q54 77 70 46Q85 16 111 46','none'),path('M10 60Q23 30 39 60Q54 91 70 60Q85 30 111 60','none')]);
+add('nature','daisy-double','Margaritas gemelas',[path('M34 39C8 23 21 9 36 26C38 2 59 8 48 29C69 14 80 34 57 42C80 49 66 68 48 56C52 82 31 83 34 59C15 72 2 54 27 47Z'),path(ellipse(43,43,9,8),'accent'),path('M85 55C68 45 78 34 86 45C88 29 103 35 96 49C112 42 118 56 101 60C116 69 105 80 94 70C95 88 81 85 83 70C66 78 61 65 78 60Z')]);
+add('nature','oak-leaf','Hoja de roble','M59 83C38 74 52 65 31 62C18 56 41 43 24 35C19 23 46 30 44 14C49 1 64 10 65 22C82 10 94 25 79 37C101 41 93 58 77 57C92 69 75 79 64 74L59 83Z');
+add('nature','dragonfly','Libélula',[path('M58 38C28 2 5 14 18 32C26 42 45 45 58 43C27 39 11 60 31 65C46 65 53 51 58 46M63 38C94 2 116 14 102 32C95 42 75 45 63 43C94 39 110 60 91 65C75 65 69 51 63 46'),path('M60 29V79M57 22A4 4 0 1 0 65 22A4 4 0 1 0 57 22','none')]);
+add('nature','wild-branch','Rama silvestre',[path('M25 83Q72 43 92 10M48 61Q16 58 29 37Q53 35 48 61M67 40Q45 20 60 10Q81 17 67 40M63 51Q94 60 100 36Q77 28 63 51','none')]);
+add('label','hexagon','Marco hexagonal','M30 10H90L113 45L90 80H30L7 45Z',box);
+add('label','notch','Etiqueta con muescas','M12 14H107L100 29L107 44L100 59L107 76H12L19 59L12 44L19 29Z',box);
+add('label','medallion','Medallón oval',[path(ellipse(60,45,49,35)),path(ellipse(60,45,42,28),'none')],box);
+add('label','ribbon-fold','Cinta plegada',[path('M8 27H30V15H90V27H113L102 47L113 68H89V76H30V68H8L19 47Z')],box);
 export const stickers=Object.freeze(list);
 const byId=new Map(stickers.map(s=>[s.id,s]));
 export const getSticker=id=>byId.get(id);

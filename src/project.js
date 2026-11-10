@@ -1,12 +1,14 @@
-import {profileById,profileVariant} from './product-profiles.js?v=fase3c-20261110';
-import {validateVector} from './vector.js?v=fase3c-20261110';
-import {normalizeFreeDesign,validateShape} from './free-design.js?v=fase3c-20261110';
-import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase3c-20261110';
+import {validateCreative,validatePatternBudget} from './creative.js?v=fase3d-20261110';
+import {profileById,profileVariant} from './product-profiles.js?v=fase3d-20261110';
+import {validateVector} from './vector.js?v=fase3d-20261110';
+import {normalizeFreeDesign,validateShape} from './free-design.js?v=fase3d-20261110';
+import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase3d-20261110';
 // Validate before changing any live editor state. Legacy V1 remains readable.
 export function validateProject(data){
  if(!data||typeof data!=='object'||![undefined,1,2].includes(data.version)||!Array.isArray(data.elements)||data.elements.length>500)throw Error('Formato o número de capas inválido');
  for(const key of ['width','height'])if(data[key]!==undefined&&(!Number.isFinite(data[key])||data[key]<1||data[key]>100))throw Error('Dimensiones fuera de 1–100 cm');
  for(const e of data.elements){
+  if(e)validateCreative(e);
   if(!e||!['text','image','glitter','sticker','shape','vector'].includes(e.type)||!Number.isFinite(e.x)||!Number.isFinite(e.y)||Math.abs(e.x)>10||Math.abs(e.y)>10)throw Error('Capa inválida');
   if(e.type==='text'&&(typeof e.text!=='string'||e.text.length>1000||!Number.isFinite(e.size)||e.size<=0||e.size>500))throw Error('Texto inválido');
   if(e.type==='image'&&(typeof e.data!=='string'||e.data.length>15_000_000||!/^data:image\/(png|jpeg|webp);base64,/.test(e.data)))throw Error('Imagen no compatible');
@@ -16,6 +18,7 @@ export function validateProject(data){
   for(const key of ['visible','locked'])if(e[key]!==undefined&&typeof e[key]!=='boolean')throw Error('Estado de capa inválido');
   if(e.opacity!==undefined&&(!Number.isFinite(e.opacity)||e.opacity<0||e.opacity>1))throw Error('Opacidad inválida');
  }
+ validatePatternBudget(data.elements,data.width||20,data.height||8.5);
  return data;
 }
 

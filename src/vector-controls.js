@@ -1,11 +1,11 @@
-import {shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,textToPaths} from './vector.js?v=fase3c-20261110';
+import {shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,textToPaths} from './vector.js?v=fase3d-20261110';
 export function createVectorControls({state,commit,exportSVG,notify}){
  const get=id=>document.getElementById(id);let optionsKey='',lastLayer;
  const run=fn=>{try{fn()}catch(error){notify(error.message)}};
  const selected=()=>{const s=state(),e=s.elements[s.selected];if(!e||e.locked)throw Error('Selecciona una capa desbloqueada');return [s,e]};
  const clone=e=>JSON.parse(JSON.stringify(e));
  get('vectorConvert').onclick=()=>run(()=>{const [s,e]=selected();commit(vectorFromPhysical(physicalPaths(e,s.w,s.h),s.w,s.h,{color:e.color}),{hideOriginal:true});notify('Figura convertida en segmentos editables; original conservado oculto')});
- get('vectorText').onclick=()=>run(()=>{const [s,e]=selected();if(e.type!=='text')throw Error('Selecciona texto');commit(vectorFromPhysical(textToPaths(e,s.w,s.h,s.canvasWidth),s.w,s.h,{color:e.color}),{hideOriginal:true});notify('Texto convertido a contornos de FEP Outline Sans')});
+ get('vectorText').onclick=()=>run(()=>{const [s,e]=selected();if(e.type!=='text')throw Error('Selecciona texto');commit(vectorFromPhysical(textToPaths(e,s.w,s.h,s.canvasWidth),s.w,s.h,{color:e.color,...(e.gradient?{gradient:{...e.gradient}}:{})}),{hideOriginal:true});notify('Texto convertido a contornos de FEP Outline Sans')});
  for(const button of document.querySelectorAll('[data-vector-op]'))button.onclick=()=>run(()=>{const s=state(),a=Number(get('vectorA').value),b=Number(get('vectorB').value);if(a===b||!s.elements[a]||!s.elements[b])throw Error('Elige dos operandos distintos');commit(vectorFromPhysical(booleanPaths(physicalPaths(s.elements[a],s.w,s.h),physicalPaths(s.elements[b],s.w,s.h),button.dataset.vectorOp),s.w,s.h,{color:s.elements[a].color}));notify('Resultado vectorial creado; operandos conservados')});
  get('vectorCreateCut').onclick=()=>run(()=>{const [s,e]=selected();commit(vectorFromPhysical(offsetPaths(physicalPaths(e,s.w,s.h),Number(get('vectorOffset').value)/10),s.w,s.h,{role:'cut',color:'#ff00aa'}));notify('Contorno creado: solo corte, excluido del PNG y del mockup')});
  function nodeSelection(){const [s,e]=selected();if(e.type!=='vector')throw Error('Selecciona un trazado editable');const ring=Math.max(0,Math.min(e.paths.length-1,Number(get('vectorRing').value)-1)),index=Math.max(0,Math.min(e.paths[ring].length-1,Number(get('vectorNode').value)-1));if(!Number.isInteger(ring)||!Number.isInteger(index))throw Error('Índice de nodo inválido');return{s,e,ring,index}}

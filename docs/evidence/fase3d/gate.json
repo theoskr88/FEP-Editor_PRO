@@ -1,0 +1,20 @@
+{
+  "phase": "fase3d",
+  "base": "463b1ac",
+  "gate": "passed locally",
+  "reports": {
+    "acceptance.json": 20,
+    "creative-browser.json": 15,
+    "stickers-browser.json": 27,
+    "vector-browser.json": 15,
+    "svg-validation.json": 5,
+    "profiles-browser.json": 4
+  },
+  "unitTests": 68,
+  "staticPackageChecks": 22,
+  "testedRuntimeSha256": "847c571246350968a626e619800ac1b211901b99e87d79cd331f37c99f47dbf2",
+  "deployed": false,
+  "physicalDevicesTested": false,
+  "physicalPrintingTested": false,
+  "hardwarePlotterTested": false
+}

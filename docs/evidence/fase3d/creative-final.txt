@@ -1,0 +1,15 @@
+PASS creative desktop curved typography, tracking, stroke, shadow and gradient render real changed pixels
+PASS creative desktop crop and ellipse mask preserve source photo and produce actual white clipped corners
+PASS creative desktop repeat uses configurable physical motifs, gap, rotation and staggered layout
+PASS creative desktop templates add native independent layers and retain existing artwork
+PASS creative desktop creative projects recover unchanged and exports retain mirror with print/cut separation
+PASS creative mobile curved typography, tracking, stroke, shadow and gradient render real changed pixels
+PASS creative mobile crop and ellipse mask preserve source photo and produce actual white clipped corners
+PASS creative mobile repeat uses configurable physical motifs, gap, rotation and staggered layout
+PASS creative mobile templates add native independent layers and retain existing artwork
+PASS creative mobile creative projects recover unchanged and exports retain mirror with print/cut separation
+PASS creative noWebGL curved typography, tracking, stroke, shadow and gradient render real changed pixels
+PASS creative noWebGL crop and ellipse mask preserve source photo and produce actual white clipped corners
+PASS creative noWebGL repeat uses configurable physical motifs, gap, rotation and staggered layout
+PASS creative noWebGL templates add native independent layers and retain existing artwork
+PASS creative noWebGL creative projects recover unchanged and exports retain mirror with print/cut separation

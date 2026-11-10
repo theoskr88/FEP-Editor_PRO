@@ -1,25 +1,27 @@
-import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById} from './src/product-profiles.js?v=fase3c-20261110';
-import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=fase3c-20261110';
-import {createVectorControls} from './src/vector-controls.js?v=fase3c-20261110';
-import {getSticker} from './src/stickers.js?v=fase3c-20261110';
-import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=fase3c-20261110';
-import {createFreeControls} from './src/free-controls.js?v=fase3c-20261110';
-import {validateStickerLayer} from './src/project.js?v=fase3c-20261110';
-import {createLayerList,layerName} from './src/layer-ui.js?v=fase3c-20261110';
-import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fase3c-20261110';
-import {createGlitterCache} from './src/glitter-cache.js?v=fase3c-20261110';
-import {createGlitterControls} from './src/glitter-controls.js?v=fase3c-20261110';
-import {prepareProject} from './src/imports.js?v=fase3c-20261110';
-import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js?v=fase3c-20261110';
-import {openDocumentStore,createAutosave} from './src/persistence.js?v=fase3c-20261110';
+import {validateCreative,validatePatternBudget,paintCreativeText,creativeTextBounds,paintCreativeImage,CREATIVE_TEMPLATES} from './src/creative.js?v=fase3d-20261110';
+import {createCreativeControls} from './src/creative-controls.js?v=fase3d-20261110';
+import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById} from './src/product-profiles.js?v=fase3d-20261110';
+import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=fase3d-20261110';
+import {createVectorControls} from './src/vector-controls.js?v=fase3d-20261110';
+import {getSticker} from './src/stickers.js?v=fase3d-20261110';
+import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=fase3d-20261110';
+import {createFreeControls} from './src/free-controls.js?v=fase3d-20261110';
+import {validateStickerLayer} from './src/project.js?v=fase3d-20261110';
+import {createLayerList,layerName} from './src/layer-ui.js?v=fase3d-20261110';
+import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fase3d-20261110';
+import {createGlitterCache} from './src/glitter-cache.js?v=fase3d-20261110';
+import {createGlitterControls} from './src/glitter-controls.js?v=fase3d-20261110';
+import {prepareProject} from './src/imports.js?v=fase3d-20261110';
+import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js?v=fase3d-20261110';
+import {openDocumentStore,createAutosave} from './src/persistence.js?v=fase3d-20261110';
 let materialVariant='original';
 let THREE,OrbitControls,resizeViewer=()=>{};
 let recovering=true,stickerController,stickerPainter,stickerGeometry,stickerReady;
-if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fase3c-20261110')).initInterface()}catch{}}
+if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fase3d-20261110')).initInterface()}catch{}}
 const ui=window.__fepUI||{refresh(){}};
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 let dragStart=null,gestureHistory=false,importGeneration=0;
-let documentWidth=20,documentHeight=8.5,editorMode='product',freeDesign=normalizeFreeDesign(),freeController,vectorController;
+let documentWidth=20,documentHeight=8.5,editorMode='product',freeDesign=normalizeFreeDesign(),freeController,vectorController,creativeController;
 let queueAutosave=()=>{},preferredGuides=$('showGuides').checked;
 let elements=[],selected=-1,dragging=false,resizing=false,resizeStart=null,history=[],redoStack=[],meshGroup,texture,renderer,scene,camera,controls,animRequest,renderQueued=false;
 // Lienzo exclusivo para texturas: nunca contiene bordes de selección.
@@ -35,12 +37,12 @@ $('productColor').oninput=()=>{buildModel()};
 $('profileVariant').onchange=()=>{materialVariant=$('profileVariant').value;buildModel();queueAutosave()};
 function setDimForProduct(){let p=$('product').value, d=dimensions[p];if(!d)return;
   if(p==='mug'||p==='tumbler')setPrintRotation(DEFAULT_PRINT_ROTATION_DEG);$('widthCm').value=d[0];$('heightCm').value=d[1]; updateDimensions(); buildModel();focusDesignFront()}
-function updateDimensions(){let w=+($('widthCm').value)||20,h=+($('heightCm').value)||8.5;w=Math.max(1,Math.min(100,w));h=Math.max(1,Math.min(100,h));$('widthCm').value=w;$('heightCm').value=h;documentWidth=w;documentHeight=h;canvas.width=Math.min(1200,Math.round(4096*w/h));canvas.height=Math.round(canvas.width*h/w);
+function updateDimensions(){let w=+($('widthCm').value)||20,h=+($('heightCm').value)||8.5;w=Math.max(1,Math.min(100,w));h=Math.max(1,Math.min(100,h));try{validatePatternBudget(elements,w,h)}catch(error){$('widthCm').value=documentWidth;$('heightCm').value=documentHeight;notify(error.message);return false}$('widthCm').value=w;$('heightCm').value=h;documentWidth=w;documentHeight=h;canvas.width=Math.min(1200,Math.round(4096*w/h));canvas.height=Math.round(canvas.width*h/w);
 textureCanvas.width=canvas.width;textureCanvas.height=canvas.height;
 $('canvasWrap').style.aspectRatio=`${w} / ${h}`;
 $('resolution').textContent=editorMode==='free'?`${Number(fromCm(w,freeDesign.unit).toFixed(3))} × ${Number(fromCm(h,freeDesign.unit).toFixed(3))} ${freeDesign.unit}`:`${w} × ${h} cm`;draw();updateImageControls()}
 function initialLayerSize(fw,ratio){const fh=fw*canvas.width/canvas.height*ratio,factor=Math.min(1,3/fh);return {widthFrac:fw*factor,heightFrac:fh*factor}}
-function copyElements(source=elements){return source.map(e=>({...e,...(e.glitter?{glitter:{...e.glitter}}:{}),...(e.label?{label:{...e.label}}:{}),...(e.paths?{paths:e.paths.map(r=>r.map(p=>[...p]))}:{})}))}
+function copyElements(source=elements){return source.map(e=>({...e,...(e.glitter?{glitter:{...e.glitter}}:{}),...(e.label?{label:{...e.label}}:{}),...(e.paths?{paths:e.paths.map(r=>r.map(p=>[...p]))}:{}),...(e.gradient?{gradient:{...e.gradient}}:{}),...(e.typography?{typography:{...e.typography}}:{}),...(e.repeat?{repeat:{...e.repeat}}:{}),...(e.crop?{crop:[...e.crop]}:{})}))}
 function trimHistory(){
  const pixels=()=>{const seen=new Set();let n=0;for(const list of [elements,...history,...redoStack])for(const e of list)if(e.type==='image'&&e.img&&!seen.has(e.data)){seen.add(e.data);n+=e.img.naturalWidth*e.img.naturalHeight}return n};
  const nodes=()=>[elements,...history,...redoStack].reduce((n,list)=>n+list.reduce((a,e)=>a+(e.paths?.reduce((b,r)=>b+r.length,0)||0),0),0);
@@ -70,12 +72,13 @@ function updateImageControls(){
   $('imageHeightCm').value=cm.h.toFixed(2);
   $('imageSelectedStatus').textContent='Imagen seleccionada · ajusta las medidas en centímetros'+(cm.w>(Number($('widthCm').value)||20)||cm.h>(Number($('heightCm').value)||8.5)?' · aviso: excede el lienzo y se recortará al exportar':'');
 }
+function canResizeLayer(e,fw,fh){try{validatePatternBudget(elements.map(item=>item===e?{...item,widthFrac:fw,heightFrac:fh}:item),documentWidth,documentHeight);return true}catch(error){notify(error.message);return false}}
 function setImageSize(w,h){
   const e=elements[selected];if(e?.type!=='image'||e.locked)return;
   const cw=Number($('widthCm').value)||20,ch=Number($('heightCm').value)||8.5;
   const ww=Number(w),hh=Number(h);
   if(!Number.isFinite(ww)||!Number.isFinite(hh)||ww<=0||hh<=0||ww>cw*3||hh>ch*3){notify('Ingresa dimensiones positivas dentro del rango permitido.');return;}
-  addHistory();e.widthFrac=ww/cw;e.heightFrac=hh/ch;
+  if(!canResizeLayer(e,ww/cw,hh/ch))return;addHistory();e.widthFrac=ww/cw;e.heightFrac=hh/ch;
   delete e.scale;draw();updateImageControls();notify('Dimensiones de la imagen actualizadas.');
 }
 $('imageWidthCm').addEventListener('change',()=>{
@@ -97,6 +100,8 @@ function paintDesign(target,width,height,{transparent=editorMode==='free'&&freeD
     const e=sourceElements[i];if(e.visible===false)continue;target.save();target.globalAlpha=e.opacity??1;
     if(e.type==='glitter'){const tile=glitterTiles.get(e.glitter);target.drawImage(tile,0,0,width,height);target.restore();continue;}
     if(e.type==='vector'){if(e.role!=='cut')paintVector(target,e,width,height);target.restore();continue;}
+    if(e.type==='text'&&(e.typography||e.gradient)){paintCreativeText(target,e,width,height,canvas.width);target.restore();continue;}
+    if(e.type==='image'&&(e.repeat||e.crop||e.mask)){const f=imageFractions(e);paintCreativeImage(target,e,getImage(e),width,height,documentWidth,f.fw,f.fh);target.restore();continue;}
     if(e.type==='shape'){paintShape(target,e,width,height);target.restore();continue;}
     if(e.type==='sticker'){if(stickerPainter)stickerPainter(target,e,width,height);target.restore();continue;}
     target.translate(e.x*width,e.y*height);
@@ -119,7 +124,7 @@ function draw(){
   refreshLayers();
   paintDesign(ctx,canvas.width,canvas.height);
   for(const e of elements)if(e.type==='vector'&&e.role==='cut'&&e.visible!==false)paintVector(ctx,e,canvas.width,canvas.height,{cutPreview:true});
-  vectorController?.sync();
+  vectorController?.sync();creativeController?.sync();
   // El borde punteado es interfaz de edición y no forma parte del diseño.
   stickerController?.sync();freeController?.sync();
   if(selected>=0){
@@ -132,7 +137,7 @@ function draw(){
   if(finishMode==='glitter')updateGlitterArtwork();updateTexture();
   if($('mirrorPreview'))refreshIndividualPreview();
 }
-function bounds(e){if(e?.type==='vector')return vectorBounds(e,canvas.width,canvas.height);if(e?.type==='shape')return shapeBounds(e,canvas.width,canvas.height);if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
+function bounds(e){if(e?.type==='text'&&(e.typography||e.gradient))return creativeTextBounds(ctx,e,canvas.width,canvas.height);if(e?.type==='vector')return vectorBounds(e,canvas.width,canvas.height);if(e?.type==='shape')return shapeBounds(e,canvas.width,canvas.height);if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
 function pos(ev){const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/canvas.width,r.height/canvas.height),w=canvas.width*scale,h=canvas.height*scale;return{x:(ev.clientX-r.left-(r.width-w)/2)/scale,y:(ev.clientY-r.top-(r.height-h)/2)/scale}}
 canvas.addEventListener('pointerdown',ev=>{
   if(dragging||resizing)return;const p=pos(ev);resizing=false;resizeStart=null;gestureHistory=false;
@@ -160,7 +165,7 @@ canvas.addEventListener('pointermove',ev=>{
     const e=elements[selected];const old=resizeStart;
     let w=Math.max(8,old.w+2*(p.x-old.x));let h=Math.max(8,old.h+2*(p.y-old.y));
     if($('keepImageRatio').checked){const factor=Math.max(.02,w/old.w);w=old.w*factor;h=old.h*factor}
-    const limit=Math.min(1,3*canvas.width/w,3*canvas.height/h);e.widthFrac=w*limit/canvas.width;e.heightFrac=h*limit/canvas.height;delete e.scale;
+    const limit=Math.min(1,3*canvas.width/w,3*canvas.height/h);if(!canResizeLayer(e,w*limit/canvas.width,h*limit/canvas.height))return;e.widthFrac=w*limit/canvas.width;e.heightFrac=h*limit/canvas.height;delete e.scale;
     draw();updateImageControls();return;
   }
   if(!dragging||selected<0)return;
@@ -175,8 +180,8 @@ canvas.addEventListener('wheel',ev=>{
   const e=elements[selected],k=ev.deltaY<0?1.08:.92;
   if(e.type==='text')e.size=Math.max(12,Math.min(500,e.size*k));
   else {
-    const f=['shape','vector'].includes(e.type)?{fw:e.widthFrac,fh:e.heightFrac}:e.type==='sticker'?stickerGeometry.stickerFractions(e,canvas.width,canvas.height):imageFractions(e);e.widthFrac=Math.max(.005,Math.min(3,f.fw*k));
-    e.heightFrac=Math.max(.005,Math.min(3,f.fh*k));delete e.scale;
+    const f=['shape','vector'].includes(e.type)?{fw:e.widthFrac,fh:e.heightFrac}:e.type==='sticker'?stickerGeometry.stickerFractions(e,canvas.width,canvas.height):imageFractions(e);const fw=Math.max(.005,Math.min(3,f.fw*k)),fh=Math.max(.005,Math.min(3,f.fh*k));if(!canResizeLayer(e,fw,fh))return;e.widthFrac=fw;
+    e.heightFrac=fh;delete e.scale;
     updateImageControls();
   }
   draw();
@@ -419,7 +424,7 @@ function focusPrintEdge(edge){
 
 function init3D(){const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,Math.max(1,node.clientWidth)/Math.max(1,node.clientHeight),.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(Math.max(1,node.clientWidth),Math.max(1,node.clientHeight));node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE?.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();const resize=()=>{const w=node.clientWidth,h=node.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)};resizeViewer=resize;typeof ResizeObserver==='function'?new ResizeObserver(resize).observe(node):window.addEventListener('resize',resize)}
 async function loadProductGLB(profile,root,bodyMaterial,printMaterial){
- try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js?v=fase3c-20261110');const loader=new GLTFLoader();let gltf;try{gltf=await deadline(loader.loadAsync(profile.url),15000,'No respondió el modelo GLB')}catch(error){if(!profile.gltfURL)throw error;gltf=await deadline(loader.loadAsync(profile.gltfURL),15000,'No respondió el modelo glTF de respaldo')}
+ try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js?v=fase3d-20261110');const loader=new GLTFLoader();let gltf;try{gltf=await deadline(loader.loadAsync(profile.url),15000,'No respondió el modelo GLB')}catch(error){if(!profile.gltfURL)throw error;gltf=await deadline(loader.loadAsync(profile.gltfURL),15000,'No respondió el modelo glTF de respaldo')}
   if(root!==modelRoot){gltf.scene.traverse(o=>{o.geometry?.dispose();if(o.material)for(const m of(Array.isArray(o.material)?o.material:[o.material]))m.dispose()});bodyMaterial.dispose();printMaterial.dispose();return}
   gltf.scene.scale.setScalar(profile.worldScale);printMaterial.map=texture;printMaterial.needsUpdate=true;let printMeshes=0;
   gltf.scene.traverse(mesh=>{if(!mesh.isMesh)return;const old=mesh.material;if(mesh.name===profile.printMesh){printMeshes++;mesh.material=printMaterial;mesh.scale.set(Math.min(1,documentWidth/profile.printCm[0]),Math.min(1,documentHeight/profile.printCm[1]),1)}else mesh.material=bodyMaterial;for(const material of(Array.isArray(old)?old:[old]))material.dispose()});
@@ -684,6 +689,10 @@ vectorController=createVectorControls({
  commit:(layer,{replace=false,hideOriginal=false}={})=>{validateVector(layer);if(!replace&&elements.length>=500)throw Error('Máximo 500 capas');const candidate=replace?elements.map((e,i)=>i===selected?layer:e):[...elements,layer];enforceDocumentBudget(candidate);addHistory();if(hideOriginal&&elements[selected])elements[selected].visible=false;if(replace)elements[selected]=layer;else{elements.push(layer);selected=elements.length-1}draw()},
  exportSVG:cutOnly=>{const result=exportVectorSVG(projectSnapshot(),{cutOnly,mirror:getMirrorMode()==='espejo',canvasWidth:canvas.width,getSticker,getRaster:e=>{const c=document.createElement('canvas');c.width=canvas.width;c.height=canvas.height;paintDesign(c.getContext('2d'),c.width,c.height,{transparent:true,onlyLayer:{...e,opacity:1}});return c.toDataURL()}});saveBlob(new Blob([result.svg],{type:'image/svg+xml'}),cutOnly?'fep-corte.svg':'fep-impresion-corte.svg');notify('SVG con medidas físicas generado. '+(cutOnly?'Solo líneas de corte; imágenes excluidas.':'Gráficos imprimibles y corte en grupos separados.'))}
 });
+creativeController=createCreativeControls({state:()=>({elements,selected,w:documentWidth,h:documentHeight}),notify,
+ apply:patch=>{const current=elements[selected];if(!current||current.locked)throw Error('Selecciona una capa desbloqueada');const next={...current,...patch};for(const key of ['gradient','typography','crop','mask','repeat'])if(next[key]===null)delete next[key];validateCreative(next);const list=elements.map((e,i)=>i===selected?next:e);validatePatternBudget(list,documentWidth,documentHeight);addHistory();elements[selected]=next;draw();updateImageControls()},
+ template:id=>{const template=CREATIVE_TEMPLATES[id];if(!template)throw Error('Plantilla no disponible');const additions=JSON.parse(JSON.stringify(template.elements));if(elements.length+additions.length>500)throw Error('Máximo 500 capas');enforceDocumentBudget([...elements,...additions]);addHistory();elements.push(...additions);selected=elements.length-1;draw();notify('Plantilla añadida como capas editables; diseño anterior conservado')}
+});
 updateDimensions();updateRotationToolbar();
 async function startThree(){
  try{
@@ -720,7 +729,7 @@ function refreshLayers(){
  $('layerOpacity').value=String(Math.round((elements[selected]?.opacity??1)*100));ui.refresh();
 }
 $('layerOpacity').onchange=ev=>{const e=elements[selected];if(!e||e.locked)return;addHistory();e.opacity=Number(ev.target.value)/100;draw()};
-$('layerDuplicate').onclick=()=>{const e=elements[selected];if(!e)return;try{if(elements.length>=500)throw Error('Máximo 500 capas');enforceDocumentBudget([...elements,e])}catch(error){notify(error.message);return}addHistory();elements.splice(selected+1,0,JSON.parse(JSON.stringify({...e,img:undefined})));selected++;draw()};
+$('layerDuplicate').onclick=()=>{const e=elements[selected];if(!e)return;try{if(elements.length>=500)throw Error('Máximo 500 capas');enforceDocumentBudget([...elements,e]);validatePatternBudget([...elements,e],documentWidth,documentHeight)}catch(error){notify(error.message);return}addHistory();elements.splice(selected+1,0,JSON.parse(JSON.stringify({...e,img:undefined})));selected++;draw()};
 for(const [id,delta] of [['layerUp',1],['layerDown',-1]])$(id).onclick=()=>{const i=selected,j=i+delta;if(i<0||j<0||j>=elements.length||elements[i].locked||((elements[i].type==='glitter')!==(elements[j].type==='glitter')))return;addHistory();[elements[i],elements[j]]=[elements[j],elements[i]];selected=j;draw()};
 
 window.__fepBoot?.enableDesign();stickerReady=loadStickers();startThree();update3DControls();
@@ -748,7 +757,7 @@ function deadline(promise,ms,message){let timer;return Promise.race([promise,new
 
 async function loadStickers(){
  try{
-  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fase3c-20261110'),import('./src/sticker-renderer.js?v=fase3c-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fase3c-20261110');
+  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fase3d-20261110'),import('./src/sticker-renderer.js?v=fase3d-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fase3d-20261110');
   stickerController=uiModule.createStickerControls({selected:()=>elements[selected],dimensions:cmPrint,busy:()=>recovering,notify,insert:definition=>{
    if(recovering)return;if(elements.length>=500){notify('Máximo 500 capas');return}
    const layer={type:'sticker',stickerId:definition.id,stickerName:definition.name,x:.5,y:.5,...initialLayerSize(.28,.75),color:'#e6eef9',outlineColor:'#52697e',outlineWidth:definition.shapes[0].stroke?1.5:0,rotation:0,flipX:false,flipY:false,shadow:false,...(definition.textBox?{label:{text:'',size:14,color:'#172b4d'}}:{})};validateStickerLayer(layer);addHistory();elements.push(layer);selected=elements.length-1;loadSelectedTextIntoInputs();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Sticker añadido: '+definition.name)
