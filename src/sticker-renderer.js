@@ -1,4 +1,4 @@
-import {getSticker} from './stickers.js?v=fase2d-20261110';
+import {getSticker} from './stickers.js?v=fase3a-20261110';
 const paths=new Map();
 export function stickerFractions(e,canvasWidth,canvasHeight){const fw=e.widthFrac??.28,fh=e.heightFrac??fw*canvasWidth/canvasHeight*.75;return {fw,fh,ratio:.75}}
 export function stickerBounds(e,width,height){const {fw,fh}=stickerFractions(e,width,height),w=fw*width,h=fh*height,a=(e.rotation||0)*Math.PI/180,bw=Math.abs(w*Math.cos(a))+Math.abs(h*Math.sin(a)),bh=Math.abs(w*Math.sin(a))+Math.abs(h*Math.cos(a));return{x:e.x*width-bw/2,y:e.y*height-bh/2,w:bw,h:bh}}

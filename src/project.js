@@ -1,13 +1,14 @@
-import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase2d-20261110';
+import {normalizeFreeDesign,validateShape} from './free-design.js?v=fase3a-20261110';
+import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase3a-20261110';
 // Validate before changing any live editor state. Legacy V1 remains readable.
 export function validateProject(data){
  if(!data||typeof data!=='object'||![undefined,1,2].includes(data.version)||!Array.isArray(data.elements)||data.elements.length>500)throw Error('Formato o número de capas inválido');
  for(const key of ['width','height'])if(data[key]!==undefined&&(!Number.isFinite(data[key])||data[key]<1||data[key]>100))throw Error('Dimensiones fuera de 1–100 cm');
  for(const e of data.elements){
-  if(!e||!['text','image','glitter','sticker'].includes(e.type)||!Number.isFinite(e.x)||!Number.isFinite(e.y)||Math.abs(e.x)>10||Math.abs(e.y)>10)throw Error('Capa inválida');
+  if(!e||!['text','image','glitter','sticker','shape'].includes(e.type)||!Number.isFinite(e.x)||!Number.isFinite(e.y)||Math.abs(e.x)>10||Math.abs(e.y)>10)throw Error('Capa inválida');
   if(e.type==='text'&&(typeof e.text!=='string'||e.text.length>1000||!Number.isFinite(e.size)||e.size<=0||e.size>500))throw Error('Texto inválido');
   if(e.type==='image'&&(typeof e.data!=='string'||e.data.length>15_000_000||!/^data:image\/(png|jpeg|webp);base64,/.test(e.data)))throw Error('Imagen no compatible');
-  if(e.type==='sticker')validateStickerLayer(e);
+  if(e.type==='sticker')validateStickerLayer(e);if(e.type==='shape')validateShape(e);
   for(const key of ['widthFrac','heightFrac','scale'])if(e[key]!==undefined&&(!Number.isFinite(e[key])||e[key]<=0||e[key]>3))throw Error('Tamaño de imagen inválido');
   if(e.glitter!==undefined&&(!e.glitter||typeof e.glitter!=='object'||Array.isArray(e.glitter)))throw Error('Parámetros glitter inválidos');
   for(const key of ['visible','locked'])if(e[key]!==undefined&&typeof e[key]!=='boolean')throw Error('Estado de capa inválido');
@@ -18,6 +19,7 @@ export function validateProject(data){
 
 export function normalizeProject(input){
  validateProject(input);
+ if(input.mode!==undefined&&!['product','free'].includes(input.mode))throw Error('Modo de documento inválido');normalizeFreeDesign(input.freeDesign);
  if(input.glitter!==undefined&&(!input.glitter||typeof input.glitter!=='object'||Array.isArray(input.glitter)))throw Error('Parámetros del material inválidos');
  if(input.glitterSchema!==undefined&&![1,GLITTER_SCHEMA].includes(input.glitterSchema))throw Error('Versión de parámetros glitter no compatible');
  if(input.glitterDraft!==undefined&&(!input.glitterDraft||typeof input.glitterDraft!=='object'||Array.isArray(input.glitterDraft)))throw Error('Borrador glitter inválido');
@@ -27,6 +29,7 @@ export function normalizeProject(input){
  for(const e of data.elements)if(e.type==='glitter')e.glitter=normalizeGlitter(e.glitter);
  if(data.finishMode==='magic'){warnings.push('El acabado antiguo se sustituyó por normal; el diseño se conservó.');data.finishMode='standard'}
  delete data.magicHeat;
+ data.mode=data.mode||'product';data.freeDesign=normalizeFreeDesign(data.freeDesign);
  data.version=2;data.finishMode=['standard','glitter'].includes(data.finishMode)?data.finishMode:'standard';
  const products=['mug','tumbler','shirt','tote','notebook','mousepad','cushion','keychain'];
  data.product=products.includes(data.product)?data.product:'mug';

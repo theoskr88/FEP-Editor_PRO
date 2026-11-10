@@ -1,0 +1,329 @@
+
+> fep-editor-pro@0.9.5 test
+> node --test tests/*.test.mjs
+
+✔ legacy project remains readable (2.904626ms)
+✔ reject nullLayer (1.66272ms)
+✔ reject badSize (3.268996ms)
+✔ reject hugeSize (1.308396ms)
+✔ reject unknownLayer (0.330299ms)
+✔ reject remoteImage (0.383298ms)
+✔ reject badOpacity (0.285181ms)
+✔ reject badPosition (0.217428ms)
+✔ reject futureVersion (0.284489ms)
+✔ reject tooMany (4.167703ms)
+✔ palette pink (0.432604ms)
+✔ palette gold (0.159251ms)
+✔ palette silver (0.089085ms)
+✔ palette blue (0.102865ms)
+✔ palette multi (0.189747ms)
+✔ palette custom (0.096956ms)
+✔ glitter controls have finite limits (0.180603ms)
+✔ deterministic printable and material textures differ (420.99218ms)
+✔ gold then a free blue color is authoritative and becomes custom (0.296167ms)
+✔ quick palettes supply their own synchronized color (0.200072ms)
+✔ legacy named palettes preserve their formerly effective color (0.350269ms)
+✔ legacy V1/V2 migrate printable and physical settings without losing artwork (1.368416ms)
+✔ new schema roundtrips independent material, draft and printable layer colors (0.474337ms)
+✔ reject future glitter schema without guessing color semantics (0.445833ms)
+✔ adaptive maps have fixed desktop and touch memory bounds (0.184629ms)
+✔ finish properties are finite and matte is rougher than gloss (0.27165ms)
+✔ irregular printable flakes use paths instead of square particle fills (85.07774ms)
+✔ normal and roughness maps align identical deterministic flake geometry (56.358697ms)
+✔ LRU tile reuse is stable and evicts allocated canvases at its cap (10.844955ms)
+✔ physical formats and unit roundtrips preserve exact centimetres (4.13945ms)
+✔ legacy projects use product mode; free settings roundtrip without altering art (1.578784ms)
+✔ malformed page, zoom and guides fail before document replacement (0.617453ms)
+✔ editable shapes validate and rotated bounds align geometrically (0.564262ms)
+✔ ruler labels represent physical units and stay bounded at extreme zoom (25.998676ms)
+✔ layout fits wide and tall art without changing its physical aspect (6.645574ms)
+✔ four recipes preserve free colors except explicit holographic multicolor (1.202777ms)
+✔ physical metallic and holographic properties stay out of ordinary glitter (0.465873ms)
+✔ JSON V2 roundtrips printable and physical recipes independently (5.606515ms)
+✔ thumbnail fits an image in 48px and never mutates layer data (0.702821ms)
+✔ metallic and holographic recipes honor matte instead of silently forcing gloss (0.305011ms)
+✔ legacy finish migration preserves art without mutating input (2.401216ms)
+✔ normalizes printable glitter under artwork and retains V2 settings (0.407054ms)
+✔ image dimensions preflight rejects huge allocation and corrupt headers (0.901881ms)
+✔ corrupt embedded image rejects preparation without mutating input (1.201073ms)
+✔ invalid material payload rejects before state application (0.287404ms)
+✔ autosave debounces to latest snapshot and reports failure (21.049232ms)
+✔ autosave serializes in-flight writes to preserve backup ordering (0.51029ms)
+✔ 60 stable local vectors, 12 in each of five categories, including required shapes (2.870535ms)
+✔ search handles accents, categories, unknown and empty results (1.073931ms)
+✔ internal SVG previews contain no remote sources or executable markup (3.976625ms)
+✔ sticker schema rejects malformed styles and text atomically (0.847971ms)
+✔ rotated sticker bounds track transformed dimensions and preserve center (0.350359ms)
+✔ V1/V2 and magic migration preserve older artwork alongside sticker data (1.164919ms)
+✔ catalog lookup rejects unknown IDs before any project state changes (20.28632ms)
+✔ valid project roundtrip normalizes sticker display names without raster assets (0.577381ms)
+ℹ tests 55
+ℹ suites 0
+ℹ pass 55
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 822.206298
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:boot
+> node tests/boot.mjs
+
+REPRODUCED resize [ 'ResizeObserver is not a constructor' ]
+REPRODUCED media [ 'media.addEventListener is not a function' ]
+REPRODUCED hasOwn [ 'Object.hasOwn is not a function' ]
+REPRODUCED glitter-export [
+  "The requested module './glitter.js' does not provide an export named 'applyGlitterPreset'"
+]
+PASS boot normal
+PASS boot stale unversioned glitter cache
+PASS boot mobile
+PASS boot legacy APIs
+PASS boot missing Three MIME fallback
+PASS boot missing sticker module
+PASS boot stalled IndexedDB
+PASS boot asynchronous 3D loading
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:regressions
+> node tests/regressions.mjs
+
+[
+  'drag preserves grab offset',
+  'export raster excludes physical glitter',
+  'export raster includes printable glitter'
+]
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:browser
+> node tests/browser.mjs
+
+{
+  "passed": 29,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "startup + print API",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "preserve original tool controls",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "text history + selection preserves redo",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "duplicate, opacity, visibility, lock",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "invalid project cannot mutate document",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "physical glitter never changes printable art",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "printable glitter is below design and changes art",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "save/reopen layers and glitter settings",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "sheet actually rotates pixels",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "no remote service requests / unhandled errors",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "startup + print API",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "preserve original tool controls",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "text history + selection preserves redo",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "duplicate, opacity, visibility, lock",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "invalid project cannot mutate document",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "physical glitter never changes printable art",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "printable glitter is below design and changes art",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "save/reopen layers and glitter settings",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "sheet actually rotates pixels",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "no remote service requests / unhandled errors",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "startup + print API",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "preserve original tool controls",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "text history + selection preserves redo",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "duplicate, opacity, visibility, lock",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "invalid project cannot mutate document",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "printable glitter is below design and changes art",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "save/reopen layers and glitter settings",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "sheet actually rotates pixels",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "no remote service requests / unhandled errors",
+      "passed": true
+    }
+  ]
+}
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:reliability
+> node tests/reliability-browser.mjs
+
+PASS legacy migration removes finish UI, retains eight products and art
+PASS PNG/JPEG/WebP images decode before insertion
+PASS corrupt image, huge dimensions and corrupt project assets are atomic
+PASS debounced autosave recovers images, sizes, text, product, glitter and placement after reload
+PASS previous IndexedDB version restores transactionally
+PASS HOLA mirror matches every reflected pixel and leaves texture normal
+PASS PNG and JPEG declare 300 dpi; PDF MediaBox matches physical cm
+PASS two 20×9 cm pieces fit A4 without scaling; overlaps and overflow rejected
+PASS plancha mirror is applied once to final raster
+PASS selected design renders on mug and updates actual WebGL pixels
+PASS 3D texture keeps updating after export and reopen; mockup PNG and video regenerate
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('#projectMenu>summary')[22m
+[2m    - locator resolved to <summary>…</summary>[22m
+[2m  - attempting click action[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <dialog open="" id="startScreen" aria-labelledby="startTitle">…</dialog> intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <dialog open="" id="startScreen" aria-labelledby="startTitle">…</dialog> intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 100ms[22m
+[2m    45 × waiting for element to be visible, enabled and stable[22m
+[2m       - element is visible, enabled and stable[22m
+[2m       - scrolling into view if needed[22m
+[2m       - done scrolling[22m
+[2m       - <dialog open="" id="startScreen" aria-labelledby="startTitle">…</dialog> intercepts pointer events[22m
+[2m     - retrying click action[22m
+[2m       - waiting 500ms[22m
+[2m    - waiting for element to be visible, enabled and stable[22m
+
+    at reveal (/workspace/FEP-Editor_PRO/tests/navigation.mjs:8:130)
+    at async Proxy.<anonymous> (/workspace/FEP-Editor_PRO/tests/navigation.mjs:11:230)
+    at async file:///workspace/FEP-Editor_PRO/tests/reliability-browser.mjs:57:633
+    at async check (/workspace/FEP-Editor_PRO/tests/reliability-browser.mjs:7:30)
+    at async file:///workspace/FEP-Editor_PRO/tests/reliability-browser.mjs:56:2 {
+  name: 'TimeoutError'
+}
+
+Node.js v24.22.1
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

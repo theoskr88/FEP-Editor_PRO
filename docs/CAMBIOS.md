@@ -1,3 +1,7 @@
+# Fases 2D y 3A
+
+Consolidación de capas, límites de resize y recuperación, validada antes de añadir Diseño libre. El mismo editor incorpora formatos, unidades, fondo transparente, ayudas de edición, zoom, formas y alineación. [Consolidación y reversión](CONSOLIDACION_FASE2D.md) · [Diseño libre y reversión](DISENO_LIBRE_FASE3A.md). Sin despliegues.
+
 # Fase 2C
 
 Arranque independiente con diagnóstico y referencias coherentes de revisión para corregir mezcla de módulos glitter; recuperación limitada por tiempo; 60 stickers vectoriales locales con texto asociado, controles y persistencia. Se conserva el motor y las funciones previas. [Informe y reversión](FASE2C.md). Sin despliegues.

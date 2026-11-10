@@ -1,18 +1,20 @@
-import {validateStickerLayer} from './src/project.js?v=fase2d-20261110';
-import {createLayerList,layerName} from './src/layer-ui.js?v=fase2d-20261110';
-import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fase2d-20261110';
-import {createGlitterCache} from './src/glitter-cache.js?v=fase2d-20261110';
-import {createGlitterControls} from './src/glitter-controls.js?v=fase2d-20261110';
-import {prepareProject} from './src/imports.js?v=fase2d-20261110';
-import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js?v=fase2d-20261110';
-import {openDocumentStore,createAutosave} from './src/persistence.js?v=fase2d-20261110';
-let THREE,OrbitControls;
+import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=fase3a-20261110';
+import {createFreeControls} from './src/free-controls.js?v=fase3a-20261110';
+import {validateStickerLayer} from './src/project.js?v=fase3a-20261110';
+import {createLayerList,layerName} from './src/layer-ui.js?v=fase3a-20261110';
+import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fase3a-20261110';
+import {createGlitterCache} from './src/glitter-cache.js?v=fase3a-20261110';
+import {createGlitterControls} from './src/glitter-controls.js?v=fase3a-20261110';
+import {prepareProject} from './src/imports.js?v=fase3a-20261110';
+import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js?v=fase3a-20261110';
+import {openDocumentStore,createAutosave} from './src/persistence.js?v=fase3a-20261110';
+let THREE,OrbitControls,resizeViewer=()=>{};
 let recovering=true,stickerController,stickerPainter,stickerGeometry,stickerReady;
-if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fase2d-20261110')).initInterface()}catch{}}
+if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fase3a-20261110')).initInterface()}catch{}}
 const ui=window.__fepUI||{refresh(){}};
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 let dragStart=null,gestureHistory=false,importGeneration=0;
-let documentWidth=20,documentHeight=8.5;
+let documentWidth=20,documentHeight=8.5,editorMode='product',freeDesign=normalizeFreeDesign(),freeController;
 let queueAutosave=()=>{},preferredGuides=$('showGuides').checked;
 let elements=[],selected=-1,dragging=false,resizing=false,resizeStart=null,history=[],redoStack=[],meshGroup,texture,renderer,scene,camera,controls,animRequest,renderQueued=false;
 // Lienzo exclusivo para texturas: nunca contiene bordes de selección.
@@ -27,7 +29,8 @@ function setDimForProduct(){let p=$('product').value, d=dimensions[p];if(!d)retu
 function updateDimensions(){let w=+($('widthCm').value)||20,h=+($('heightCm').value)||8.5;w=Math.max(1,Math.min(100,w));h=Math.max(1,Math.min(100,h));$('widthCm').value=w;$('heightCm').value=h;documentWidth=w;documentHeight=h;canvas.width=Math.min(1200,Math.round(4096*w/h));canvas.height=Math.round(canvas.width*h/w);
 textureCanvas.width=canvas.width;textureCanvas.height=canvas.height;
 $('canvasWrap').style.aspectRatio=`${w} / ${h}`;
-$('resolution').textContent=`${w} × ${h} cm`;draw();updateImageControls()}
+$('resolution').textContent=editorMode==='free'?`${Number(fromCm(w,freeDesign.unit).toFixed(3))} × ${Number(fromCm(h,freeDesign.unit).toFixed(3))} ${freeDesign.unit}`:`${w} × ${h} cm`;draw();updateImageControls()}
+function initialLayerSize(fw,ratio){const fh=fw*canvas.width/canvas.height*ratio,factor=Math.min(1,3/fh);return {widthFrac:fw*factor,heightFrac:fh*factor}}
 function copyElements(source=elements){return source.map(e=>({...e,...(e.glitter?{glitter:{...e.glitter}}:{}),...(e.label?{label:{...e.label}}:{})}))}
 function trimHistory(){
  const pixels=()=>{const seen=new Set();let n=0;for(const list of [elements,...history,...redoStack])for(const e of list)if(e.type==='image'&&e.img&&!seen.has(e.data)){seen.add(e.data);n+=e.img.naturalWidth*e.img.naturalHeight}return n};
@@ -76,12 +79,13 @@ $('imageHeightCm').addEventListener('change',()=>{
   setImageSize($('keepImageRatio').checked?h*old.w/old.h:Number($('imageWidthCm').value),h);
 });
 
-function paintDesign(target,width,height,{transparent=false}={}){
+function paintDesign(target,width,height,{transparent=editorMode==='free'&&freeDesign.background==='transparent'}={}){
   target.clearRect(0,0,width,height);
   if(!transparent){target.fillStyle='#ffffff';target.fillRect(0,0,width,height)}
   for(let i=0;i<elements.length;i++){
     const e=elements[i];if(e.visible===false)continue;target.save();target.globalAlpha=e.opacity??1;
     if(e.type==='glitter'){const tile=glitterTiles.get(e.glitter);target.drawImage(tile,0,0,width,height);target.restore();continue;}
+    if(e.type==='shape'){paintShape(target,e,width,height);target.restore();continue;}
     if(e.type==='sticker'){if(stickerPainter)stickerPainter(target,e,width,height);target.restore();continue;}
     target.translate(e.x*width,e.y*height);
     if(e.type==='text'){
@@ -103,26 +107,26 @@ function draw(){
   refreshLayers();
   paintDesign(ctx,canvas.width,canvas.height);
   // El borde punteado es interfaz de edición y no forma parte del diseño.
-  stickerController?.sync();
+  stickerController?.sync();freeController?.sync();
   if(selected>=0){
     const b=bounds(elements[selected]);ctx.save();ctx.strokeStyle='#0c91a3';
     ctx.lineWidth=3;ctx.setLineDash([9,7]);ctx.strokeRect(b.x,b.y,b.w,b.h);
-    if(['image','sticker'].includes(elements[selected]?.type)){ctx.setLineDash([]);ctx.fillStyle='#0c91a3';ctx.fillRect(b.x+b.w-9,b.y+b.h-9,18,18);ctx.strokeStyle='#fff';ctx.strokeRect(b.x+b.w-9,b.y+b.h-9,18,18)}
+    if(['image','sticker','shape'].includes(elements[selected]?.type)){ctx.setLineDash([]);ctx.fillStyle='#0c91a3';ctx.fillRect(b.x+b.w-9,b.y+b.h-9,18,18);ctx.strokeStyle='#fff';ctx.strokeRect(b.x+b.w-9,b.y+b.h-9,18,18)}
     ctx.restore();
   }
   paintDesign(textureCtx,textureCanvas.width,textureCanvas.height);
   if(finishMode==='glitter')updateGlitterArtwork();updateTexture();
   if($('mirrorPreview'))refreshIndividualPreview();
 }
-function bounds(e){if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
+function bounds(e){if(e?.type==='shape')return shapeBounds(e,canvas.width,canvas.height);if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
 function pos(ev){const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/canvas.width,r.height/canvas.height),w=canvas.width*scale,h=canvas.height*scale;return{x:(ev.clientX-r.left-(r.width-w)/2)/scale,y:(ev.clientY-r.top-(r.height-h)/2)/scale}}
 canvas.addEventListener('pointerdown',ev=>{
   if(dragging||resizing)return;const p=pos(ev);resizing=false;resizeStart=null;gestureHistory=false;
   // El cuadro inferior derecho cambia el tamaño de una imagen seleccionada.
-  if(selected>=0&&['image','sticker'].includes(elements[selected]?.type)&&!elements[selected].locked){
+  if(selected>=0&&['image','sticker','shape'].includes(elements[selected]?.type)&&!elements[selected].locked){
     const b=bounds(elements[selected]);const hit=15*canvas.width/Math.max(1,canvas.getBoundingClientRect().width);
     if(Math.abs(p.x-(b.x+b.w))<=hit&&Math.abs(p.y-(b.y+b.h))<=hit){
-      resizing=true;resizeStart={x:p.x,y:p.y,w:elements[selected].type==='sticker'?elements[selected].widthFrac*canvas.width:b.w,h:elements[selected].type==='sticker'?elements[selected].heightFrac*canvas.height:b.h};
+      resizing=true;resizeStart={x:p.x,y:p.y,w:['sticker','shape'].includes(elements[selected].type)?elements[selected].widthFrac*canvas.width:b.w,h:['sticker','shape'].includes(elements[selected].type)?elements[selected].heightFrac*canvas.height:b.h};
       canvas.setPointerCapture(ev.pointerId);return;
     }
   }
@@ -157,7 +161,7 @@ canvas.addEventListener('wheel',ev=>{
   const e=elements[selected],k=ev.deltaY<0?1.08:.92;
   if(e.type==='text')e.size=Math.max(12,Math.min(500,e.size*k));
   else {
-    const f=e.type==='sticker'?stickerGeometry.stickerFractions(e,canvas.width,canvas.height):imageFractions(e);e.widthFrac=Math.max(.005,Math.min(3,f.fw*k));
+    const f=e.type==='shape'?{fw:e.widthFrac,fh:e.heightFrac}:e.type==='sticker'?stickerGeometry.stickerFractions(e,canvas.width,canvas.height):imageFractions(e);e.widthFrac=Math.max(.005,Math.min(3,f.fw*k));
     e.heightFrac=Math.max(.005,Math.min(3,f.fh*k));delete e.scale;
     updateImageControls();
   }
@@ -202,9 +206,10 @@ $('rotatePlus').onclick=()=>setPrintRotation(printRotationDeg+5);
 $('rotationViewFront').onclick=focusDesignFront;
 $('rotationNumber').addEventListener('change',e=>setPrintRotation(e.target.value));
 $('widthCm').onchange=()=>{updateDimensions();buildModel()};$('heightCm').onchange=updateDimensions;$('product').onchange=()=>{setDimForProduct();updateRotationToolbar()};
-function projectSnapshot(){return {version:2,glitterSchema:GLITTER_SCHEMA,glitter:glitterControls.material(),glitterDraft:glitterControls.draft(),glitterMode:glitterControls.mode(),product:$('product').value,color:$('productColor').value,width:documentWidth,height:documentHeight,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,viewerBackground:$('viewerBackground').value,showGuides:preferredGuides,keepImageRatio:$('keepImageRatio').checked,elements:elements.map(({img,...e})=>e)}}
+function projectSnapshot(){return {version:2,mode:editorMode,freeDesign:normalizeFreeDesign(freeDesign),glitterSchema:GLITTER_SCHEMA,glitter:glitterControls.material(),glitterDraft:glitterControls.draft(),glitterMode:glitterControls.mode(),product:$('product').value,color:$('productColor').value,width:documentWidth,height:documentHeight,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,viewerBackground:$('viewerBackground').value,showGuides:preferredGuides,keepImageRatio:$('keepImageRatio').checked,elements:elements.map(({img,...e})=>e)}}
 function applyPreparedProject({data,warnings}){
  if(data.elements.some(e=>e.type==='sticker')&&!stickerPainter)throw Error('El motor de stickers no está disponible; el documento abierto se conserva');
+ editorMode=data.mode;freeDesign=normalizeFreeDesign(data.freeDesign);document.body.dataset.mode=editorMode;freeController?.sync();
  glitterControls.restore({material:data.glitter,draft:data.glitterDraft,mode:data.glitterMode});$('product').value=data.product;$('productColor').value=data.color;finishMode=data.finishMode;$('finishMode').value=finishMode;
  $('mirrorModeIndividual').checked=data.mirrorMode==='espejo';$('widthCm').value=data.width;$('heightCm').value=data.height;
  elements=data.elements;selected=-1;history=[];redoStack=[];printRotationDeg=data.printRotationDeg;
@@ -258,7 +263,8 @@ function refreshIndividualPreview(){
 // normalmente declara 96 dpi: insertamos pHYs de 300 ppp en el PNG.
 const PRINT_DPI=300;
 const cmPrint=()=>({w:Number($('widthCm').value)||20,h:Number($('heightCm').value)||8.5});
-const canvasBlob=(c,type,quality)=>new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(Error('No se pudo generar el archivo')),type,quality));
+function whiteBackground(source){const c=document.createElement('canvas');c.width=source.width;c.height=source.height;const x=c.getContext('2d');x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);x.drawImage(source,0,0);return c}
+const canvasBlob=(c,type,quality)=>new Promise((resolve,reject)=>(type==='image/jpeg'?whiteBackground(c):c).toBlob(b=>b?resolve(b):reject(Error('No se pudo generar el archivo')),type,quality));
 function crc32(arr){let crc=0xffffffff;for(let i=0;i<arr.length;i++){crc^=arr[i];for(let j=0;j<8;j++)crc=(crc>>>1)^((crc&1)?0xedb88320:0)}return (crc^0xffffffff)>>>0}
 function pngWithDpi(buffer,dpi=300){
   const source=new Uint8Array(buffer),head=[137,80,78,71,13,10,26,10];
@@ -397,7 +403,7 @@ function focusPrintEdge(edge){
   controls.update();
 }
 
-function init3D(){const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,node.clientWidth/Math.max(1,node.clientHeight),.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(node.clientWidth,Math.max(1,node.clientHeight));node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE?.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();const resize=()=>{const w=node.clientWidth,h=node.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)};typeof ResizeObserver==='function'?new ResizeObserver(resize).observe(node):window.addEventListener('resize',resize)}
+function init3D(){const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,Math.max(1,node.clientWidth)/Math.max(1,node.clientHeight),.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(Math.max(1,node.clientWidth),Math.max(1,node.clientHeight));node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE?.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();const resize=()=>{const w=node.clientWidth,h=node.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)};resizeViewer=resize;typeof ResizeObserver==='function'?new ResizeObserver(resize).observe(node):window.addEventListener('resize',resize)}
 function addGeo(geo,mat,x=0,y=0,z=0,rotateX=0){let o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);o.rotation.x=rotateX;modelRoot.add(o);return o}
 function buildModel(){if(!scene)return;if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material]))material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&['mug','tumbler'].includes(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';let printMat=new THREE.MeshStandardMaterial({map:physical?physicalArtTexture:texture,transparent:physical,depthWrite:!physical,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;
 if(p==='mug'||p==='tumbler'){let r=p==='mug'?.93:.66,h=p==='mug'?2.05:3;// Cuerpo completo sin arte: evita repetir el archivo en toda la taza.
@@ -552,7 +558,7 @@ function updateTexture(){
     refreshFrame=requestAnimationFrame(refreshTextureNow);
   }
 }
-function resync3D({resetView=false, selectedObject=false}={}){
+function resync3D({resetView=false, selectedObject=false,silent=false}={}){
   if(!texture || !renderer || !scene) return;
   // La textura se pinta desde todas las capas, nunca desde el cuadro de seleccion.
   paintDesign(textureCtx,textureCanvas.width,textureCanvas.height);
@@ -572,7 +578,7 @@ function resync3D({resetView=false, selectedObject=false}={}){
     }else{focusDesignFront();}
   }
   renderer.render(scene,camera);
-  notify('Diseño 3D sincronizado · '+elements.length+' capas');
+  if(!silent)notify('Diseño 3D sincronizado · '+elements.length+' capas');
 }
 $('resync3D').onclick=()=>resync3D({resetView:true});
 $('viewSelected3D').onclick=()=>resync3D({resetView:true,selectedObject:true});
@@ -642,6 +648,15 @@ $('exportVideo').addEventListener('click',async()=>{
 
 const renderLayerList=createLayerList({list:$('layerList'),getImage,getGlitterTile:value=>glitterTiles.get(value),getStickerRenderer:()=>stickerPainter,onSelect:index=>{selected=index;if(elements[index].type==='glitter')glitterControls.selectLayer(elements[index].glitter);loadSelectedTextIntoInputs();updateImageControls();draw()},onToggle:(index,key,value)=>{addHistory();elements[index][key]=value;draw()}});
 
+freeController=createFreeControls({
+ state:()=>({mode:editorMode,page:freeDesign,w:documentWidth,h:documentHeight,selected:elements[selected],hasLayers:elements.length>0,storageFailed:window.__fepBoot?.stages.storage.state==='failed'}),notify,
+ settings:patch=>{freeDesign=normalizeFreeDesign({...freeDesign,...patch});draw();ui.refresh();queueAutosave()},
+ format:(size,patch={})=>{if(!Number.isFinite(size.w)||!Number.isFinite(size.h)||size.w<1||size.h<1||size.w>100||size.h>100)throw Error('Las dimensiones deben estar entre 1 y 100 cm');freeDesign=normalizeFreeDesign({...freeDesign,...patch});$('widthCm').value=size.w;$('heightCm').value=size.h;updateDimensions();buildModel();ui.refresh()},
+ switchMode:mode=>{if(recovering)return;const previous=editorMode;editorMode=mode;document.body.dataset.mode=mode;if(mode==='free'&&previous!=='free'&&!elements.length){const size=pageSize(freeDesign.preset==='custom'?'A4':freeDesign.preset);$('widthCm').value=size.w;$('heightCm').value=size.h;$('mirrorModeIndividual').checked=false}else if(mode==='free'&&previous!=='free')freeDesign=normalizeFreeDesign({...freeDesign,preset:'custom'});updateDimensions();update3DControls();ui.refresh();requestAnimationFrame(()=>{resizeViewer();resync3D({silent:true})});queueAutosave()},
+ insertShape:(shape,color)=>{if(recovering)return;if(elements.length>=500){notify('Máximo 500 capas');return}const layer={type:'shape',shape,color,outlineColor:'#163b62',outlineWidth:1,rotation:0,x:.5,y:.5,...initialLayerSize(.3,1)};validateShape(layer);addHistory();elements.push(layer);selected=elements.length-1;draw();updateImageControls();notify('Figura añadida')},
+ editShape:patch=>{const layer=elements[selected];if(layer?.type!=='shape'||layer.locked)return;const next={...layer,...patch};validateShape(next);addHistory();elements[selected]=next;draw()},
+ align:action=>{const layer=elements[selected];if(!layer||layer.locked||layer.type==='glitter'){notify('Selecciona una capa desbloqueada para alinear');return}const {dx,dy}=alignedPosition(bounds(layer),canvas.width,canvas.height,action);addHistory();layer.x+=dx;layer.y+=dy;draw()}
+});
 updateDimensions();updateRotationToolbar();
 async function startThree(){
  try{
@@ -653,7 +668,7 @@ async function startThree(){
  }catch(error){window.__fepBoot?.stage('three','failed',error);scene=null;renderer=null;$('viewerFallback').hidden=false;$('liveStatus').textContent='Solo 2D';$('liveStatus').parentElement.dataset.state='offline';notify('Visor 3D no disponible. El editor y la impresión 2D siguen disponibles.')}
  finally{update3DControls();stickerController?.sync();if(!stickerController&&$('stickerInsert'))$('stickerInsert').disabled=true}
 }
-function update3DControls(){for(const id of ['exportMockup','exportVideo']){$(id).disabled=!renderer;$(id).title=renderer?'':'Requiere visor 3D disponible'}}
+function update3DControls(){for(const id of ['exportMockup','exportVideo']){$(id).disabled=!renderer||editorMode==='free';$(id).title=editorMode==='free'?'Disponible en Personalizar producto 3D':renderer?'':'Requiere visor 3D disponible'}}
 
 
 // API interna de impresión: la plancha recibe el arte limpio y los codificadores de 300 ppp.
@@ -691,7 +706,7 @@ const startupControls=[...document.querySelectorAll('button,input,select')].filt
 try{
  documentStore=await openDocumentStore();
  const current=await deadline(documentStore.read(),6000,'La lectura del guardado local no respondió');
- if(current){try{const prepared=await deadline(prepareProject(current.document),10000,'No terminó la recuperación de imágenes');if(prepared.data.elements.some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');applyPreparedProject(prepared);showSaveStatus('saved')}catch(error){window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);notify('La copia actual no se pudo recuperar. Usa Restaurar versión anterior o abre un JSON; no se sobrescribió la copia.')}}
+ if(current){try{const prepared=await deadline(prepareProject(current.document),10000,'No terminó la recuperación de imágenes');if(prepared.data.elements.some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');applyPreparedProject(prepared);$('startScreen').close();showSaveStatus('saved')}catch(error){window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);notify('La copia actual no se pudo recuperar. Usa Restaurar versión anterior o abre un JSON; no se sobrescribió la copia.')}}
  else autosaveStatus.textContent='Autoguardado local activo';
  autosave=createAutosave({store:documentStore,snapshot:projectSnapshot,status:showSaveStatus});
  if(window.__fepBoot?.stages.storage.state!=='failed')window.__fepBoot?.stage('storage','ready');
@@ -700,16 +715,16 @@ try{
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autosave.flush()});window.addEventListener('pagehide',()=>autosave.flush());
  $('restorePrevious').onclick=async()=>{try{const old=await documentStore.read('previous');if(!old){notify('Todavía no hay una versión anterior.');return}const before=JSON.stringify(projectSnapshot()),prepared=await prepareProject(old.document);if(prepared.data.elements.some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(before!==JSON.stringify(projectSnapshot()))throw Error('El documento cambió; vuelve a intentarlo');applyPreparedProject(prepared);await autosave.flush();notify('Versión anterior restaurada; la versión reemplazada queda como respaldo.')}catch(error){notify('No se pudo restaurar: '+error.message)}};
 }catch(error){window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);$('restorePrevious').title='Almacenamiento local no disponible'}
-finally{recovering=false;startupControls.forEach(([node,disabled])=>node.disabled=disabled);if(!autosave)$('restorePrevious').disabled=true;updateImageControls();glitterControls.switchMode(glitterControls.mode());update3DControls();stickerController?.sync();if(!stickerController&&$('stickerInsert'))$('stickerInsert').disabled=true}
+finally{recovering=false;freeController?.ready();startupControls.forEach(([node,disabled])=>node.disabled=disabled);if(!autosave)$('restorePrevious').disabled=true;updateImageControls();glitterControls.switchMode(glitterControls.mode());update3DControls();stickerController?.sync();if(!stickerController&&$('stickerInsert'))$('stickerInsert').disabled=true}
 
 function deadline(promise,ms,message){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error(message)),ms)})]).finally(()=>clearTimeout(timer))}
 
 async function loadStickers(){
  try{
-  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fase2d-20261110'),import('./src/sticker-renderer.js?v=fase2d-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fase2d-20261110');
+  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fase3a-20261110'),import('./src/sticker-renderer.js?v=fase3a-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fase3a-20261110');
   stickerController=uiModule.createStickerControls({selected:()=>elements[selected],dimensions:cmPrint,busy:()=>recovering,notify,insert:definition=>{
    if(recovering)return;if(elements.length>=500){notify('Máximo 500 capas');return}
-   const layer={type:'sticker',stickerId:definition.id,stickerName:definition.name,x:.5,y:.5,widthFrac:.28,heightFrac:.28*canvas.width/canvas.height*.75,color:'#e6eef9',outlineColor:'#52697e',outlineWidth:definition.shapes[0].stroke?1.5:0,rotation:0,flipX:false,flipY:false,shadow:false,...(definition.textBox?{label:{text:'',size:14,color:'#172b4d'}}:{})};validateStickerLayer(layer);addHistory();elements.push(layer);selected=elements.length-1;loadSelectedTextIntoInputs();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Sticker añadido: '+definition.name)
+   const layer={type:'sticker',stickerId:definition.id,stickerName:definition.name,x:.5,y:.5,...initialLayerSize(.28,.75),color:'#e6eef9',outlineColor:'#52697e',outlineWidth:definition.shapes[0].stroke?1.5:0,rotation:0,flipX:false,flipY:false,shadow:false,...(definition.textBox?{label:{text:'',size:14,color:'#172b4d'}}:{})};validateStickerLayer(layer);addHistory();elements.push(layer);selected=elements.length-1;loadSelectedTextIntoInputs();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Sticker añadido: '+definition.name)
   },commit:next=>{if(recovering)throw Error('Espera a que termine la recuperación');validateStickerLayer(next);addHistory();Object.assign(elements[selected],next);draw()}});
   $('stickerLibraryStatus').textContent='Biblioteca local · '+catalog.stickers.length+' elementos vectoriales';window.__fepBoot?.stage('stickers','ready');draw();return true;
  }catch(error){window.__fepBoot?.stage('stickers','failed',error);if($('stickerLibraryStatus'))$('stickerLibraryStatus').textContent='No se pudo cargar la biblioteca: '+error.message;if($('stickerInsert'))$('stickerInsert').disabled=true;return false}

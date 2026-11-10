@@ -1,0 +1,67 @@
+
+> fep-editor-pro@0.9.5 test
+> node --test tests/*.test.mjs
+
+✔ legacy project remains readable (1.640359ms)
+✔ reject nullLayer (1.036967ms)
+✔ reject badSize (0.205821ms)
+✔ reject hugeSize (0.682231ms)
+✔ reject unknownLayer (0.289147ms)
+✔ reject remoteImage (0.23187ms)
+✔ reject badOpacity (0.167022ms)
+✔ reject badPosition (0.128083ms)
+✔ reject futureVersion (0.186532ms)
+✔ reject tooMany (2.179815ms)
+✔ palette pink (0.312262ms)
+✔ palette gold (0.093872ms)
+✔ palette silver (0.068523ms)
+✔ palette blue (0.136867ms)
+✔ palette multi (0.155765ms)
+✔ palette custom (0.193943ms)
+✔ glitter controls have finite limits (0.156336ms)
+✔ deterministic printable and material textures differ (244.201881ms)
+✔ gold then a free blue color is authoritative and becomes custom (0.316798ms)
+✔ quick palettes supply their own synchronized color (0.133312ms)
+✔ legacy named palettes preserve their formerly effective color (0.305372ms)
+✔ legacy V1/V2 migrate printable and physical settings without losing artwork (0.947251ms)
+✔ new schema roundtrips independent material, draft and printable layer colors (0.394366ms)
+✔ reject future glitter schema without guessing color semantics (0.494548ms)
+✔ adaptive maps have fixed desktop and touch memory bounds (0.116917ms)
+✔ finish properties are finite and matte is rougher than gloss (0.254645ms)
+✔ irregular printable flakes use paths instead of square particle fills (80.091002ms)
+✔ normal and roughness maps align identical deterministic flake geometry (37.952273ms)
+✔ LRU tile reuse is stable and evicts allocated canvases at its cap (54.524896ms)
+✔ layout fits wide and tall art without changing its physical aspect (1.816085ms)
+✔ four recipes preserve free colors except explicit holographic multicolor (0.851506ms)
+✔ physical metallic and holographic properties stay out of ordinary glitter (0.300825ms)
+✔ JSON V2 roundtrips printable and physical recipes independently (1.153793ms)
+✔ thumbnail fits an image in 48px and never mutates layer data (0.66175ms)
+✔ metallic and holographic recipes honor matte instead of silently forcing gloss (0.270579ms)
+✔ legacy finish migration preserves art without mutating input (4.541582ms)
+✔ normalizes printable glitter under artwork and retains V2 settings (0.587217ms)
+✔ image dimensions preflight rejects huge allocation and corrupt headers (1.126102ms)
+✔ corrupt embedded image rejects preparation without mutating input (2.056638ms)
+✔ invalid material payload rejects before state application (0.346544ms)
+✔ autosave debounces to latest snapshot and reports failure (20.79235ms)
+✔ autosave serializes in-flight writes to preserve backup ordering (0.619115ms)
+✔ 60 stable local vectors, 12 in each of five categories, including required shapes (1.286634ms)
+✔ search handles accents, categories, unknown and empty results (0.783544ms)
+✔ internal SVG previews contain no remote sources or executable markup (1.856826ms)
+✔ sticker schema rejects malformed styles and text atomically (0.62188ms)
+✔ rotated sticker bounds track transformed dimensions and preserve center (0.256498ms)
+✔ V1/V2 and magic migration preserve older artwork alongside sticker data (0.93301ms)
+✔ catalog lookup rejects unknown IDs before any project state changes (1.697545ms)
+✔ valid project roundtrip normalizes sticker display names without raster assets (0.441156ms)
+ℹ tests 50
+ℹ suites 0
+ℹ pass 50
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 559.549456
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
