@@ -1,3 +1,5 @@
+import {initInterface} from './src/interface.js';
+import {createLayerList,layerName} from './src/layer-ui.js';
 import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js';
 import {createGlitterCache} from './src/glitter-cache.js';
 import {createGlitterControls} from './src/glitter-controls.js';
@@ -6,6 +8,7 @@ import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.
 import {openDocumentStore,createAutosave} from './src/persistence.js';
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+const ui=initInterface();
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 let dragStart=null,gestureHistory=false,importGeneration=0;
 let documentWidth=20,documentHeight=8.5;
@@ -329,7 +332,7 @@ function refreshGlitterMaterial(){
  for(const [canvas,map]of [[glitterCanvas,'color'],[glitterNormalCanvas,'normal'],[glitterRoughCanvas,'roughness']])paintGlitter(canvas.getContext('2d'),canvas.width,canvas.height,settings,{material:true,map});
  for(const texture of [glitterTexture,glitterNormalTexture,glitterRoughTexture])texture.needsUpdate=true;
  const props=glitterMaterialProperties(settings);
- modelRoot?.traverse(o=>{for(const m of(o.material?(Array.isArray(o.material)?o.material:[o.material]):[])){if(!m.userData.glitterSurface)continue;m.roughness=props.roughness;m.metalness=props.metalness;m.clearcoat=props.clearcoat;m.clearcoatRoughness=props.clearcoatRoughness;m.normalScale.setScalar(props.normalStrength);if(m.userData.glitterSurface==='body')m.color.set(settings.color)}});
+ modelRoot?.traverse(o=>{for(const m of(o.material?(Array.isArray(o.material)?o.material:[o.material]):[])){if(!m.userData.glitterSurface)continue;m.roughness=props.roughness;m.metalness=props.metalness;m.clearcoat=props.clearcoat;m.clearcoatRoughness=props.clearcoatRoughness;if((m.iridescence>0)!==(props.iridescence>0))m.needsUpdate=true;m.iridescence=props.iridescence||0;m.normalScale.setScalar(props.normalStrength);if(m.userData.glitterSurface==='body')m.color.set(settings.color)}});
 }
 function queueGlitterMaterial(){if(!materialFrame)materialFrame=requestAnimationFrame(refreshGlitterMaterial)}
 const glitterControls=createGlitterControls({preview:settings=>{const node=$('glitterPreview');node.getContext('2d').drawImage(glitterTiles.get(settings),0,0,node.width,node.height)},onMaterialChange:queueGlitterMaterial});
@@ -390,9 +393,9 @@ function focusPrintEdge(edge){
   controls.update();
 }
 
-function init3D(){const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,node.clientWidth/430,.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(node.clientWidth,430);node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();window.addEventListener('resize',()=>{let w=node.clientWidth;camera.aspect=w/430;camera.updateProjectionMatrix();renderer.setSize(w,430)})}
+function init3D(){const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,node.clientWidth/Math.max(1,node.clientHeight),.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(node.clientWidth,Math.max(1,node.clientHeight));node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();const resize=()=>{const w=node.clientWidth,h=node.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)};new ResizeObserver(resize).observe(node)}
 function addGeo(geo,mat,x=0,y=0,z=0,rotateX=0){let o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);o.rotation.x=rotateX;modelRoot.add(o);return o}
-function buildModel(){if(!scene)return;if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material]))material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&['mug','tumbler'].includes(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';let printMat=new THREE.MeshStandardMaterial({map:physical?physicalArtTexture:texture,transparent:physical,depthWrite:!physical,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;
+function buildModel(){if(!scene)return;if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material]))material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&['mug','tumbler'].includes(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';let printMat=new THREE.MeshStandardMaterial({map:physical?physicalArtTexture:texture,transparent:physical,depthWrite:!physical,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;
 if(p==='mug'||p==='tumbler'){let r=p==='mug'?.93:.66,h=p==='mug'?2.05:3;// Cuerpo completo sin arte: evita repetir el archivo en toda la taza.
 if(p==='mug'){
   // Taza 11 oz de paredes lisas, base discreta y labio delgado (foto de referencia).
@@ -420,7 +423,7 @@ const printSurface=addGeo(
 printSurface.rotation.y=THREE.MathUtils.degToRad(printRotationDeg);
 // Segunda superficie puramente decorativa: jamás se usa para exportar arte plano.
 if(finishMode==='glitter'){
- const glossMat=new THREE.MeshPhysicalMaterial({map:glitterTexture,normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,alphaMap:glitterMaskTexture,transparent:true,opacity:1,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,depthWrite:false,side:THREE.FrontSide});glossMat.userData.glitterSurface='overlay';
+ const glossMat=new THREE.MeshPhysicalMaterial({map:glitterTexture,normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,alphaMap:glitterMaskTexture,transparent:true,opacity:1,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],depthWrite:false,side:THREE.FrontSide});glossMat.userData.glitterSurface='overlay';
  const sparkles=addGeo(new THREE.CylinderGeometry(r+.024,r+.024,h-.29,128,1,true,-printArc/2,printArc),glossMat);
  sparkles.rotation.y=THREE.MathUtils.degToRad(printRotationDeg);
  // Artwork remains above the coating; the inverse alpha mask protects photos and text.
@@ -509,7 +512,7 @@ else if(p==='keychain'){
   addGeo(new THREE.TorusGeometry(.19,.047,12,32),ring,0,1.18,0);
   addGeo(new THREE.TorusGeometry(.38,.075,12,42),ring,0,1.66,0);
 }
-$('productColor').oninput=()=>{buildModel()};notify('Modelo cargado · V0.9.1 · Taza cerámica mejorada')}
+$('productColor').oninput=()=>{buildModel()};notify('Vista 3D lista · '+$('product').selectedOptions[0].textContent)}
 // V0.8.2: recargar los pixels en GPU tras cambios del editor.
 let lastCanvasRevision=0;
 // V0.8.4: crear un objeto de textura nuevo para cada revision del lienzo.
@@ -633,7 +636,9 @@ $('exportVideo').addEventListener('click',async()=>{
   finally{if(stream)stream.getTracks().forEach(t=>t.stop());camera.position.copy(start);controls.target.copy(target);controls.enabled=true;controls.enableDamping=true;controls.update();if(show){$('showGuides').checked=true;buildModel()}recording=false;button.disabled=false;button.textContent='Grabar giro 360° (WebM)';requestAnimationFrame(()=>resync3D());}
 });
 
-updateDimensions();try{init3D()}catch(error){scene=null;renderer=null;notify('Visor 3D no disponible. El editor y la impresión 2D siguen disponibles.')}updateRotationToolbar();focusDesignFront();
+const renderLayerList=createLayerList({list:$('layerList'),getImage,getGlitterTile:value=>glitterTiles.get(value),onSelect:index=>{selected=index;if(elements[index].type==='glitter')glitterControls.selectLayer(elements[index].glitter);loadSelectedTextIntoInputs();updateImageControls();draw()},onToggle:(index,key,value)=>{addHistory();elements[index][key]=value;draw()}});
+
+updateDimensions();try{init3D()}catch(error){scene=null;renderer=null;$('viewerFallback').hidden=false;$('liveStatus').textContent='Solo 2D';$('liveStatus').parentElement.dataset.state='offline';for(const id of ['exportMockup','exportVideo']){$(id).disabled=true;$(id).title='Requiere visor 3D disponible'}notify('Visor 3D no disponible. El editor y la impresión 2D siguen disponibles.')}updateRotationToolbar();focusDesignFront();
 
 // API interna de impresión: la plancha recibe el arte limpio y los codificadores de 300 ppp.
 let savedMirrorMode;try{savedMirrorMode=localStorage.getItem('estudio-mirror-mode')}catch{}
@@ -651,12 +656,10 @@ function readGlitterControls(){return glitterControls.current()}
 $('applyGlitterLayer').onclick=()=>{const e=elements[selected];if(glitterControls.mode()!=='print'||e?.type!=='glitter'||e.locked){notify('Selecciona una capa glitter desbloqueada en modo imprimible.');return}addHistory();e.glitter=readGlitterControls();draw();notify('Glitter aplicado solo a la capa seleccionada.');};
 $('addGlitterLayer').onclick=()=>{if(elements.length>=500){notify('Máximo 500 capas');return}const settings=readGlitterControls();addHistory();elements.unshift({type:'glitter',x:.5,y:.5,locked:false,glitter:settings});selected=0;glitterControls.selectLayer(settings);draw();notify('Glitter simulado añadido al arte imprimible, debajo del diseño.');};
 function refreshLayers(){
- const list=$('layerList');if(!list)return;list.replaceChildren();
- for(let i=elements.length-1;i>=0;i--){const e=elements[i],row=document.createElement('div');row.className='btnrow';
- const choose=document.createElement('button');choose.textContent=(selected===i?'✓ ':'')+(e.type==='text'?e.text.slice(0,24):e.type==='glitter'?'Glitter imprimible':'Imagen');choose.onclick=()=>{selected=i;if(e.type==='glitter')glitterControls.selectLayer(e.glitter);loadSelectedTextIntoInputs();updateImageControls();draw()};row.append(choose);
- for(const [key,label] of [['visible','Visible'],['locked','Bloquear']]){const lab=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.checked=key==='visible'?e.visible!==false:!!e.locked;input.setAttribute('aria-label',label+' '+i);input.onchange=()=>{addHistory();e[key]=input.checked;draw()};lab.append(input,document.createTextNode(label));row.append(lab)}list.append(row);
- }
- $('layerOpacity').value=String(Math.round((elements[selected]?.opacity??1)*100));
+ const list=$('layerList');if(!list)return;renderLayerList(elements,selected);
+ const count=elements.length+' '+(elements.length===1?'capa':'capas');$('layerCount').textContent=$('canvasLayerCount').textContent=count;$('emptyLayers').hidden=elements.length>0;$('emptyDesignHint').hidden=elements.length>0;
+ $('layerSelectionSummary').textContent=elements[selected]?layerName(elements[selected])+(elements[selected].locked?' · bloqueada':' · seleccionada'):'Selecciona una capa para editarla.';
+ $('layerOpacity').value=String(Math.round((elements[selected]?.opacity??1)*100));ui.refresh();
 }
 $('layerOpacity').onchange=ev=>{const e=elements[selected];if(!e||e.locked)return;addHistory();e.opacity=Number(ev.target.value)/100;draw()};
 $('layerDuplicate').onclick=()=>{const e=elements[selected];if(!e)return;try{if(elements.length>=500)throw Error('Máximo 500 capas');enforceDocumentBudget([...elements,e])}catch(error){notify(error.message);return}addHistory();elements.splice(selected+1,0,JSON.parse(JSON.stringify({...e,img:undefined})));selected++;draw()};

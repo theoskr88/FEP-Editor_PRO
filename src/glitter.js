@@ -1,6 +1,8 @@
 // Stable particle layout: no random work or texture regeneration in the render loop.
 export const palettes={pink:'#e88ac2',gold:'#d5ab42',silver:'#c9d1dc',blue:'#368cdb',multi:'#b97be0'};
 export const GLITTER_SCHEMA=2;
+export const glitterPresets={fine:{name:'Fino',size:1.5,intensity:60,finish:'satin'},coarse:{name:'Grueso',size:6,intensity:80,finish:'gloss'},metallic:{name:'Metálico',size:2.5,intensity:75,finish:'gloss'},holographic:{name:'Holográfico',palette:'multi',color:palettes.multi,size:3,intensity:85,finish:'gloss'}};
+export function applyGlitterPreset(value,id){if(!Object.hasOwn(glitterPresets,id))throw Error('Preajuste glitter no válido');const {name,...params}=glitterPresets[id];return glitterSettings({...value,...params,preset:id})}
 const validColor=value=>typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value);
 export function glitterSettings(value={}){
  value=value&&typeof value==='object'?value:{};
@@ -8,7 +10,7 @@ export function glitterSettings(value={}){
  let palette=Object.hasOwn(palettes,value.palette)||value.palette==='custom'?value.palette:'pink';
  const color=validColor(value.color)?value.color.toLowerCase():(palettes[palette]||palettes.pink);
  if(palette!=='multi'&&palette!=='custom'&&color!==palettes[palette])palette='custom';
- return {palette,color,size:clamp(value.size,1,8,3),intensity:clamp(value.intensity,0,100,65),finish:['gloss','satin','matte'].includes(value.finish)?value.finish:'gloss'};
+ return {palette,color,size:clamp(value.size,1,8,3),intensity:clamp(value.intensity,0,100,65),finish:['gloss','satin','matte'].includes(value.finish)?value.finish:'gloss',...(Object.hasOwn(glitterPresets,value.preset)?{preset:value.preset}:{})};
 }
 // V1/V2 before glitterSchema=2 ignored color for named palettes. Preserve what
 // those projects actually displayed; free colors become authoritative thereafter.
@@ -21,7 +23,8 @@ export function glitterTextureSize({touch=false,deviceMemory=8,viewportWidth=120
 }
 export function glitterMaterialProperties(settings){
  const s=glitterSettings(settings),roughness={gloss:.23,satin:.46,matte:.79}[s.finish];
- return {roughness,metalness:s.finish==='matte'?.18:.52,clearcoat:s.finish==='gloss'?.65:s.finish==='satin'?.2:0,clearcoatRoughness:s.finish==='gloss'?.18:.5,normalStrength:s.finish==='matte'?.22:.5};
+ const style=s.preset==='metallic'?{metalness:.82,clearcoat:s.finish==='gloss'?.35:s.finish==='satin'?.2:0}:s.preset==='holographic'?{metalness:.68,iridescence:1}:{};
+ return {roughness,metalness:s.finish==='matte'?.18:.52,clearcoat:s.finish==='gloss'?.65:s.finish==='satin'?.2:0,clearcoatRoughness:s.finish==='gloss'?.18:.5,normalStrength:s.finish==='matte'?.22:.5,...style};
 }
 const rgb=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
 const shade=(channels,amount)=>`rgb(${channels.map(c=>Math.round(amount>=0?c+(255-c)*amount:c*(1+amount))).join(',')})`;
