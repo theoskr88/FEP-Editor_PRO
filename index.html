@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>Estudio 3D | Editor inicial</title><style>
+:root{font-family:Inter,system-ui,Arial,sans-serif;color:#eaf0fa;background:#0b1020}*{box-sizing:border-box}body{margin:0}header{display:flex;align-items:center;justify-content:space-between;padding:15px 22px;background:#141d33;border-bottom:1px solid #2a3550;gap:12px;flex-wrap:wrap}h1{font-size:18px;margin:0}small{color:#a5b5ce}.tag{background:#1b4f4d;color:#a9f4d3;border-radius:9px;padding:5px 9px;font-size:11px}main{display:grid;grid-template-columns:235px minmax(260px,1fr) minmax(300px,1.1fr);gap:12px;padding:12px;min-height:calc(100vh - 78px)}section{min-width:0;background:#151e32;border:1px solid #293754;border-radius:15px;padding:14px}.sub{font-size:14px;margin:0 0 12px}.form{display:grid;gap:9px}label{font-size:12px;color:#aabbd4;display:grid;gap:4px}input,select,button{font:inherit;border-radius:8px;border:1px solid #3b4b67;padding:9px;background:#0d1627;color:white;min-width:0}input[type=color]{width:100%;height:37px;padding:2px}input[type=range]{padding:0}button{cursor:pointer;background:#243451}button:hover{background:#31496f}.primary{background:#267e73;border-color:#267e73}.primary:hover{background:#31988b}.btnrow{display:flex;gap:7px;flex-wrap:wrap}.btnrow button{flex:1;font-size:12px}.muted{font-size:12px;color:#a4b5cd;line-height:1.5}#canvasWrap{width:100%;aspect-ratio:1.4;background:white;overflow:hidden;border-radius:10px;touch-action:none}#designCanvas{width:100%;height:100%;display:block;touch-action:none;cursor:move}#viewer{width:100%;height:430px;display:block;touch-action:none;border-radius:12px;background:radial-gradient(circle at center,#35475f,#131d2f)}.foot{margin-top:9px;color:#9eaec8;font-size:12px}#notice{color:#b8efdf;font-size:12px;min-height:18px}.divider{border-top:1px solid #293754;margin:15px 0}.pill{background:#243650;padding:5px 8px;border-radius:6px;color:#a8c7e8;font-size:11px}.status{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px} .full{width:100%} @media(max-width:1000px){main{grid-template-columns:230px 1fr}#viewPanel{grid-column:1/-1}}@media(max-width:640px){main{grid-template-columns:1fr}#viewPanel{grid-column:auto}#viewer{height:340px}header{padding:12px}}
+.image-size-panel{border:1px solid #3b4b67;border-radius:10px;padding:10px;display:grid;gap:8px;background:#1a2944}.image-size-panel[hidden]{display:none}.image-size-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.image-lock{display:flex;align-items:center;gap:8px;flex-direction:row}.image-lock input{min-width:auto;width:16px;height:16px}
+
+/* Área de trabajo estable y controles desplazables. */
+@media(min-width:1001px){
+  html,body{height:100%;overflow:hidden}
+  body{display:flex;flex-direction:column}
+  header{flex:0 0 auto}
+  main{flex:1;min-height:0;height:auto;grid-template-columns:260px minmax(0,1fr) minmax(0,1fr);overflow:hidden;align-items:stretch}
+  main>section{height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#536789 transparent}
+  main>section:nth-child(2),#viewPanel{overflow-y:auto}
+  #viewer{height:min(52vh,480px)!important}
+}
+@media(min-width:641px) and (max-width:1000px){
+  main{grid-template-columns:235px minmax(0,1fr)}
+  main>section:first-child{position:sticky;top:8px;align-self:start;max-height:calc(100vh - 24px);overflow:auto}
+}
+@media(max-width:640px){
+  main{display:flex;flex-direction:column}
+  #canvasWrap{max-height:46vh}
+  #viewer{height:320px!important}
+}
+#canvasWrap{max-width:100%;max-height:55vh;aspect-ratio:20/8.5;display:flex;align-items:center;justify-content:center}
+#designCanvas{object-fit:contain;width:100%;height:100%}
+main>section{scrollbar-width:thin}
+
+/* Ajuste seguro para uso prolongado: herramientas con scroll, trabajo siempre visible en escritorio */
+@media(min-width:1001px){main>section:first-child{overflow-y:auto} main>section:nth-child(2),main>section:nth-child(3){overflow-y:auto}}
+@media(max-width:640px){#viewer{height:310px!important}.btnrow button{min-width:90px}main{padding:8px}}
+
+/* V0.8.7: vista 3D primero y control de rotación debajo, también en móviles */
+.rotation-toolbar[hidden]{display:none!important}
+.rotation-toolbar{border:1px solid #3d7182;border-radius:12px;padding:12px;background:#192c40;margin:8px 0 12px;display:grid;gap:10px}
+.rotation-toolbar-top{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px}
+#rotationValue{color:#83ebd7;font-size:17px;font-variant-numeric:tabular-nums}
+.rotation-adjust{display:flex;align-items:center;gap:10px;min-width:0}
+.rotation-adjust input[type=range]{flex:1;min-width:0;width:100%;accent-color:#43cbb7;height:32px;touch-action:auto;cursor:pointer}
+.rotation-adjust input[type=range]::-webkit-slider-thumb{width:26px;height:26px}
+.rotation-adjust button{flex:0 0 56px;min-height:46px;font-weight:700}
+.rotation-action{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rotation-action label{font-size:12px}
+.rotation-action input{width:70px;min-height:42px;min-width:0}
+.rotation-action button{flex:1;min-height:42px;font-size:12px}
+.rotation-explainer{margin:0;font-size:11px;color:#a4b5cd;line-height:1.45}
+@media(max-width:640px){
+  #viewPanel{order:2}
+  .rotation-toolbar{position:relative;padding:12px;margin-top:10px}
+  .rotation-adjust{gap:6px}
+  .rotation-adjust button{flex-basis:52px}
+  .rotation-action button{min-width:110px}
+  #viewer{height:320px!important}
+}
+
+/* Módulo independiente de plancha: no modifica el editor 3D */
+#sheetOverlay[hidden]{display:none!important}
+#sheetOverlay{position:fixed;inset:0;z-index:1000;background:#090f1deb;overflow-y:auto;padding:14px;color:#eaf0fa}
+.sheet-layout{max-width:1480px;margin:auto;background:#131e34;border:1px solid #354766;border-radius:16px;padding:18px;min-height:calc(100vh - 28px)}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+.sheet-head h2{margin:0;font-size:20px}.sheet-body{display:grid;grid-template-columns:minmax(275px,340px) minmax(0,1fr);gap:16px}
+.sheet-tools{background:#182840;border:1px solid #344967;border-radius:12px;padding:14px;display:grid;align-content:start;gap:12px;max-height:calc(100vh - 115px);overflow:auto}
+.sheet-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sheet-controls label{min-width:0}.sheet-controls input,.sheet-controls select{width:100%}
+.sheet-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sheet-btns button{min-height:42px;font-size:13px}
+.sheet-preview-holder{min-height:500px;display:flex;flex-direction:column;align-items:center;gap:10px;background:#243248;border-radius:12px;padding:14px;overflow:auto}
+#sheetPreview{display:block;background:white;max-width:100%;max-height:68vh;object-fit:contain;cursor:grab;touch-action:none;box-shadow:0 6px 28px #0007}
+.sheet-help{font-size:12px;line-height:1.5;color:#acbed9}.sheet-bad{color:#ffb3a3!important}.sheet-good{color:#a9ead0}
+.sheet-divider{height:1px;background:#344967;margin:4px 0}
+@media(max-width:850px){#sheetOverlay{padding:5px}.sheet-layout{padding:10px}.sheet-body{grid-template-columns:1fr}.sheet-tools{max-height:none;overflow:visible}.sheet-preview-holder{min-height:350px}#sheetPreview{max-height:55vh}}
+.mirror-switch{display:flex;align-items:center;gap:10px;font-weight:700;color:#f0fffb}.mirror-switch input{width:22px;height:22px;min-width:22px;accent-color:#43cbb7;cursor:pointer}</style></head><body><header><div><h1>◈ Estudio 3D <span class="tag">EDICIÓN CLOUDFLARE V0.9.5</span></h1><small>Diseña, visualiza y exporta · 8 productos · sin cuentas ni pagos.</small></div><div class="btnrow"><button class="primary" id="openPrintSheet" type="button">Plancha de impresión</button><button id="save">Guardar proyecto</button><button id="load">Abrir proyecto</button><input accept=".json,application/json" hidden="" id="projectFile" type="file"/></div></header><main>
+<section><h2 class="sub">1. Producto</h2><div class="form"><label>Modelo<select id="product"><option value="mug">Taza cerámica 11 oz</option><option value="tumbler">Vaso térmico</option><option value="shirt">Polera manga corta · mejorada</option><option value="tote">Bolsa de tela</option><option value="notebook">Libreta espiral</option><option value="mousepad">Mousepad rectangular</option><option value="cushion">Cojín cuadrado</option><option value="keychain">Llavero redondo</option></select></label><label>Color del producto<input id="productColor" type="color" value="#ffffff"/></label><label>Ancho imprimible (cm)<input id="widthCm" max="100" min="1" step="0.1" type="number" value="20"/></label><label>Alto imprimible (cm)<input id="heightCm" max="100" min="1" step="0.1" type="number" value="8.5"/></label></div><div class="divider"></div><h2 class="sub">2. Herramientas</h2><div class="form"><label>Texto<input id="textValue" maxlength="100" value="Mi diseño"/></label><label>Color texto<input id="textColor" type="color" value="#172b4d"/></label><label>Tamaño texto<input id="fontSize" max="180" min="20" type="range" value="65"/></label><button id="addText">+ Añadir texto nuevo</button><div class="muted" id="selectedTextStatus">Ningún texto seleccionado</div><button id="applyText">Aplicar cambios al texto seleccionado</button><label>Cargar imagen<input accept="image/png,image/jpeg,image/webp" id="imageFile" type="file"/></label><div class="quick-fit" style="margin:8px 0 12px;padding:10px;border:1px solid #3c5878;border-radius:10px"><strong style="font-size:13px">Colocación rápida de imagen</strong><div class="btnrow" style="margin-top:8px"><button id="quickCenter" type="button">Centrar</button><button id="quickContain" type="button">Ajustar completa</button><button id="quickCover" type="button">Llenar zona</button></div><small style="color:#aabbcf">Selecciona una imagen en el lienzo. “Llenar” puede recortar los extremos visibles en la impresión.</small></div><div class="form" style="border:1px solid #3c5878;border-radius:10px;padding:10px"><strong>Acabados y efectos (solo mockup 3D)</strong><label>Acabado del producto<select id="finishMode"><option value="standard">Cerámica / normal</option><option value="glitter">Glitter · brillo decorativo</option><option value="magic">Taza mágica · revelado por calor</option></select></label><label id="magicHeatRow" hidden>Nivel de calor / revelado <input id="magicHeat" type="range" min="0" max="100" value="0" step="1"/><span id="magicHeatValue">0 % · fría</span></label><p class="muted">Estos efectos son simulaciones visuales. No cambian el arte plano ni el modo espejo de impresión. “Mágica” está disponible solo para taza 11 oz.</p></div><div class="image-size-panel" hidden="" id="imageSizePanel"><strong>Dimensiones de imagen seleccionada</strong><div class="image-size-grid"><label>Ancho (cm)<input id="imageWidthCm" max="300" min="0.01" step="0.1" type="number"/></label><label>Alto (cm)<input id="imageHeightCm" max="300" min="0.01" step="0.1" type="number"/></label></div><label class="image-lock"><input checked="" id="keepImageRatio" type="checkbox"/> Mantener proporción original</label><div class="muted" id="imageSelectedStatus"></div><p class="muted">También puedes arrastrar el cuadrado de la esquina inferior derecha de una imagen seleccionada, o usar la rueda del ratón.</p></div><div class="btnrow"><button id="delete">Eliminar seleccionado</button><button id="clear">Limpiar</button></div><div class="btnrow"><button id="undo">Deshacer</button><button id="redo">Rehacer</button></div><p class="muted">Arrastra elementos para moverlos. Al seleccionar un texto se cargarán sus valores. Escribir en los campos no modifica el diseño hasta pulsar «Aplicar cambios». «Añadir texto nuevo» siempre crea otra capa. Usa la rueda sobre el elemento seleccionado para cambiar su tamaño.</p></div></section>
+<section><div class="status"><h2 class="sub" style="margin:0">3. Lienzo de impresión</h2><span class="pill" id="resolution">20 × 8,5 cm</span></div><div id="canvasWrap"><canvas height="510" id="designCanvas" width="1200"></canvas></div><div class="foot">Vista de composición: proporción correspondiente a las medidas de impresión configuradas.</div><div class="divider"></div><h2 class="sub">4. Exportaciones</h2><div class="image-lock" style="margin:9px 0;padding:12px;border-radius:9px;background:#233b4c;display:grid;gap:8px">
+  <strong>Impresión individual (PNG, JPEG y PDF)</strong>
+  <label class="mirror-switch"><input id="mirrorModeIndividual" type="checkbox" checked> Espejo</label>
+  <small>Invierte horizontalmente todos los píxeles, incluidas las formas de las letras. Solo afecta las descargas para impresión.</small>
+  <div><strong id="mirrorModeStatus" style="font-size:12px;color:#98e3d5">ESPEJO ACTIVADO</strong></div>
+  <canvas id="mirrorPreview" width="400" height="180" style="display:block;max-width:100%;height:auto;background:white;border-radius:6px" aria-label="Vista previa de la salida de impresión"></canvas>
+  <button id="refreshMirrorPreview" type="button">Actualizar vista previa de impresión</button>
+</div><div class="btnrow"><button class="primary" id="exportPrint">PNG impresión 300 dpi</button><button id="exportMockup">PNG mockup 3D</button></div><div class="btnrow" style="margin-top:8px"><button id="exportJpg">JPEG impresión</button><button id="exportPDF">Guardar impresión en PDF</button></div><p class="muted">PNG y JPEG incluyen metadatos de 300 ppp. PDF se descarga con página de tamaño físico exacto. Imprime PDF al 100 % sin ajustar a página; Word puede reducir imágenes que excedan los márgenes. Comprueba resolución original, sangrado y medidas antes de fabricar.</p><div id="notice" role="status"></div></section>
+<section id="viewPanel"><div class="status"><h2 class="sub" style="margin:0">5. Vista tridimensional</h2><span class="pill">Girar · Zoom</span></div><div id="viewer"></div><div class="rotation-toolbar" id="rotationToolbar"><div class="rotation-toolbar-top"><strong>Posición del diseño en el producto</strong><strong id="rotationValue">270°</strong></div>
+<div class="rotation-adjust"><button aria-label="Girar diseño 5 grados hacia atrás" id="rotateMinus" type="button">−5°</button><input aria-label="Desplazar posición del diseño en grados" id="rotationDeg" max="359" min="0" step="1" type="range" value="270"/><button aria-label="Girar diseño 5 grados hacia adelante" id="rotatePlus" type="button">+5°</button></div>
+<div class="rotation-action"><label for="rotationNumber">Grados</label><input aria-label="Posición en grados" id="rotationNumber" inputmode="numeric" max="359" min="0" step="1" type="number" value="270"/><button id="rotationReset" type="button">Volver a 270°</button><button id="rotationViewFront" type="button">Vista frontal</button></div><p class="rotation-explainer">Mueve solo el diseño: la cámara mantiene la vista frontal original. La posición inicial es 270°. No altera el PNG/JPEG de impresión.</p></div><div class="form" style="margin-top:12px"><label>Fondo del visor<select id="viewerBackground"><option value="#17253a">Azul marino</option><option value="#e6eaf0">Gris claro</option><option value="#ffffff">Blanco</option></select></label><label class="image-lock"><input checked="" id="showGuides" type="checkbox"/> Mostrar guías de impresión 3D</label><div class="btnrow"><button id="exportVideo">Grabar giro 360° (WebM)</button></div><p class="muted" id="videoHint">Video de aproximadamente 6 segundos. Disponible en navegadores con MediaRecorder y captura de canvas; requiere mantener la pestaña activa.</p></div><p class="muted">Arrastra para rotar. Usa la rueda o dos dedos para acercar. La textura se actualiza mientras editas. Las guías turquesa indican los límites de impresión; puedes ocultarlas antes de exportar. Los productos son modelos geométricos de prueba; antes de fabricar deben calibrarse con las medidas del producto real.</p><div class="btnrow"><button class="primary" id="viewDesign">Ver diseño</button><button class="primary" id="resync3D">Sincronizar 3D</button><button id="viewSelected3D">Ver elemento seleccionado</button><button id="viewStart">Ver borde inicial</button><button id="viewEnd">Ver borde final</button><button id="resetCam">Restablecer cámara</button></div></section>
+</main>
+<div id="sheetOverlay" hidden role="dialog" aria-modal="true" aria-label="Plancha de impresión">
+<div class="sheet-layout">
+<div class="sheet-head"><div><h2>Plancha de impresión <span class="tag">V0.9.4</span></h2><div class="sheet-help">Combina varios diseños en una hoja, a escala real y 300 ppp.</div></div><button id="sheetClose" type="button">Volver al editor 3D</button></div>
+<div class="sheet-body">
+ <div class="sheet-tools">
+  <label>Formato de papel<select id="sheetPaper"><option value="A4">A4 · 21 × 29,7 cm</option><option value="Carta">Carta · 21,59 × 27,94 cm</option><option value="Oficio">Oficio · 21,6 × 33 cm</option><option value="A3">A3 · 29,7 × 42 cm</option><option value="Personalizado">Personalizado</option></select></label>
+  <label>Orientación<select id="sheetOrientation"><option value="portrait">Vertical</option><option value="landscape">Horizontal</option></select></label>
+  <div class="sheet-controls"><label>Ancho hoja (cm)<input id="sheetPageW" type="number" min="5" max="100" step="0.01" value="21"></label><label>Alto hoja (cm)<input id="sheetPageH" type="number" min="5" max="100" step="0.01" value="29.7"></label></div>
+  <div class="sheet-controls"><label>Margen (cm)<input id="sheetMargin" type="number" min="0" max="5" step="0.1" value="0.5"></label><label>Separación (cm)<input id="sheetGap" type="number" min="0" max="5" step="0.1" value="0.3"></label></div>
+  <div class="sheet-divider"></div>
+  <div class="sheet-btns"><button class="primary" id="sheetAddCurrent">+ Diseño del editor</button><button id="sheetImport">+ Imagen PNG/JPEG</button></div>
+  <input id="sheetImportInput" type="file" accept="image/png,image/jpeg" multiple hidden>
+  <div class="sheet-help">Selecciona una pieza en la hoja para moverla arrastrando. Se mantienen sus centímetros; si una pieza no cabe, aparece una advertencia.</div>
+  <div class="sheet-divider"></div>
+  <strong style="font-size:14px">Pieza seleccionada</strong>
+  <div id="sheetSelectedName" class="sheet-help">Ninguna</div>
+  <div class="sheet-controls"><label>X (cm)<input id="sheetX" type="number" step="0.1"></label><label>Y (cm)<input id="sheetY" type="number" step="0.1"></label><label>Ancho (cm)<input id="sheetW" type="number" min="0.1" step="0.1"></label><label>Alto (cm)<input id="sheetH" type="number" min="0.1" step="0.1"></label></div>
+  <div class="sheet-btns"><button id="sheetDuplicate">Duplicar</button><button id="sheetRotate">Girar 90°</button><button id="sheetRemove">Eliminar</button><button id="sheetArrange" class="primary">Ordenar automáticamente</button></div>
+  <div id="sheetStatus" class="sheet-help" role="status">Hoja vacía.</div>
+  <div class="sheet-divider"></div>
+  <strong style="font-size:14px">Exportar o imprimir</strong>
+  <div class="image-lock" style="display:grid;gap:8px;padding:10px;background:#233b4c;border-radius:8px">
+  <strong>Impresión de la plancha</strong>
+  <label class="mirror-switch"><input id="sheetMirrorMode" type="checkbox" checked> Espejo</label>
+  <small>Refleja horizontalmente toda la hoja al exportar o imprimir. La composición y el 3D permanecen normales.</small>
+</div>
+  <div class="sheet-btns"><button class="primary" id="sheetPng">PNG · 300 ppp</button><button id="sheetJpg">JPEG · 300 ppp</button><button id="sheetPdf">PDF tamaño real</button><button class="primary" id="sheetPrint">Imprimir plancha</button></div>
+  <div class="sheet-help">«Imprimir plancha» abre el diálogo de impresión del dispositivo para seleccionar una impresora instalada o accesible. Usa escala 100 %, sin ajustar y comprueba márgenes. Algunas impresoras no admiten impresión sin bordes.</div>
+ </div>
+ <div class="sheet-preview-holder"><strong>Vista previa de la hoja completa</strong><canvas id="sheetPreview" width="680" height="960" aria-label="Vista previa de plancha de impresión"></canvas><div id="sheetDimensions" class="sheet-help">A4 · 21 × 29,7 cm</div></div>
+</div></div></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script><script src="./app.js?v=095-correccion" type="module"></script><script src="./plancha.js?v=094-espejo" type="module"></script></body></html>

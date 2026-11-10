@@ -1,0 +1,8 @@
+Estudio 3D ZIP B V0.9.5 — CORRECCIÓN CRÍTICA
+
+Basado en V0.9.4. Arreglo: declaración duplicada de variables en app.js impedía iniciar el editor.
+Ahora las herramientas Acabados y efectos se ubican en la columna izquierda, junto a las de edición.
+Se preservan: sincronización de imágenes, editor 2D/3D, espejo real, plancha, videos 360°, 270° por defecto.
+Publicación: subir este ZIP en Deployments del proyecto Cloudflare Pages existente.
+Verificar distintivo V0.9.5, probar modelo 3D, texto e imagen, efectos y exportación.
+Pruebas visuales y de impresión física aún pendientes.
