@@ -12,8 +12,8 @@ Base aprobada: `1138d9864ed9a0f719ec5430dc6286005a503e43` de `mejora/glitter-fas
 | `npm run test:reliability` | 16 escenarios aprobados | Recuperación, importación atómica, espejo, medidas, mockup y video con holográfico activo |
 | `npm run test:glitter` | 33 recorridos UI + 3 archivos | Color libre, capas y material en escritorio/táctil/sin WebGL; PNG/JPEG/PDF reales descargados |
 | `npm run test:interface` | 24 escenarios | Seis pestañas, dos vistas, panel móvil, miniaturas, recetas, guardado y plancha lateral |
-| `npm run package` | Pendiente de empaquetado final | ZIP estático y ZIP de fuente separados |
-| `npm run test:package` | Pendiente de ejecución | Prueba sobre el ZIP extraído sin instrumentar la aplicación |
+| `npm run package` | Ejecutado; dos ZIP íntegros | ZIP estático y ZIP de fuente separados |
+| `npm run test:package` | 1 escenario, 12 verificaciones aprobadas | ZIP extraído: estilos locales, seis pestañas, previews visibles, WebGL, edición, glitter, autoguardado y cero dependencias faltantes |
 
 No se omiten fallos: el primer test de teclado falló con `false !== true` al esperar Diseño después de ArrowRight desde el foco de Producto. El código usaba el índice de la pestaña activa anterior; se corrigió para usar la pestaña enfocada. Se repitió el recorrido completo. No se eliminaron aserciones. Las cantidades son una mezcla de pruebas unitarias y escenarios de integración, no una certificación de funciones comerciales.
 
