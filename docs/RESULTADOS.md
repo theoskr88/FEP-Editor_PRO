@@ -20,7 +20,7 @@ No se omiten fallos: el primer test de teclado falló con `false !== true` al es
 ## Comprobaciones de interfaz
 
 - Seis pestañas exactas y un único panel de herramientas visible, sin controles con IDs duplicados. Navegación con flechas/Home/End; panel móvil recogible con Escape y botón; campos inertes cuando está cerrado.
-- Ambos previews completos y sin superposición para las seis pestañas en escritorio 1024×600, 1024×768 y 1500×980. También siguen visibles al abrir la plancha acoplada.
+- Proporción real del canvas conservada, sin distorsión por bordes. Ambos previews completos y sin superposición para las seis pestañas en escritorio 1024×600, 1024×768 y 1500×980. También siguen visibles al abrir la plancha acoplada.
 - Móvil emulado 390×844 y 360×800: barra inferior dentro de pantalla, panel de hasta 55 % de alto, sin overflow horizontal; el lienzo y el control frontal 270° permanecen alcanzables cerrando/desplazando el panel.
 - Texto e imagen en acordeones; capas con miniaturas de 48×48 diferentes por contenido, selección, orden, bloqueo, visibilidad, duplicado y Undo/Redo. La miniatura no cambia las medidas ni el arte.
 - Fino/grueso son recetas de partícula. Metálico/holográfico son parámetros del material existente; mate y ajustes de intensidad siguen funcionando. Se verificó la propiedad de iridescencia y ausencia de errores de shader en WebGL.

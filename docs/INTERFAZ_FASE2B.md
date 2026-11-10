@@ -21,7 +21,7 @@ A partir de 901 px, el área de trabajo tiene herramientas a la izquierda y dos 
 
 La plancha se acopla al panel izquierdo en lugar de cubrir la aplicación. Tiene una vista de hoja y acordeones de papel, piezas y exportación. Las dos vistas continúan visibles al trabajar en ella. Cambiar de pestaña cierra la plancha y restaura el scroll; no descarta las piezas. Sus centímetros, rotación, espejo, formatos y diálogo de impresión usan el módulo aprobado sin reescribirlo.
 
-El canvas 2D se ajusta visualmente al espacio disponible conservando su relación de aspecto. No modifica resolución del documento, tamaño de objetos o centímetros de producción. El renderer 3D usa la altura real del visor y ResizeObserver para evitar estirar el producto al redimensionar; cámara `(0,1,5.7)`, FOV 40°, geometrías y 270° iniciales se mantienen.
+El canvas 2D se ajusta visualmente al espacio disponible conservando su relación de aspecto. No modifica resolución del documento, tamaño de objetos o centímetros de producción. El contorno del lienzo no consume píxeles de su caja; se comprueba también su proporción real en el DOM. El renderer 3D usa la altura real del visor y ResizeObserver para evitar estirar el producto al redimensionar; cámara `(0,1,5.7)`, FOV 40°, geometrías y 270° iniciales se mantienen.
 
 ### Móvil
 
