@@ -1,9 +1,12 @@
 import {paintGlitter,glitterSettings} from './src/glitter.js';
-import {validateProject} from './src/project.js';
+import {prepareProject} from './src/imports.js';
+import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js';
+import {openDocumentStore,createAutosave} from './src/persistence.js';
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
-let dragStart=null,gestureHistory=false;
+let dragStart=null,gestureHistory=false,importGeneration=0;
+let queueAutosave=()=>{};
 let elements=[],selected=-1,dragging=false,resizing=false,resizeStart=null,history=[],redoStack=[],meshGroup,texture,renderer,scene,camera,controls,animRequest,renderQueued=false;
 // Lienzo exclusivo para texturas: nunca contiene bordes de selección.
 const textureCanvas=document.createElement('canvas');
@@ -81,6 +84,7 @@ function paintDesign(target,width,height){
   }
 }
 function draw(){
+  queueAutosave();
   refreshLayers();
   paintDesign(ctx,canvas.width,canvas.height);
   // El borde punteado es interfaz de edición y no forma parte del diseño.
@@ -169,7 +173,10 @@ $('applyText').onclick=()=>{
   draw(); refreshSelectedLabel();
   notify('Cambios aplicados únicamente al texto seleccionado.');
 };
-$('imageFile').onchange=ev=>{const file=ev.target.files?.[0];if(!file)return;if(file.size>10*1024*1024){notify('Máximo 10 MB por imagen');return}const reader=new FileReader();reader.onload=()=>{let im=new Image();im.onload=()=>{addHistory();elements.push({type:'image',data:reader.result,img:im,scale:.38,x:.5,y:.5});selected=elements.length-1;refreshSelectedLabel();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}))};im.src=reader.result};reader.readAsDataURL(file);ev.target.value=''};
+$('imageFile').onchange=async ev=>{
+ const file=ev.target.files?.[0];ev.target.value='';if(!file)return;const generation=++importGeneration;
+ try{const asset=await prepareImageFile(file);if(generation!==importGeneration)return;const e={type:'image',data:asset.data,img:asset.img,scale:.38,x:.5,y:.5};if(elements.length>=500)throw Error('Máximo 500 capas');enforceDocumentBudget([...elements,e]);addHistory();elements.push(e);selected=elements.length-1;refreshSelectedLabel();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Imagen añadida.')}catch(error){notify('No se pudo abrir la imagen: '+error.message)}
+};
 $('delete').onclick=()=>{if(selected>=0){addHistory();elements.splice(selected,1);selected=-1;refreshSelectedLabel();updateImageControls();draw()}};
 $('clear').onclick=()=>{addHistory();elements=[];selected=-1;refreshSelectedLabel();updateImageControls();draw()};$('undo').onclick=undo;$('redo').onclick=redo;
 $('rotationDeg').addEventListener('input',e=>setPrintRotation(e.target.value));
@@ -178,10 +185,25 @@ $('rotateMinus').onclick=()=>setPrintRotation(printRotationDeg-5);
 $('rotatePlus').onclick=()=>setPrintRotation(printRotationDeg+5);
 $('rotationViewFront').onclick=focusDesignFront;
 $('rotationNumber').addEventListener('change',e=>setPrintRotation(e.target.value));
-$('widthCm').onchange=()=>{updateDimensions();buildModel()};$('heightCm').onchange=updateDimensions;$('product').onchange=()=>{setDimForProduct();updateRotationToolbar();syncFinishUI()};
-$('save').onclick=()=>{const out={version:2,glitter:readGlitterControls(),product:$('product').value,color:$('productColor').value,width:+$('widthCm').value,height:+$('heightCm').value,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,magicHeat,elements:elements.map(({img,...e})=>e)};saveBlob(new Blob([JSON.stringify(out)],{type:'application/json'}),'proyecto-estudio3d.json')};
-$('load').onclick=()=>$('projectFile').click();$('projectFile').onchange=async ev=>{try{const f=ev.target.files[0];if(!f)return;if(f.size>30_000_000)throw Error('Proyecto demasiado grande');const data=validateProject(JSON.parse(await f.text()));applyGlitterControls(data.glitter);$('product').value=dimensions[data.product]?data.product:'mug';$('productColor').value=data.color||'#ffffff';finishMode=['standard','glitter','magic'].includes(data.finishMode)?data.finishMode:'standard';magicHeat=Number.isFinite(data.magicHeat)?Math.max(0,Math.min(100,data.magicHeat)):0;$('finishMode').value=finishMode;$('magicHeat').value=magicHeat;updateMagicCoating();syncFinishUI();$('mirrorModeIndividual').checked=data.mirrorMode!=='normal' && data.mirrorMode!=='none' && data.mirrorPrint!==false;refreshIndividualPreview();$('widthCm').value=data.width||20;$('heightCm').value=data.height||8.5;history=[];redoStack=[];printRotationDeg=Number.isFinite(Number(data.printRotationDeg)) && data.printRotationDeg!==undefined ? ((Number(data.printRotationDeg)%360)+360)%360 : DEFAULT_PRINT_ROTATION_DEG;$('rotationDeg').value=String(printRotationDeg);$('rotationValue').textContent=`${Math.round(printRotationDeg)}°`;
-  if($('rotationNumber'))$('rotationNumber').value=String(Math.round(printRotationDeg));restore(JSON.stringify(data.elements));updateDimensions();buildModel();focusDesignFront();updateRotationToolbar();notify('Proyecto cargado')}catch(e){notify('No se pudo abrir el proyecto: '+e.message)}};
+$('widthCm').onchange=()=>{updateDimensions();buildModel()};$('heightCm').onchange=updateDimensions;$('product').onchange=()=>{setDimForProduct();updateRotationToolbar()};
+function projectSnapshot(){return {version:2,glitter:readGlitterControls(),product:$('product').value,color:$('productColor').value,width:+$('widthCm').value,height:+$('heightCm').value,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,viewerBackground:$('viewerBackground').value,showGuides:$('showGuides').checked,elements:elements.map(({img,...e})=>e)}}
+function applyPreparedProject({data,warnings}){
+ applyGlitterControls(data.glitter);$('product').value=data.product;$('productColor').value=data.color;finishMode=data.finishMode;$('finishMode').value=finishMode;
+ $('mirrorModeIndividual').checked=data.mirrorMode==='espejo';$('widthCm').value=data.width;$('heightCm').value=data.height;
+ elements=data.elements;selected=-1;history=[];redoStack=[];printRotationDeg=data.printRotationDeg;
+ if(['#17253a','#e6eaf0','#ffffff'].includes(data.viewerBackground)){$('viewerBackground').value=data.viewerBackground;if(scene)scene.background=new THREE.Color(data.viewerBackground)}
+ if(typeof data.showGuides==='boolean')$('showGuides').checked=data.showGuides;
+ $('rotationDeg').value=String(printRotationDeg);$('rotationValue').textContent=`${Math.round(printRotationDeg)}°`;$('rotationNumber').value=String(Math.round(printRotationDeg));
+ updateDimensions();refreshSelectedLabel();buildModel();focusDesignFront();updateRotationToolbar();queueAutosave();notify(warnings.length?'Proyecto cargado. '+warnings.join(' '):'Proyecto cargado');
+}
+$('save').onclick=()=>saveBlob(new Blob([JSON.stringify(projectSnapshot())],{type:'application/json'}),'proyecto-estudio3d.json');
+$('load').onclick=()=>$('projectFile').click();
+$('projectFile').onchange=async ev=>{
+ const f=ev.target.files?.[0];ev.target.value='';if(!f)return;const generation=++importGeneration,before=JSON.stringify(projectSnapshot());
+ try{if(f.size>ASSET_LIMITS.projectBytes)throw Error('Proyecto demasiado grande (máximo 30 MB)');let raw;try{raw=JSON.parse(await f.text())}catch{throw Error('El archivo no contiene JSON válido')}
+ const prepared=await prepareProject(raw);if(generation!==importGeneration)return;if(JSON.stringify(projectSnapshot())!==before)throw Error('El documento cambió durante la importación; vuelve a abrir el archivo');applyPreparedProject(prepared)
+ }catch(error){notify('No se pudo abrir el proyecto: '+error.message)}
+};
 function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
 // Reflejo REAL: toda la imagen ya rasterizada, no invierte el orden del texto.
 function mirrorFinishedImage(source){
@@ -277,41 +299,13 @@ $('exportPrint').onclick=async()=>{
 };
 let baseMat,modelRoot,modelUVs=[];
 // Efectos no destructivos: se visualizan exclusivamente en el modelo 3D.
-let finishMode='standard', magicHeat=0;
+let finishMode='standard';
 const glitterCanvas=document.createElement('canvas'); glitterCanvas.width=512;glitterCanvas.height=256;
 const glitterCtx=glitterCanvas.getContext('2d');
 // Brillos deterministas, sin aleatorizar cada fotograma ni alterar la impresión.
 paintGlitter(glitterCtx,512,256,glitterSettings(),{material:true});
 const glitterTexture=new THREE.CanvasTexture(glitterCanvas);glitterTexture.colorSpace=THREE.SRGBColorSpace;glitterTexture.flipY=true;
-const magicCanvas=document.createElement('canvas');magicCanvas.width=512;magicCanvas.height=256;
-const magicCtx=magicCanvas.getContext('2d');
-const magicTexture=new THREE.CanvasTexture(magicCanvas);magicTexture.flipY=true;
-function updateMagicCoating(){
-  const g=magicCtx,w=magicCanvas.width,h=magicCanvas.height;
-  g.clearRect(0,0,w,h);
-  const reveal=Math.max(0,Math.min(1,magicHeat/100));
-  if(reveal<1){
-    const edge=reveal*w;
-    const band=Math.max(8,w*.08);
-    g.fillStyle='rgba(8,12,18,0.96)';g.fillRect(edge+band/2,0,w-edge,h);
-    const grad=g.createLinearGradient(Math.max(0,edge-band/2),0,Math.min(w,edge+band/2),0);
-    grad.addColorStop(0,'rgba(8,12,18,0)');grad.addColorStop(1,'rgba(8,12,18,0.96)');
-    g.fillStyle=grad;g.fillRect(Math.max(0,edge-band/2),0,band,h);
-    // En frío toda la capa exterior permanece oscura.
-    if(reveal===0){g.fillStyle='rgba(8,12,18,0.96)';g.fillRect(0,0,w,h)}
-  }
-  magicTexture.needsUpdate=true;
-}
-updateMagicCoating();
-function syncFinishUI(){
- const p=$('product').value;
- $('finishMode').querySelector('option[value="magic"]').disabled=p!=='mug';
- if(p!=='mug'&&finishMode==='magic'){finishMode='standard';$('finishMode').value=finishMode}
- $('magicHeatRow').hidden=finishMode!=='magic';
- $('magicHeatValue').textContent=`${magicHeat} % · ${magicHeat===0?'fría':magicHeat===100?'caliente':'transición'}`;
-}
-$('finishMode').onchange=e=>{finishMode=e.target.value;syncFinishUI();buildModel()};
-$('magicHeat').oninput=e=>{magicHeat=Number(e.target.value);$('magicHeatValue').textContent=`${magicHeat} % · ${magicHeat===0?'fría':magicHeat===100?'caliente':'transición'}`;updateMagicCoating();};
+$('finishMode').onchange=e=>{finishMode=e.target.value;buildModel()};
 function selectedImageForFit(){const e=elements[selected];if(!e||e.type!=='image'){notify('Selecciona una imagen en el lienzo para usar esta herramienta.');return null}const im=getImage(e);if(!im?.naturalWidth){notify('La imagen todavía está cargando.');return null}return {e,im}}
 function quickFit(mode){const item=selectedImageForFit();if(!item)return;const {e,im}=item;addHistory();const sourceRatio=im.naturalWidth/im.naturalHeight;const areaRatio=canvas.width/canvas.height;
  if(mode==='center'){e.x=.5;e.y=.5}
@@ -399,11 +393,6 @@ if(finishMode==='glitter'){
  const sparkles=addGeo(new THREE.CylinderGeometry(r+.024,r+.024,h-.29,128,1,true,-printArc/2,printArc),glossMat);
  sparkles.rotation.y=THREE.MathUtils.degToRad(printRotationDeg);
  printMat.roughness=.28;printMat.metalness=.06;
-}
-if(finishMode==='magic'&&p==='mug'){
- const coatMat=new THREE.MeshBasicMaterial({map:magicTexture,transparent:true,depthWrite:false,side:THREE.FrontSide});
- const coat=addGeo(new THREE.CylinderGeometry(r+.026,r+.026,h-.29,128,1,true,-printArc/2,printArc),coatMat);
- coat.rotation.y=THREE.MathUtils.degToRad(printRotationDeg);
 }
 // Indicadores de ambos límites: quedan fuera del PNG para impresión.
 if($('showGuides').checked) for (const theta of [-printArc/2+THREE.MathUtils.degToRad(printRotationDeg),printArc/2+THREE.MathUtils.degToRad(printRotationDeg)]) {
@@ -613,12 +602,12 @@ $('exportVideo').addEventListener('click',async()=>{
   finally{if(stream)stream.getTracks().forEach(t=>t.stop());camera.position.copy(start);controls.target.copy(target);controls.enabled=true;controls.enableDamping=true;controls.update();if(show){$('showGuides').checked=true;buildModel()}recording=false;button.disabled=false;button.textContent='Grabar giro 360° (WebM)';requestAnimationFrame(()=>resync3D());}
 });
 
-updateDimensions();try{init3D()}catch(error){scene=null;renderer=null;notify('Visor 3D no disponible. El editor y la impresión 2D siguen disponibles.')}syncFinishUI();updateRotationToolbar();focusDesignFront();
+updateDimensions();try{init3D()}catch(error){scene=null;renderer=null;notify('Visor 3D no disponible. El editor y la impresión 2D siguen disponibles.')}updateRotationToolbar();focusDesignFront();
 
 // API interna de impresión: la plancha recibe el arte limpio y los codificadores de 300 ppp.
-const savedMirrorMode=localStorage.getItem('estudio-mirror-mode');
+let savedMirrorMode;try{savedMirrorMode=localStorage.getItem('estudio-mirror-mode')}catch{}
 $('mirrorModeIndividual').checked=savedMirrorMode!=='normal' && savedMirrorMode!=='none';
-$('mirrorModeIndividual').addEventListener('change',()=>{localStorage.setItem('estudio-mirror-mode',getMirrorMode());refreshIndividualPreview()});
+$('mirrorModeIndividual').addEventListener('change',()=>{try{localStorage.setItem('estudio-mirror-mode',getMirrorMode())}catch{}refreshIndividualPreview()});
 $('refreshMirrorPreview').onclick=refreshIndividualPreview;
 requestAnimationFrame(refreshIndividualPreview);
 window.__estudioPrintAPI={renderToExportCanvas, cmPrint, pngWithDpi, jpegWithDpi, pdfAtPhysicalSize, saveBlob};
@@ -631,7 +620,7 @@ function readGlitterControls(){return glitterSettings({palette:$('glitterPalette
 function applyGlitterControls(value){const s=glitterSettings(value);for(const [id,key]of [['glitterPalette','palette'],['glitterColor','color'],['glitterSize','size'],['glitterIntensity','intensity'],['glitterFinish','finish']])$(id).value=s[key];paintGlitter(glitterCtx,512,256,s,{material:true});glitterTexture.needsUpdate=true;}
 for(const id of ['glitterPalette','glitterColor','glitterSize','glitterIntensity','glitterFinish'])$(id).onchange=()=>{applyGlitterControls(readGlitterControls());buildModel()};
 $('applyGlitterLayer').onclick=()=>{const e=elements[selected];if(e?.type!=='glitter'||e.locked){notify('Selecciona una capa glitter desbloqueada.');return}addHistory();e.glitter=readGlitterControls();draw()};
-$('addGlitterLayer').onclick=()=>{addHistory();elements.unshift({type:'glitter',x:.5,y:.5,locked:true,glitter:readGlitterControls()});selected=0;draw();notify('Glitter simulado añadido al arte imprimible, debajo del diseño.');};
+$('addGlitterLayer').onclick=()=>{addHistory();elements.unshift({type:'glitter',x:.5,y:.5,locked:false,glitter:readGlitterControls()});selected=0;draw();notify('Glitter simulado añadido al arte imprimible, debajo del diseño.');};
 function refreshLayers(){
  const list=$('layerList');if(!list)return;list.replaceChildren();
  for(let i=elements.length-1;i>=0;i--){const e=elements[i],row=document.createElement('div');row.className='btnrow';
@@ -641,5 +630,23 @@ function refreshLayers(){
  $('layerOpacity').value=String(Math.round((elements[selected]?.opacity??1)*100));
 }
 $('layerOpacity').onchange=ev=>{const e=elements[selected];if(!e||e.locked)return;addHistory();e.opacity=Number(ev.target.value)/100;draw()};
-$('layerDuplicate').onclick=()=>{const e=elements[selected];if(!e)return;addHistory();elements.splice(selected+1,0,JSON.parse(JSON.stringify({...e,img:undefined})));selected++;draw()};
-for(const [id,delta] of [['layerUp',1],['layerDown',-1]])$(id).onclick=()=>{const i=selected,j=i+delta;if(i<0||j<0||j>=elements.length||elements[i].locked)return;addHistory();[elements[i],elements[j]]=[elements[j],elements[i]];selected=j;draw()};
+$('layerDuplicate').onclick=()=>{const e=elements[selected];if(!e)return;try{if(elements.length>=500)throw Error('Máximo 500 capas');enforceDocumentBudget([...elements,e])}catch(error){notify(error.message);return}addHistory();elements.splice(selected+1,0,JSON.parse(JSON.stringify({...e,img:undefined})));selected++;draw()};
+for(const [id,delta] of [['layerUp',1],['layerDown',-1]])$(id).onclick=()=>{const i=selected,j=i+delta;if(i<0||j<0||j>=elements.length||elements[i].locked||((elements[i].type==='glitter')!==(elements[j].type==='glitter')))return;addHistory();[elements[i],elements[j]]=[elements[j],elements[i]];selected=j;draw()};
+
+// Recovery completes before the editor accepts changes. No empty startup save.
+const autosaveStatus=$('autosaveStatus');
+function showSaveStatus(state,error){autosaveStatus.dataset.state=state;autosaveStatus.textContent=({saving:'Guardando…',saved:'Guardado en este navegador',error:'Error de autoguardado. Descarga el proyecto JSON.'})[state]||state;if(error)autosaveStatus.title=error.message}
+let documentStore,autosave;
+const startupControls=[...document.querySelectorAll('button,input,select')].map(node=>[node,node.disabled]);startupControls.forEach(([node])=>node.disabled=true);
+try{
+ documentStore=await openDocumentStore();
+ const current=await documentStore.read();
+ if(current){try{applyPreparedProject(await prepareProject(current.document));showSaveStatus('saved')}catch(error){showSaveStatus('error',error);notify('La copia actual no se pudo recuperar. Usa Restaurar versión anterior o abre un JSON; no se sobrescribió la copia.')}}
+ else autosaveStatus.textContent='Autoguardado local activo';
+ autosave=createAutosave({store:documentStore,snapshot:projectSnapshot,status:showSaveStatus});
+ let observed=JSON.stringify(projectSnapshot());queueAutosave=()=>{const next=JSON.stringify(projectSnapshot());if(next!==observed){observed=next;autosave.schedule()}};
+ for(const event of ['input','change','click'])document.addEventListener(event,()=>queueMicrotask(queueAutosave));
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autosave.flush()});window.addEventListener('pagehide',()=>autosave.flush());
+ $('restorePrevious').onclick=async()=>{try{const old=await documentStore.read('previous');if(!old){notify('Todavía no hay una versión anterior.');return}const before=JSON.stringify(projectSnapshot()),prepared=await prepareProject(old.document);if(before!==JSON.stringify(projectSnapshot()))throw Error('El documento cambió; vuelve a intentarlo');applyPreparedProject(prepared);await autosave.flush();notify('Versión anterior restaurada; la versión reemplazada queda como respaldo.')}catch(error){notify('No se pudo restaurar: '+error.message)}};
+}catch(error){showSaveStatus('error',error);$('restorePrevious').title='Almacenamiento local no disponible'}
+finally{startupControls.forEach(([node,disabled])=>node.disabled=disabled);updateImageControls()}
