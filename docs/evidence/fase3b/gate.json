@@ -1,0 +1,26 @@
+{
+  "phase": "fase3b",
+  "base": "5b56756",
+  "gate": "passed locally",
+  "reports": {
+    "compat/browser.json": 29,
+    "compat/reliability.json": 16,
+    "compat/glitter/glitter-browser.json": 33,
+    "compat/glitter/print-files.json": 3,
+    "interface/interface-browser.json": 24,
+    "stickers-browser.json": 27,
+    "free-browser.json": 27,
+    "consolidation.json": 5,
+    "free-recovery.json": 2,
+    "free-limits.json": 2,
+    "vector-browser.json": 15,
+    "svg-validation.json": 5,
+    "acceptance.json": 20
+  },
+  "staticPackageChecks": 20,
+  "testedRuntimeSha256": "644a3d987a81fce71e6fe0aca9d9465b773f7dac45931b7cf825808e1146d4d5",
+  "deployed": false,
+  "physicalDevicesTested": false,
+  "physicalPrintingTested": false,
+  "hardwarePlotterTested": false
+}

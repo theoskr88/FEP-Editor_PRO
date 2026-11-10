@@ -18,9 +18,11 @@
     "test:consolidation": "node tests/consolidation-browser.mjs",
     "test:free": "node tests/free-browser.mjs",
     "test:free:recovery": "node tests/free-recovery-browser.mjs",
-    "test:free:limits": "node tests/free-limits-browser.mjs"
+    "test:free:limits": "node tests/free-limits-browser.mjs",
+    "test:vector": "node tests/vector-browser.mjs"
   },
   "dependencies": {
+    "clipper-lib": "6.4.2",
     "three": "0.170.0"
   },
   "devDependencies": {

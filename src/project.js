@@ -1,14 +1,15 @@
-import {normalizeFreeDesign,validateShape} from './free-design.js?v=fase3a-20261110';
-import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase3a-20261110';
+import {validateVector} from './vector.js?v=fase3b-20261110';
+import {normalizeFreeDesign,validateShape} from './free-design.js?v=fase3b-20261110';
+import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase3b-20261110';
 // Validate before changing any live editor state. Legacy V1 remains readable.
 export function validateProject(data){
  if(!data||typeof data!=='object'||![undefined,1,2].includes(data.version)||!Array.isArray(data.elements)||data.elements.length>500)throw Error('Formato o número de capas inválido');
  for(const key of ['width','height'])if(data[key]!==undefined&&(!Number.isFinite(data[key])||data[key]<1||data[key]>100))throw Error('Dimensiones fuera de 1–100 cm');
  for(const e of data.elements){
-  if(!e||!['text','image','glitter','sticker','shape'].includes(e.type)||!Number.isFinite(e.x)||!Number.isFinite(e.y)||Math.abs(e.x)>10||Math.abs(e.y)>10)throw Error('Capa inválida');
+  if(!e||!['text','image','glitter','sticker','shape','vector'].includes(e.type)||!Number.isFinite(e.x)||!Number.isFinite(e.y)||Math.abs(e.x)>10||Math.abs(e.y)>10)throw Error('Capa inválida');
   if(e.type==='text'&&(typeof e.text!=='string'||e.text.length>1000||!Number.isFinite(e.size)||e.size<=0||e.size>500))throw Error('Texto inválido');
   if(e.type==='image'&&(typeof e.data!=='string'||e.data.length>15_000_000||!/^data:image\/(png|jpeg|webp);base64,/.test(e.data)))throw Error('Imagen no compatible');
-  if(e.type==='sticker')validateStickerLayer(e);if(e.type==='shape')validateShape(e);
+  if(e.type==='sticker')validateStickerLayer(e);if(e.type==='shape')validateShape(e);if(e.type==='vector')validateVector(e);
   for(const key of ['widthFrac','heightFrac','scale'])if(e[key]!==undefined&&(!Number.isFinite(e[key])||e[key]<=0||e[key]>3))throw Error('Tamaño de imagen inválido');
   if(e.glitter!==undefined&&(!e.glitter||typeof e.glitter!=='object'||Array.isArray(e.glitter)))throw Error('Parámetros glitter inválidos');
   for(const key of ['visible','locked'])if(e[key]!==undefined&&typeof e[key]!=='boolean')throw Error('Estado de capa inválido');

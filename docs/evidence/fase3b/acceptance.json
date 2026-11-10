@@ -1,0 +1,106 @@
+{
+  "passed": 20,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "startup, six tabs and all product profiles render",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "text, photo and sticker update artwork and actual 3D pixels",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "layers preserve duplicate, opacity, lock, visibility, order and undo",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "physical glitter is excluded from print while printable glitter is included",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "autosave and JSON recover the same project",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "PNG, JPEG, PDF and real horizontal mirror preserve physical dimensions",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "print sheet preserves centimetres and downloads real sheet",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "vector cut SVG remains paths only and excludes photographs",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "360 video generates, decodes and leaves editor responsive",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "free design keeps all layers, physical units, guides and transparent export",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "startup, six tabs and all product profiles render",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "text, photo and sticker update artwork and actual 3D pixels",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "layers preserve duplicate, opacity, lock, visibility, order and undo",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "physical glitter is excluded from print while printable glitter is included",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "autosave and JSON recover the same project",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "PNG, JPEG, PDF and real horizontal mirror preserve physical dimensions",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "print sheet preserves centimetres and downloads real sheet",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "vector cut SVG remains paths only and excludes photographs",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "360 video generates, decodes and leaves editor responsive",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "free design keeps all layers, physical units, guides and transparent export",
+      "passed": true
+    }
+  ],
+  "physicalDevicesTested": false
+}

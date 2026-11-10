@@ -1,20 +1,23 @@
-import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=fase3a-20261110';
-import {createFreeControls} from './src/free-controls.js?v=fase3a-20261110';
-import {validateStickerLayer} from './src/project.js?v=fase3a-20261110';
-import {createLayerList,layerName} from './src/layer-ui.js?v=fase3a-20261110';
-import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fase3a-20261110';
-import {createGlitterCache} from './src/glitter-cache.js?v=fase3a-20261110';
-import {createGlitterControls} from './src/glitter-controls.js?v=fase3a-20261110';
-import {prepareProject} from './src/imports.js?v=fase3a-20261110';
-import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js?v=fase3a-20261110';
-import {openDocumentStore,createAutosave} from './src/persistence.js?v=fase3a-20261110';
+import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=fase3b-20261110';
+import {createVectorControls} from './src/vector-controls.js?v=fase3b-20261110';
+import {getSticker} from './src/stickers.js?v=fase3b-20261110';
+import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=fase3b-20261110';
+import {createFreeControls} from './src/free-controls.js?v=fase3b-20261110';
+import {validateStickerLayer} from './src/project.js?v=fase3b-20261110';
+import {createLayerList,layerName} from './src/layer-ui.js?v=fase3b-20261110';
+import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fase3b-20261110';
+import {createGlitterCache} from './src/glitter-cache.js?v=fase3b-20261110';
+import {createGlitterControls} from './src/glitter-controls.js?v=fase3b-20261110';
+import {prepareProject} from './src/imports.js?v=fase3b-20261110';
+import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js?v=fase3b-20261110';
+import {openDocumentStore,createAutosave} from './src/persistence.js?v=fase3b-20261110';
 let THREE,OrbitControls,resizeViewer=()=>{};
 let recovering=true,stickerController,stickerPainter,stickerGeometry,stickerReady;
-if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fase3a-20261110')).initInterface()}catch{}}
+if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fase3b-20261110')).initInterface()}catch{}}
 const ui=window.__fepUI||{refresh(){}};
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 let dragStart=null,gestureHistory=false,importGeneration=0;
-let documentWidth=20,documentHeight=8.5,editorMode='product',freeDesign=normalizeFreeDesign(),freeController;
+let documentWidth=20,documentHeight=8.5,editorMode='product',freeDesign=normalizeFreeDesign(),freeController,vectorController;
 let queueAutosave=()=>{},preferredGuides=$('showGuides').checked;
 let elements=[],selected=-1,dragging=false,resizing=false,resizeStart=null,history=[],redoStack=[],meshGroup,texture,renderer,scene,camera,controls,animRequest,renderQueued=false;
 // Lienzo exclusivo para texturas: nunca contiene bordes de selección.
@@ -31,10 +34,11 @@ textureCanvas.width=canvas.width;textureCanvas.height=canvas.height;
 $('canvasWrap').style.aspectRatio=`${w} / ${h}`;
 $('resolution').textContent=editorMode==='free'?`${Number(fromCm(w,freeDesign.unit).toFixed(3))} × ${Number(fromCm(h,freeDesign.unit).toFixed(3))} ${freeDesign.unit}`:`${w} × ${h} cm`;draw();updateImageControls()}
 function initialLayerSize(fw,ratio){const fh=fw*canvas.width/canvas.height*ratio,factor=Math.min(1,3/fh);return {widthFrac:fw*factor,heightFrac:fh*factor}}
-function copyElements(source=elements){return source.map(e=>({...e,...(e.glitter?{glitter:{...e.glitter}}:{}),...(e.label?{label:{...e.label}}:{})}))}
+function copyElements(source=elements){return source.map(e=>({...e,...(e.glitter?{glitter:{...e.glitter}}:{}),...(e.label?{label:{...e.label}}:{}),...(e.paths?{paths:e.paths.map(r=>r.map(p=>[...p]))}:{})}))}
 function trimHistory(){
  const pixels=()=>{const seen=new Set();let n=0;for(const list of [elements,...history,...redoStack])for(const e of list)if(e.type==='image'&&e.img&&!seen.has(e.data)){seen.add(e.data);n+=e.img.naturalWidth*e.img.naturalHeight}return n};
- while(history.length+redoStack.length>40||pixels()>ASSET_LIMITS.totalPixels){if(history.length)history.shift();else if(redoStack.length)redoStack.shift();else break}
+ const nodes=()=>[elements,...history,...redoStack].reduce((n,list)=>n+list.reduce((a,e)=>a+(e.paths?.reduce((b,r)=>b+r.length,0)||0),0),0);
+ while(history.length+redoStack.length>40||pixels()>ASSET_LIMITS.totalPixels||nodes()>1_000_000){if(history.length)history.shift();else if(redoStack.length)redoStack.shift();else break}
 }
 function addHistory(){history.push(copyElements());redoStack=[];trimHistory()}
 function restore(state){elements=copyElements(state);selected=-1;draw();refreshSelectedLabel();updateImageControls()}
@@ -79,12 +83,14 @@ $('imageHeightCm').addEventListener('change',()=>{
   setImageSize($('keepImageRatio').checked?h*old.w/old.h:Number($('imageWidthCm').value),h);
 });
 
-function paintDesign(target,width,height,{transparent=editorMode==='free'&&freeDesign.background==='transparent'}={}){
+function paintDesign(target,width,height,{transparent=editorMode==='free'&&freeDesign.background==='transparent',onlyLayer=null}={}){
   target.clearRect(0,0,width,height);
   if(!transparent){target.fillStyle='#ffffff';target.fillRect(0,0,width,height)}
-  for(let i=0;i<elements.length;i++){
-    const e=elements[i];if(e.visible===false)continue;target.save();target.globalAlpha=e.opacity??1;
+  const sourceElements=onlyLayer?[onlyLayer]:elements;
+  for(let i=0;i<sourceElements.length;i++){
+    const e=sourceElements[i];if(e.visible===false)continue;target.save();target.globalAlpha=e.opacity??1;
     if(e.type==='glitter'){const tile=glitterTiles.get(e.glitter);target.drawImage(tile,0,0,width,height);target.restore();continue;}
+    if(e.type==='vector'){if(e.role!=='cut')paintVector(target,e,width,height);target.restore();continue;}
     if(e.type==='shape'){paintShape(target,e,width,height);target.restore();continue;}
     if(e.type==='sticker'){if(stickerPainter)stickerPainter(target,e,width,height);target.restore();continue;}
     target.translate(e.x*width,e.y*height);
@@ -106,27 +112,29 @@ function draw(){
   trimHistory();queueAutosave();
   refreshLayers();
   paintDesign(ctx,canvas.width,canvas.height);
+  for(const e of elements)if(e.type==='vector'&&e.role==='cut'&&e.visible!==false)paintVector(ctx,e,canvas.width,canvas.height,{cutPreview:true});
+  vectorController?.sync();
   // El borde punteado es interfaz de edición y no forma parte del diseño.
   stickerController?.sync();freeController?.sync();
   if(selected>=0){
     const b=bounds(elements[selected]);ctx.save();ctx.strokeStyle='#0c91a3';
     ctx.lineWidth=3;ctx.setLineDash([9,7]);ctx.strokeRect(b.x,b.y,b.w,b.h);
-    if(['image','sticker','shape'].includes(elements[selected]?.type)){ctx.setLineDash([]);ctx.fillStyle='#0c91a3';ctx.fillRect(b.x+b.w-9,b.y+b.h-9,18,18);ctx.strokeStyle='#fff';ctx.strokeRect(b.x+b.w-9,b.y+b.h-9,18,18)}
+    if(['image','sticker','shape','vector'].includes(elements[selected]?.type)){ctx.setLineDash([]);ctx.fillStyle='#0c91a3';ctx.fillRect(b.x+b.w-9,b.y+b.h-9,18,18);ctx.strokeStyle='#fff';ctx.strokeRect(b.x+b.w-9,b.y+b.h-9,18,18)}
     ctx.restore();
   }
   paintDesign(textureCtx,textureCanvas.width,textureCanvas.height);
   if(finishMode==='glitter')updateGlitterArtwork();updateTexture();
   if($('mirrorPreview'))refreshIndividualPreview();
 }
-function bounds(e){if(e?.type==='shape')return shapeBounds(e,canvas.width,canvas.height);if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
+function bounds(e){if(e?.type==='vector')return vectorBounds(e,canvas.width,canvas.height);if(e?.type==='shape')return shapeBounds(e,canvas.width,canvas.height);if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
 function pos(ev){const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/canvas.width,r.height/canvas.height),w=canvas.width*scale,h=canvas.height*scale;return{x:(ev.clientX-r.left-(r.width-w)/2)/scale,y:(ev.clientY-r.top-(r.height-h)/2)/scale}}
 canvas.addEventListener('pointerdown',ev=>{
   if(dragging||resizing)return;const p=pos(ev);resizing=false;resizeStart=null;gestureHistory=false;
   // El cuadro inferior derecho cambia el tamaño de una imagen seleccionada.
-  if(selected>=0&&['image','sticker','shape'].includes(elements[selected]?.type)&&!elements[selected].locked){
+  if(selected>=0&&['image','sticker','shape','vector'].includes(elements[selected]?.type)&&!elements[selected].locked){
     const b=bounds(elements[selected]);const hit=15*canvas.width/Math.max(1,canvas.getBoundingClientRect().width);
     if(Math.abs(p.x-(b.x+b.w))<=hit&&Math.abs(p.y-(b.y+b.h))<=hit){
-      resizing=true;resizeStart={x:p.x,y:p.y,w:['sticker','shape'].includes(elements[selected].type)?elements[selected].widthFrac*canvas.width:b.w,h:['sticker','shape'].includes(elements[selected].type)?elements[selected].heightFrac*canvas.height:b.h};
+      resizing=true;resizeStart={x:p.x,y:p.y,w:['sticker','shape','vector'].includes(elements[selected].type)?elements[selected].widthFrac*canvas.width:b.w,h:['sticker','shape','vector'].includes(elements[selected].type)?elements[selected].heightFrac*canvas.height:b.h};
       canvas.setPointerCapture(ev.pointerId);return;
     }
   }
@@ -161,7 +169,7 @@ canvas.addEventListener('wheel',ev=>{
   const e=elements[selected],k=ev.deltaY<0?1.08:.92;
   if(e.type==='text')e.size=Math.max(12,Math.min(500,e.size*k));
   else {
-    const f=e.type==='shape'?{fw:e.widthFrac,fh:e.heightFrac}:e.type==='sticker'?stickerGeometry.stickerFractions(e,canvas.width,canvas.height):imageFractions(e);e.widthFrac=Math.max(.005,Math.min(3,f.fw*k));
+    const f=['shape','vector'].includes(e.type)?{fw:e.widthFrac,fh:e.heightFrac}:e.type==='sticker'?stickerGeometry.stickerFractions(e,canvas.width,canvas.height):imageFractions(e);e.widthFrac=Math.max(.005,Math.min(3,f.fw*k));
     e.heightFrac=Math.max(.005,Math.min(3,f.fh*k));delete e.scale;
     updateImageControls();
   }
@@ -657,6 +665,11 @@ freeController=createFreeControls({
  editShape:patch=>{const layer=elements[selected];if(layer?.type!=='shape'||layer.locked)return;const next={...layer,...patch};validateShape(next);addHistory();elements[selected]=next;draw()},
  align:action=>{const layer=elements[selected];if(!layer||layer.locked||layer.type==='glitter'){notify('Selecciona una capa desbloqueada para alinear');return}const {dx,dy}=alignedPosition(bounds(layer),canvas.width,canvas.height,action);addHistory();layer.x+=dx;layer.y+=dy;draw()}
 });
+vectorController=createVectorControls({
+ state:()=>({elements,selected,w:documentWidth,h:documentHeight,canvasWidth:canvas.width}),notify,
+ commit:(layer,{replace=false,hideOriginal=false}={})=>{validateVector(layer);if(!replace&&elements.length>=500)throw Error('Máximo 500 capas');const candidate=replace?elements.map((e,i)=>i===selected?layer:e):[...elements,layer];enforceDocumentBudget(candidate);addHistory();if(hideOriginal&&elements[selected])elements[selected].visible=false;if(replace)elements[selected]=layer;else{elements.push(layer);selected=elements.length-1}draw()},
+ exportSVG:cutOnly=>{const result=exportVectorSVG(projectSnapshot(),{cutOnly,mirror:getMirrorMode()==='espejo',canvasWidth:canvas.width,getSticker,getRaster:e=>{const c=document.createElement('canvas');c.width=canvas.width;c.height=canvas.height;paintDesign(c.getContext('2d'),c.width,c.height,{transparent:true,onlyLayer:{...e,opacity:1}});return c.toDataURL()}});saveBlob(new Blob([result.svg],{type:'image/svg+xml'}),cutOnly?'fep-corte.svg':'fep-impresion-corte.svg');notify('SVG con medidas físicas generado. '+(cutOnly?'Solo líneas de corte; imágenes excluidas.':'Gráficos imprimibles y corte en grupos separados.'))}
+});
 updateDimensions();updateRotationToolbar();
 async function startThree(){
  try{
@@ -721,7 +734,7 @@ function deadline(promise,ms,message){let timer;return Promise.race([promise,new
 
 async function loadStickers(){
  try{
-  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fase3a-20261110'),import('./src/sticker-renderer.js?v=fase3a-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fase3a-20261110');
+  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fase3b-20261110'),import('./src/sticker-renderer.js?v=fase3b-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fase3b-20261110');
   stickerController=uiModule.createStickerControls({selected:()=>elements[selected],dimensions:cmPrint,busy:()=>recovering,notify,insert:definition=>{
    if(recovering)return;if(elements.length>=500){notify('Máximo 500 capas');return}
    const layer={type:'sticker',stickerId:definition.id,stickerName:definition.name,x:.5,y:.5,...initialLayerSize(.28,.75),color:'#e6eef9',outlineColor:'#52697e',outlineWidth:definition.shapes[0].stroke?1.5:0,rotation:0,flipX:false,flipY:false,shadow:false,...(definition.textBox?{label:{text:'',size:14,color:'#172b4d'}}:{})};validateStickerLayer(layer);addHistory();elements.push(layer);selected=elements.length-1;loadSelectedTextIntoInputs();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Sticker añadido: '+definition.name)

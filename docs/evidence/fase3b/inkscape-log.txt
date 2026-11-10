@@ -1,0 +1,53 @@
+cut.svg
+svg2,219.024,94.2992,166.677,151.559
+g2,219.024,94.2992,166.677,151.559
+
+cut,219.024,94.2992,166.677,151.559
+path2,219.024,94.2992,166.677,151.559
+
+
+** (inkscape:102438): WARNING **: 20:29:37.087: Failed to wrap object of type 'PangoFT2FontMap'. Hint: this error is commonly caused by failing to call a library init() function.
+
+** (inkscape:102438): WARNING **: 20:29:37.208: Failed to wrap object of type 'GtkRecentManager'. Hint: this error is commonly caused by failing to call a library init() function.
+
+cut-mirror.svg
+svg2,370.205,94.2992,166.677,151.559
+g2,370.205,94.2992,166.677,151.559
+
+cut,370.205,94.2992,166.677,151.559
+path2,370.205,94.2992,166.677,151.559
+
+
+** (inkscape:102445): WARNING **: 20:29:37.280: Failed to wrap object of type 'PangoFT2FontMap'. Hint: this error is commonly caused by failing to call a library init() function.
+
+** (inkscape:102445): WARNING **: 20:29:37.418: Failed to wrap object of type 'GtkRecentManager'. Hint: this error is commonly caused by failing to call a library init() function.
+
+print.svg
+svg7,0,0,755.906,340.157
+g7,0,0,755.906,340.157
+print,0,0,755.906,340.157
+path2,151.181,102.047,226.772,136.063
+path3,226.772,102.047,226.772,136.063
+path4,151.181,102.047,302.362,136.063
+path5,151.181,102.047,75.5906,136.063
+path6,226.772,102.047,151.181,136.063
+image6,0,0,755.906,340.157
+cut,219.024,94.2992,166.677,151.559
+path7,219.024,94.2992,166.677,151.559
+
+
+** (inkscape:102452): WARNING **: 20:29:37.493: Failed to wrap object of type 'PangoFT2FontMap'. Hint: this error is commonly caused by failing to call a library init() function.
+
+** (inkscape:102452): WARNING **: 20:29:37.627: Failed to wrap object of type 'GtkRecentManager'. Hint: this error is commonly caused by failing to call a library init() function.
+
+
+
+** (inkscape:102459): WARNING **: 20:29:37.711: Failed to wrap object of type 'PangoFT2FontMap'. Hint: this error is commonly caused by failing to call a library init() function.
+
+** (inkscape:102459): WARNING **: 20:29:37.794: Failed to wrap object of type 'GtkRecentManager'. Hint: this error is commonly caused by failing to call a library init() function.
+
+
+
+** (inkscape:102466): WARNING **: 20:29:37.871: Failed to wrap object of type 'PangoFT2FontMap'. Hint: this error is commonly caused by failing to call a library init() function.
+
+** (inkscape:102466): WARNING **: 20:29:37.950: Failed to wrap object of type 'GtkRecentManager'. Hint: this error is commonly caused by failing to call a library init() function.

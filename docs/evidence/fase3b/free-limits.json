@@ -1,0 +1,19 @@
+{
+  "passed": 2,
+  "checks": [
+    "100:1 shape and sticker remain valid for save/reopen",
+    "40 megapixel limit rejects export without blocking JSON save"
+  ],
+  "elements": [
+    {
+      "type": "shape",
+      "width": 0.03,
+      "height": 3
+    },
+    {
+      "type": "sticker",
+      "width": 0.039999999999999994,
+      "height": 2.9999999999999996
+    }
+  ]
+}

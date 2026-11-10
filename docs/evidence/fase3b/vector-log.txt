@@ -1,0 +1,21 @@
+PASS vector desktop shape conversion, node edit, subdivision and undo are real document operations
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert(Math.abs(layer.widthFrac-width)<1e-5)
+
+    at file:///workspace/FEP-Editor_PRO/tests/vector-browser.mjs:5:697
+    at async check (file:///workspace/FEP-Editor_PRO/tests/vector-browser.mjs:3:225)
+    at async file:///workspace/FEP-Editor_PRO/tests/vector-browser.mjs:5:2 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

@@ -1,0 +1,48 @@
+import Clipper from '../vendor/clipper.js?v=fase3b-20261110';
+import glyphs from '../vendor/font-outlines.js?v=fase3b-20261110';
+const SCALE=10000;
+export function validateVector(e){
+ if(!Array.isArray(e.paths)||!e.paths.length||e.paths.length>512)throw Error('Trazado vacío o demasiado complejo');let count=0;
+ for(const ring of e.paths){if(!Array.isArray(ring)||ring.length<3)throw Error('Contorno inválido');count+=ring.length;for(const p of ring)if(!Array.isArray(p)||p.length!==2||p.some(n=>!Number.isFinite(n)||Math.abs(n)>10000))throw Error('Nodo inválido')}
+ if(count>32768)throw Error('Máximo 32768 nodos por trazado');
+ for(const k of ['widthFrac','heightFrac'])if(!Number.isFinite(e[k])||e[k]<=0||e[k]>3)throw Error('Tamaño de trazado inválido');
+ if(!Number.isFinite(e.rotation)||Math.abs(e.rotation)>3600||!/^#[a-f0-9]{6}$/i.test(e.color)||!['print','cut'].includes(e.role))throw Error('Estilo de trazado inválido');return e;
+}
+export function shapePaths(e){
+ if(e.type==='vector')return e.paths;
+ if(e.type!=='shape')throw Error('Elige figuras o trazados; las imágenes no son vectores');
+ if(e.shape==='rectangle')return [[[0,0],[100,0],[100,100],[0,100]]];
+ if(e.shape==='triangle')return [[[50,0],[100,100],[0,100]]];
+ const count=e.shape==='star'?10:128;return [Array.from({length:count},(_,i)=>{const a=-Math.PI/2+i*Math.PI*2/count,r=e.shape==='star'&&i%2?.44:1;return [50+50*r*Math.cos(a),50+50*r*Math.sin(a)]})];
+}
+export function physicalPaths(e,w,h){const a=(e.rotation||0)*Math.PI/180,c=Math.cos(a),s=Math.sin(a);return shapePaths(e).map(r=>r.map(([px,py])=>{const x=(px/100-.5)*e.widthFrac*w,y=(py/100-.5)*e.heightFrac*h;return [e.x*w+x*c-y*s,e.y*h+x*s+y*c]}))}
+export function pathsBounds(paths){const pts=paths.flat();if(!pts.length)throw Error('Resultado vacío');const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);let x=Infinity,y=Infinity,right=-Infinity,bottom=-Infinity;for(let i=0;i<xs.length;i++){x=Math.min(x,xs[i]);y=Math.min(y,ys[i]);right=Math.max(right,xs[i]);bottom=Math.max(bottom,ys[i])}return{x,y,w:right-x,h:bottom-y}}
+export function vectorFromPhysical(paths,w,h,style={}){const b=pathsBounds(paths);if(b.w<.00001||b.h<.00001)throw Error('Resultado vacío o degenerado');const e={type:'vector',role:'print',color:'#76b8d8',rotation:0,x:(b.x+b.w/2)/w,y:(b.y+b.h/2)/h,widthFrac:b.w/w,heightFrac:b.h/h,paths:paths.map(r=>r.map(p=>[(p[0]-b.x)/b.w*100,(p[1]-b.y)/b.h*100])),...style};return validateVector(e)}
+const integers=paths=>paths.map(r=>r.map(([x,y])=>({X:Math.round(x*SCALE),Y:Math.round(y*SCALE)})));
+const decimals=paths=>paths.map(r=>r.map(p=>[p.X/SCALE,p.Y/SCALE]));
+export function booleanPaths(a,b,op){if(!['union','difference','intersection'].includes(op))throw Error('Operación inválida');const clip=new Clipper.Clipper();clip.AddPaths(integers(a),Clipper.PolyType.ptSubject,true);clip.AddPaths(integers(b),Clipper.PolyType.ptClip,true);const solution=[];clip.Execute({union:Clipper.ClipType.ctUnion,difference:Clipper.ClipType.ctDifference,intersection:Clipper.ClipType.ctIntersection}[op],solution,Clipper.PolyFillType.pftEvenOdd,Clipper.PolyFillType.pftEvenOdd);if(!solution.length)throw Error('La operación produce un resultado vacío; las capas se conservan');return decimals(solution)}
+export function offsetPaths(paths,cm){if(!Number.isFinite(cm)||Math.abs(cm)>2)throw Error('Offset fuera de −20 a 20 mm');const clean=Clipper.Clipper.SimplifyPolygons(integers(paths),Clipper.PolyFillType.pftEvenOdd),offset=new Clipper.ClipperOffset(2,.0005*SCALE),solution=[];offset.AddPaths(clean,Clipper.JoinType.jtRound,Clipper.EndType.etClosedPolygon);offset.Execute(solution,cm*SCALE);if(!solution.length)throw Error('El offset elimina el contorno');return decimals(solution)}
+export function vectorBounds(e,width,height){return pathsBounds(physicalPaths(e,width,height))}
+export function paintVector(ctx,e,width,height,{cutPreview=false}={}){const paths=physicalPaths(e,width,height);ctx.save();ctx.beginPath();for(const r of paths){r.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath()}if(e.role==='cut'){if(cutPreview){ctx.strokeStyle='#eb4eaf';ctx.lineWidth=2;ctx.setLineDash([7,4]);ctx.stroke()}}else{ctx.fillStyle=e.color;ctx.fill('evenodd')}ctx.restore()}
+export function textToPaths(e,w,h,canvasWidth){
+ if(!e.text?.trim()||e.text.length>120)throw Error('Convierte entre 1 y 120 caracteres por vez');
+ const chars=[...e.text];for(const c of chars)if(!glyphs[c])throw Error('No hay contorno de fuente para: '+c);
+ const size=e.size/canvasWidth*w,advance=chars.reduce((n,c)=>n+glyphs[c].advance,0),scale=Math.min(size,w*.9/Math.max(advance,.001));let cursor=-advance*scale/2;
+ const paths=[];for(const c of chars){const g=glyphs[c];for(const r of g.paths)paths.push(r.map(([x,y])=>[e.x*w+cursor+x*scale,y*scale]));cursor+=g.advance*scale}
+ const b=pathsBounds(paths);return paths.map(r=>r.map(([x,y])=>[x,y-b.y-b.h/2+e.y*h]));
+}
+export function svgPath(paths){return paths.map(r=>r.map(([x,y],i)=>`${i?'L':'M'}${Number(x.toFixed(5))} ${Number(y.toFixed(5))}`).join(' ')+'Z').join(' ')}
+const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
+export function exportVectorSVG(doc,{mirror=false,cutOnly=false,canvasWidth=1200,getRaster,getSticker}={}){
+ const w=doc.width*10,h=doc.height*10,print=[],cut=[];let skipped=0;
+ for(const e of doc.elements){if(e.visible===false)continue;const opacity=e.opacity??1;
+  if(e.type==='shape'||e.type==='vector'){const paths=physicalPaths(e,w,h),d=svgPath(paths);if(e.role==='cut')cut.push(`<path d="${d}" fill="none" stroke="#ff00aa" stroke-width="0.1"/>`);else if(!cutOnly){if(e.type==='shape'){const local=shapePaths(e).map(r=>r.map(([x,y])=>[(x-50)*1.2,(y-50)*.9]));print.push(`<path d="${svgPath(local)}" transform="translate(${e.x*w} ${e.y*h}) rotate(${e.rotation}) scale(${e.widthFrac*w/120} ${e.heightFrac*h/90})" fill="${e.color}" stroke="${e.outlineColor}" stroke-width="${e.outlineWidth}" opacity="${opacity}"/>`)}else print.push(`<path d="${d}" fill="${e.color}" fill-rule="evenodd" opacity="${opacity}"/>`)}}
+  else if(cutOnly){skipped++;continue}
+  else if(e.type==='text'){try{const paths=textToPaths(e,w,h,canvasWidth);print.push(`<path d="${svgPath(paths)}" fill="${e.color}" fill-rule="evenodd" opacity="${opacity}"/>`)}catch{print.push(`<text x="${e.x*w}" y="${e.y*h}" font-family="Arial,sans-serif" font-weight="bold" font-size="${e.size/canvasWidth*w}" text-anchor="middle" dominant-baseline="middle" fill="${e.color}" opacity="${opacity}">${escape(e.text)}</text>`)}}
+  else if(e.type==='sticker'){const def=getSticker?.(e.stickerId);if(!def)throw Error('Sticker no disponible');const sw=e.widthFrac*w,sh=e.heightFrac*h,body=def.shapes.map((p,index)=>`<path${index===0&&e.shadow?' filter="url(#fep-shadow)"':''} d="${p.d}" fill="${p.fill==='color'?e.color:p.fill==='accent'?'#a8c8e5':p.fill==='white'?'#ffffff':escape(p.fill)}" stroke="${p.stroke||p===def.shapes[0]?e.outlineColor:'none'}" stroke-width="${e.outlineWidth}"/>`).join('');let label='';if(e.label?.text){if(!def.textBox)throw Error('Sticker sin área de texto');const b=def.textBox,paths=textToPaths({text:e.label.text,size:e.label.size,x:(b.x+b.w/2)/120,y:(b.y+b.h/2)/90},120,90,120);label=`<path d="${svgPath(paths)}" fill="${e.label.color}" fill-rule="evenodd"/>`}print.push(`<g opacity="${opacity}" transform="translate(${e.x*w} ${e.y*h}) rotate(${e.rotation}) scale(${(e.flipX?-1:1)*sw/120} ${(e.flipY?-1:1)*sh/90}) translate(-60 -45)">${body}${label}</g>`)}
+  else if(e.type==='image'||e.type==='glitter'){const raster=getRaster?.(e);if(!raster)throw Error('No se pudo preparar el gráfico raster');print.push(`<image data-fep-kind="raster-print-only" x="0" y="0" width="${w}" height="${h}" href="${escape(raster)}" opacity="${opacity}"/>`)}
+ }
+ if(cutOnly&&!cut.length)throw Error('No hay contornos de corte. Crea uno con Offset de corte. Las fotografías no se trazan automáticamente.');
+ const transform=mirror?` transform="translate(${w} 0) scale(-1 1)"`:'';
+ return {svg:`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="${w}mm" height="${h}mm" viewBox="0 0 ${w} ${h}"><defs><filter id="fep-shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur"/><feOffset in="blur" dx="2" dy="2" result="offset"/><feFlood flood-color="#000000" flood-opacity=".3" result="shade"/><feComposite in="shade" in2="offset" operator="in" result="shadow"/><feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><title>FEP Editor PRO · ${cutOnly?'Corte':'Impresión y corte'}</title><g${transform}><g id="print" data-role="print" inkscape:groupmode="layer" inkscape:label="Imprimible">${print.join('')}</g><g id="cut" data-role="cut" inkscape:groupmode="layer" inkscape:label="Corte">${cut.join('')}</g></g></svg>`,skipped};
+}

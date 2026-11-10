@@ -1,0 +1,238 @@
+{
+  "results": [
+    {
+      "name": "baseline exception: resize",
+      "reproduced": true,
+      "errors": [
+        "ResizeObserver is not a constructor"
+      ]
+    },
+    {
+      "name": "baseline exception: media",
+      "reproduced": true,
+      "errors": [
+        "media.addEventListener is not a function"
+      ]
+    },
+    {
+      "name": "baseline exception: hasOwn",
+      "reproduced": true,
+      "errors": [
+        "Object.hasOwn is not a function"
+      ]
+    },
+    {
+      "name": "baseline exception: glitter-export",
+      "reproduced": true,
+      "errors": [
+        "The requested module './glitter.js' does not provide an export named 'applyGlitterPreset'"
+      ]
+    },
+    {
+      "name": "normal",
+      "passed": true,
+      "stages": {
+        "release": "fase3b",
+        "path": "/",
+        "stages": {
+          "ui": {
+            "state": "ready"
+          },
+          "design": {
+            "state": "ready"
+          },
+          "three": {
+            "state": "ready"
+          },
+          "storage": {
+            "state": "ready"
+          },
+          "sheet": {
+            "state": "ready"
+          },
+          "stickers": {
+            "state": "ready"
+          }
+        }
+      }
+    },
+    {
+      "name": "stale unversioned glitter cache",
+      "passed": true,
+      "stages": {
+        "release": "fase3b",
+        "path": "/",
+        "stages": {
+          "ui": {
+            "state": "ready"
+          },
+          "design": {
+            "state": "ready"
+          },
+          "three": {
+            "state": "ready"
+          },
+          "storage": {
+            "state": "ready"
+          },
+          "sheet": {
+            "state": "ready"
+          },
+          "stickers": {
+            "state": "ready"
+          }
+        }
+      }
+    },
+    {
+      "name": "mobile",
+      "passed": true,
+      "stages": {
+        "release": "fase3b",
+        "path": "/",
+        "stages": {
+          "ui": {
+            "state": "ready"
+          },
+          "design": {
+            "state": "ready"
+          },
+          "three": {
+            "state": "ready"
+          },
+          "storage": {
+            "state": "ready"
+          },
+          "sheet": {
+            "state": "ready"
+          },
+          "stickers": {
+            "state": "ready"
+          }
+        }
+      }
+    },
+    {
+      "name": "legacy APIs",
+      "passed": true,
+      "stages": {
+        "release": "fase3b",
+        "path": "/",
+        "stages": {
+          "ui": {
+            "state": "ready"
+          },
+          "design": {
+            "state": "ready"
+          },
+          "three": {
+            "state": "ready"
+          },
+          "storage": {
+            "state": "ready"
+          },
+          "sheet": {
+            "state": "ready"
+          },
+          "stickers": {
+            "state": "ready"
+          }
+        }
+      }
+    },
+    {
+      "name": "missing Three MIME fallback",
+      "passed": true,
+      "stages": {
+        "release": "fase3b",
+        "path": "/",
+        "stages": {
+          "ui": {
+            "state": "ready"
+          },
+          "design": {
+            "state": "ready"
+          },
+          "three": {
+            "state": "failed",
+            "message": "Failed to fetch dynamically imported module: http://127.0.0.1:32791/vendor/three.module.js",
+            "stack": "TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:32791/vendor/three.module.js"
+          },
+          "storage": {
+            "state": "ready"
+          },
+          "sheet": {
+            "state": "ready"
+          },
+          "stickers": {
+            "state": "ready"
+          }
+        }
+      }
+    },
+    {
+      "name": "missing sticker module",
+      "passed": true,
+      "stages": {
+        "release": "fase3b",
+        "path": "/",
+        "stages": {
+          "ui": {
+            "state": "ready"
+          },
+          "design": {
+            "state": "ready"
+          },
+          "three": {
+            "state": "ready"
+          },
+          "storage": {
+            "state": "ready"
+          },
+          "sheet": {
+            "state": "ready"
+          },
+          "stickers": {
+            "state": "failed",
+            "message": "Failed to fetch dynamically imported module: http://127.0.0.1:36463/src/sticker-controls.js?v=fase3b-20261110",
+            "stack": "TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:36463/src/sticker-controls.js?v=fase3b-20261110"
+          }
+        }
+      }
+    },
+    {
+      "name": "stalled IndexedDB",
+      "passed": true,
+      "stages": {
+        "release": "fase3b",
+        "path": "/",
+        "stages": {
+          "ui": {
+            "state": "ready"
+          },
+          "design": {
+            "state": "ready"
+          },
+          "three": {
+            "state": "ready"
+          },
+          "storage": {
+            "state": "failed",
+            "message": "IndexedDB no respondió; puedes editar y guardar JSON",
+            "stack": "Error: IndexedDB no respondió; puedes editar y guardar JSON\n    at http://127.0.0.1:37989/src/persistence.js?v=fase3b-20261110:3:106"
+          },
+          "sheet": {
+            "state": "ready"
+          },
+          "stickers": {
+            "state": "ready"
+          }
+        }
+      }
+    },
+    {
+      "name": "2D and tabs respond while Three is still loading",
+      "passed": true
+    }
+  ]
+}

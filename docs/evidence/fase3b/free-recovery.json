@@ -1,0 +1,15 @@
+{
+  "passed": 2,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "free project restores before delayed Three; product renders without ResizeObserver",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "free project restores before delayed Three; product renders without ResizeObserver",
+      "passed": true
+    }
+  ]
+}

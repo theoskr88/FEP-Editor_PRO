@@ -33,6 +33,7 @@ export async function prepareImageFile(file){
  return decodeImageData(`data:${info.type};base64,${btoa(raw)}`);
 }
 export function enforceDocumentBudget(elements){
+ if(elements.reduce((n,e)=>n+(e.paths?.reduce((a,r)=>a+r.length,0)||0),0)>200000)throw Error('Máximo 200000 nodos por documento');
  // Count each layer because independent image elements may own decoded buffers.
  let pixels=0,bytes=0;for(const e of elements)if(e.type==='image'){const im=e.img;if(im)pixels+=im.naturalWidth*im.naturalHeight;bytes+=e.data.length}
  if(pixels>ASSET_LIMITS.totalPixels||bytes>ASSET_LIMITS.projectBytes)throw Error('El documento supera 32 megapíxeles o 30 MB de imágenes');
