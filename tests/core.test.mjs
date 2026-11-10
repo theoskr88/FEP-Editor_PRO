@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validateProject} from '../src/project.js';
+import {glitterSettings,paintGlitter} from '../src/glitter.js';
+const text={type:'text',x:.5,y:.5,text:'FEP',size:65,color:'#000000'};
+test('legacy project remains readable',()=>assert.equal(validateProject({version:1,elements:[text]}).elements[0],text));
+for(const [name,project]of Object.entries({nullLayer:{elements:[null]},badSize:{elements:[],width:0},hugeSize:{elements:[],height:101},unknownLayer:{elements:[{...text,type:'remote'}]},remoteImage:{elements:[{...text,type:'image',data:'https://example.org/x.png'}]},badOpacity:{elements:[{...text,opacity:2}]},badPosition:{elements:[{...text,x:NaN}]},futureVersion:{version:999,elements:[]},tooMany:{elements:Array(501).fill(text)}}))test('reject '+name,()=>assert.throws(()=>validateProject(project)));
+for(const palette of ['pink','gold','silver','blue','multi','custom'])test('palette '+palette,()=>assert.equal(glitterSettings({palette}).palette,palette));
+test('glitter controls have finite limits',()=>{const s=glitterSettings({size:999,intensity:-1,finish:'unknown'});assert.equal(s.size,8);assert.equal(s.intensity,0);assert.equal(s.finish,'gloss')});
+test('deterministic printable and material textures differ',()=>{const record=material=>{const operations=[];const ctx=new Proxy({},{get:(_,key)=> (...args)=>operations.push([key,...args]),set:(_,key,val)=>{operations.push([key,val]);return true}});paintGlitter(ctx,512,256,{palette:'gold'},{material});return operations};assert.deepEqual(record(false),record(false));assert.notDeepEqual(record(false),record(true))});

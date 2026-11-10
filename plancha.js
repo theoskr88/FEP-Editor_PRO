@@ -32,7 +32,7 @@ function addItem(item){const position=findSpace(item);item.x=position.x;item.y=p
 function paint(out,drawSelection=false){const {w,h,margin}=dims();const sx=out.canvas.width/w,sy=out.canvas.height/h;
  out.fillStyle='#ffffff';out.fillRect(0,0,out.canvas.width,out.canvas.height);
  if(drawSelection){out.strokeStyle='#d0d8df';out.lineWidth=1;out.setLineDash([5,5]);out.strokeRect(margin*sx,margin*sy,(w-2*margin)*sx,(h-2*margin)*sy);out.setLineDash([])}
- for(let i=0;i<items.length;i++){const v=items[i];out.drawImage(v.img,v.x*sx,v.y*sy,v.w*sx,v.h*sy);
+ for(let i=0;i<items.length;i++){const v=items[i];out.save();out.translate((v.x+v.w/2)*sx,(v.y+v.h/2)*sy);out.rotate((v.turns||0)*Math.PI/2);const odd=(v.turns||0)%2;out.drawImage(v.img,-(odd?v.h:v.w)*sx/2,-(odd?v.w:v.h)*sy/2,(odd?v.h:v.w)*sx,(odd?v.w:v.h)*sy);out.restore();
    if(drawSelection){out.strokeStyle=i===selected?'#0e9daa':'#c1cbdd';out.lineWidth=i===selected?3:1;out.strokeRect(v.x*sx,v.y*sy,v.w*sx,v.h*sy)}
  }
 }
@@ -83,7 +83,7 @@ el('sheetOrientation').onchange=()=>{const w=el('sheetPageW').value;el('sheetPag
 for(const id of ['sheetPageW','sheetPageH','sheetMargin','sheetGap'])el(id).onchange=()=>{if(id==='sheetPageW'||id==='sheetPageH')el('sheetPaper').value='Personalizado';draw()};
 for(const [id,key] of [['sheetX','x'],['sheetY','y'],['sheetW','w'],['sheetH','h']])el(id).onchange=()=>{if(selected<0)return;const n=num(id);if(!Number.isFinite(n)||(key==='w'||key==='h')&&n<=0)return;items[selected][key]=n;draw()};
 el('sheetDuplicate').onclick=()=>{if(selected<0)return;const old=items[selected];const copy={...old,id:++objectCount,name:old.name+' (copia)',x:old.x+0.5,y:old.y+0.5};items.push(copy);selectItem(items.length-1)};
-el('sheetRotate').onclick=()=>{if(selected<0)return;const v=items[selected];[v.w,v.h]=[v.h,v.w];selectItem(selected)};
+el('sheetRotate').onclick=()=>{if(selected<0)return;const v=items[selected];[v.w,v.h]=[v.h,v.w];v.turns=((v.turns||0)+1)%4;selectItem(selected)};
 el('sheetRemove').onclick=()=>{if(selected<0)return;const removed=items.splice(selected,1)[0];if(!items.some(x=>x.url===removed.url))URL.revokeObjectURL(removed.url);selectItem(-1)};
 el('sheetArrange').onclick=()=>{const {w,h,margin,gap}=dims();let x=margin,y=margin,rowH=0,count=0;
  for(const v of items){if(x+v.w>w-margin+1e-6){x=margin;y+=rowH+gap;rowH=0;}v.x=x;v.y=y;if(v.x+v.w<=w-margin&&v.y+v.h<=h-margin)count++;x+=v.w+gap;rowH=Math.max(rowH,v.h)}

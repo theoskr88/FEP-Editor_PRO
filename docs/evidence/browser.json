@@ -1,0 +1,147 @@
+[
+  {
+    "mode": "desktop",
+    "name": "startup + print API",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "preserve original tool controls",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "text history + selection preserves redo",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "duplicate, opacity, visibility, lock",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "invalid project cannot mutate document",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "physical glitter never changes printable art",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "printable glitter is below design and changes art",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "save/reopen layers and glitter settings",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "sheet actually rotates pixels",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "no remote service requests / unhandled errors",
+    "passed": true
+  },
+  {
+    "mode": "touch",
+    "name": "startup + print API",
+    "passed": true
+  },
+  {
+    "mode": "touch",
+    "name": "preserve original tool controls",
+    "passed": true
+  },
+  {
+    "mode": "touch",
+    "name": "text history + selection preserves redo",
+    "passed": true
+  },
+  {
+    "mode": "touch",
+    "name": "duplicate, opacity, visibility, lock",
+    "passed": true
+  },
+  {
+    "mode": "touch",
+    "name": "invalid project cannot mutate document",
+    "passed": true
+  },
+  {
+    "mode": "touch",
+    "name": "physical glitter never changes printable art",
+    "passed": true
+  },
+  {
+    "mode": "touch",
+    "name": "printable glitter is below design and changes art",
+    "passed": true
+  },
+  {
+    "mode": "touch",
+    "name": "save/reopen layers and glitter settings",
+    "passed": true
+  },
+  {
+    "mode": "touch",
+    "name": "sheet actually rotates pixels",
+    "passed": true
+  },
+  {
+    "mode": "touch",
+    "name": "no remote service requests / unhandled errors",
+    "passed": true
+  },
+  {
+    "mode": "noWebGL",
+    "name": "startup + print API",
+    "passed": true
+  },
+  {
+    "mode": "noWebGL",
+    "name": "preserve original tool controls",
+    "passed": true
+  },
+  {
+    "mode": "noWebGL",
+    "name": "text history + selection preserves redo",
+    "passed": true
+  },
+  {
+    "mode": "noWebGL",
+    "name": "duplicate, opacity, visibility, lock",
+    "passed": true
+  },
+  {
+    "mode": "noWebGL",
+    "name": "invalid project cannot mutate document",
+    "passed": true
+  },
+  {
+    "mode": "noWebGL",
+    "name": "printable glitter is below design and changes art",
+    "passed": true
+  },
+  {
+    "mode": "noWebGL",
+    "name": "save/reopen layers and glitter settings",
+    "passed": true
+  },
+  {
+    "mode": "noWebGL",
+    "name": "sheet actually rotates pixels",
+    "passed": true
+  },
+  {
+    "mode": "noWebGL",
+    "name": "no remote service requests / unhandled errors",
+    "passed": true
+  }
+]

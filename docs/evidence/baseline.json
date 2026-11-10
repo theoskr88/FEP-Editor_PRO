@@ -1,0 +1,59 @@
+{
+  "source": "Original ZIP V0.9.5, unchanged",
+  "observations": {
+    "startup": true,
+    "selectionClearsRedo": {
+      "before": 1,
+      "after": 0
+    },
+    "dragOffset": {
+      "expected": 0.0176678445229682,
+      "actual": 0.035335689045936425
+    },
+    "glitterAfterEditing": {
+      "design": 2,
+      "glitter": 0,
+      "magic": 0
+    },
+    "invalidImport": {
+      "beforeProduct": "mug",
+      "stateAfter": {
+        "elements": [
+          null
+        ],
+        "selected": 1,
+        "history": 0,
+        "redo": 0,
+        "width": 1200,
+        "height": 510,
+        "product": "shirt"
+      }
+    },
+    "sheetRotation": {
+      "size": [
+        2,
+        4
+      ],
+      "topLeft": [
+        255,
+        0,
+        0,
+        255
+      ],
+      "topRight": [
+        0,
+        0,
+        255,
+        255
+      ],
+      "bottomLeft": [
+        255,
+        0,
+        0,
+        255
+      ]
+    }
+  },
+  "pageErrors": [],
+  "externalRequests": []
+}

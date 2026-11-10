@@ -1,6 +1,9 @@
+import {paintGlitter,glitterSettings} from './src/glitter.js';
+import {validateProject} from './src/project.js';
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
+let dragStart=null,gestureHistory=false;
 let elements=[],selected=-1,dragging=false,resizing=false,resizeStart=null,history=[],redoStack=[],meshGroup,texture,renderer,scene,camera,controls,animRequest,renderQueued=false;
 // Lienzo exclusivo para texturas: nunca contiene bordes de selección.
 const textureCanvas=document.createElement('canvas');
@@ -9,14 +12,14 @@ const notify=s=>{$('notice').textContent=s};
 const dimensions={mug:[20,8.5],tumbler:[23,21],shirt:[30,35],tote:[28,30],notebook:[15,21],mousepad:[22,18],cushion:[28,28],keychain:[4,4]};
 function setDimForProduct(){let p=$('product').value, d=dimensions[p];if(!d)return;
   if(p==='mug'||p==='tumbler')setPrintRotation(DEFAULT_PRINT_ROTATION_DEG);$('widthCm').value=d[0];$('heightCm').value=d[1]; updateDimensions(); buildModel();focusDesignFront()}
-function updateDimensions(){let w=+($('widthCm').value)||20,h=+($('heightCm').value)||8.5;canvas.width=1200;canvas.height=Math.round(1200*h/w);
+function updateDimensions(){let w=+($('widthCm').value)||20,h=+($('heightCm').value)||8.5;w=Math.max(1,Math.min(100,w));h=Math.max(1,Math.min(100,h));$('widthCm').value=w;$('heightCm').value=h;canvas.width=Math.min(1200,Math.round(4096*w/h));canvas.height=Math.round(canvas.width*h/w);
 textureCanvas.width=canvas.width;textureCanvas.height=canvas.height;
 $('canvasWrap').style.aspectRatio=`${w} / ${h}`;
 $('resolution').textContent=`${w} × ${h} cm`;draw();updateImageControls()}
-function addHistory(){history.push(JSON.stringify(elements.map(e=>({...e,image:undefined}))));if(history.length>40)history.shift();redoStack=[]}
+function addHistory(){history.push(JSON.stringify(elements.map(e=>({...e,img:undefined}))));if(history.length>40)history.shift();redoStack=[]}
 function restore(s){elements=JSON.parse(s);for(const e of elements)if(e.type==='image'){e.img=new Image();e.img.onload=()=>{draw();requestAnimationFrame(()=>resync3D());};e.img.src=e.data}selected=-1;draw();if($('selectedTextStatus'))refreshSelectedLabel();updateImageControls()}
-function undo(){if(!history.length)return;redoStack.push(JSON.stringify(elements.map(e=>({...e,image:undefined}))));restore(history.pop())}
-function redo(){if(!redoStack.length)return;history.push(JSON.stringify(elements.map(e=>({...e,image:undefined}))));restore(redoStack.pop())}
+function undo(){if(!history.length)return;redoStack.push(JSON.stringify(elements.map(e=>({...e,img:undefined}))));restore(history.pop())}
+function redo(){if(!redoStack.length)return;history.push(JSON.stringify(elements.map(e=>({...e,img:undefined}))));restore(redoStack.pop())}
 function getImage(e){if(!e.img && e.data){e.img=new Image();e.img.onload=()=>{draw();requestAnimationFrame(()=>resync3D());};e.img.src=e.data}return e.img}
 
 // Compatibilidad: las imágenes guardadas en V0.5 solo tenían scale.
@@ -38,7 +41,7 @@ function updateImageControls(){
   $('imageSelectedStatus').textContent='Imagen seleccionada · ajusta las medidas en centímetros'+(cm.w>(Number($('widthCm').value)||20)||cm.h>(Number($('heightCm').value)||8.5)?' · aviso: excede el lienzo y se recortará al exportar':'');
 }
 function setImageSize(w,h){
-  const e=elements[selected];if(e?.type!=='image')return;
+  const e=elements[selected];if(e?.type!=='image'||e.locked)return;
   const cw=Number($('widthCm').value)||20,ch=Number($('heightCm').value)||8.5;
   const ww=Number(w),hh=Number(h);
   if(!Number.isFinite(ww)||!Number.isFinite(hh)||ww<=0||hh<=0||ww>cw*3||hh>ch*3){notify('Ingresa dimensiones positivas dentro del rango permitido.');return;}
@@ -46,12 +49,12 @@ function setImageSize(w,h){
   delete e.scale;draw();updateImageControls();notify('Dimensiones de la imagen actualizadas.');
 }
 $('imageWidthCm').addEventListener('change',()=>{
-  const e=elements[selected];if(e?.type!=='image')return;
+  const e=elements[selected];if(e?.type!=='image'||e.locked)return;
   const w=Number($('imageWidthCm').value),old=imageCm(e);
   setImageSize(w,$('keepImageRatio').checked?w*old.h/old.w:Number($('imageHeightCm').value));
 });
 $('imageHeightCm').addEventListener('change',()=>{
-  const e=elements[selected];if(e?.type!=='image')return;
+  const e=elements[selected];if(e?.type!=='image'||e.locked)return;
   const h=Number($('imageHeightCm').value),old=imageCm(e);
   setImageSize($('keepImageRatio').checked?h*old.w/old.h:Number($('imageWidthCm').value),h);
 });
@@ -60,7 +63,9 @@ function paintDesign(target,width,height){
   target.clearRect(0,0,width,height);
   target.fillStyle='#ffffff';target.fillRect(0,0,width,height);
   for(let i=0;i<elements.length;i++){
-    const e=elements[i];target.save();target.translate(e.x*width,e.y*height);
+    const e=elements[i];if(e.visible===false)continue;target.save();target.globalAlpha=e.opacity??1;
+    if(e.type==='glitter'){const tile=document.createElement('canvas');tile.width=1024;tile.height=512;paintGlitter(tile.getContext('2d'),tile.width,tile.height,e.glitter);target.drawImage(tile,0,0,width,height);target.restore();continue;}
+    target.translate(e.x*width,e.y*height);
     if(e.type==='text'){
       target.font=`bold ${e.size*width/canvas.width}px Arial`;
       target.textAlign='center';target.textBaseline='middle';target.fillStyle=e.color;
@@ -76,6 +81,7 @@ function paintDesign(target,width,height){
   }
 }
 function draw(){
+  refreshLayers();
   paintDesign(ctx,canvas.width,canvas.height);
   // El borde punteado es interfaz de edición y no forma parte del diseño.
   if(selected>=0){
@@ -88,27 +94,30 @@ function draw(){
   updateTexture();
   if($('mirrorPreview'))refreshIndividualPreview();
 }
-function bounds(e){if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
-function pos(ev){let r=canvas.getBoundingClientRect();return{x:(ev.clientX-r.left)/r.width*canvas.width,y:(ev.clientY-r.top)/r.height*canvas.height}}
+function bounds(e){if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
+function pos(ev){const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/canvas.width,r.height/canvas.height),w=canvas.width*scale,h=canvas.height*scale;return{x:(ev.clientX-r.left-(r.width-w)/2)/scale,y:(ev.clientY-r.top-(r.height-h)/2)/scale}}
 canvas.addEventListener('pointerdown',ev=>{
-  const p=pos(ev);resizing=false;resizeStart=null;
+  if(dragging||resizing)return;const p=pos(ev);resizing=false;resizeStart=null;gestureHistory=false;
   // El cuadro inferior derecho cambia el tamaño de una imagen seleccionada.
-  if(selected>=0&&elements[selected]?.type==='image'){
+  if(selected>=0&&elements[selected]?.type==='image'&&!elements[selected].locked){
     const b=bounds(elements[selected]);const hit=15*canvas.width/Math.max(1,canvas.getBoundingClientRect().width);
     if(Math.abs(p.x-(b.x+b.w))<=hit&&Math.abs(p.y-(b.y+b.h))<=hit){
-      addHistory();resizing=true;resizeStart={x:p.x,y:p.y,w:b.w,h:b.h};
+      resizing=true;resizeStart={x:p.x,y:p.y,w:b.w,h:b.h};
       canvas.setPointerCapture(ev.pointerId);return;
     }
   }
   selected=-1;
   for(let i=elements.length-1;i>=0;i--){
-    const b=bounds(elements[i]);if(p.x>=b.x&&p.x<=b.x+b.w&&p.y>=b.y&&p.y<=b.y+b.h){selected=i;break}
+    if(elements[i].visible===false||elements[i].locked)continue;const b=bounds(elements[i]);if(p.x>=b.x&&p.x<=b.x+b.w&&p.y>=b.y&&p.y<=b.y+b.h){selected=i;break}
   }
-  if(selected>=0){addHistory();dragging=true;canvas.setPointerCapture(ev.pointerId)}
+  if(selected>=0){dragStart={px:p.x,py:p.y,x:elements[selected].x,y:elements[selected].y,pointerId:ev.pointerId};dragging=true;canvas.setPointerCapture(ev.pointerId)}
   loadSelectedTextIntoInputs();updateImageControls();draw();
 });
 canvas.addEventListener('pointermove',ev=>{
   const p=pos(ev);
+  if(!dragging&&!resizing)return;
+  if(dragging&&ev.pointerId!==dragStart.pointerId)return;
+  if(!gestureHistory){addHistory();gestureHistory=true;}
   if(resizing&&selected>=0){
     const e=elements[selected];const old=resizeStart;
     let w=Math.max(8,old.w+2*(p.x-old.x));let h=Math.max(8,old.h+2*(p.y-old.y));
@@ -117,14 +126,14 @@ canvas.addEventListener('pointermove',ev=>{
     draw();updateImageControls();return;
   }
   if(!dragging||selected<0)return;
-  elements[selected].x=Math.max(0,Math.min(1,p.x/canvas.width));
-  elements[selected].y=Math.max(0,Math.min(1,p.y/canvas.height));draw();
+  elements[selected].x=Math.max(0,Math.min(1,dragStart.x+(p.x-dragStart.px)/canvas.width));
+  elements[selected].y=Math.max(0,Math.min(1,dragStart.y+(p.y-dragStart.py)/canvas.height));draw();
 });
 function stopCanvasInteraction(){dragging=false;resizing=false;resizeStart=null;updateImageControls()}
 canvas.addEventListener('pointerup',stopCanvasInteraction);
 canvas.addEventListener('pointercancel',stopCanvasInteraction);
 canvas.addEventListener('wheel',ev=>{
-  if(selected<0)return;ev.preventDefault();addHistory();
+  if(selected<0||elements[selected].locked||elements[selected].type==='glitter')return;ev.preventDefault();addHistory();
   const e=elements[selected],k=ev.deltaY<0?1.08:.92;
   if(e.type==='text')e.size=Math.max(12,Math.min(500,e.size*k));
   else {
@@ -162,7 +171,7 @@ $('applyText').onclick=()=>{
 };
 $('imageFile').onchange=ev=>{const file=ev.target.files?.[0];if(!file)return;if(file.size>10*1024*1024){notify('Máximo 10 MB por imagen');return}const reader=new FileReader();reader.onload=()=>{let im=new Image();im.onload=()=>{addHistory();elements.push({type:'image',data:reader.result,img:im,scale:.38,x:.5,y:.5});selected=elements.length-1;refreshSelectedLabel();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}))};im.src=reader.result};reader.readAsDataURL(file);ev.target.value=''};
 $('delete').onclick=()=>{if(selected>=0){addHistory();elements.splice(selected,1);selected=-1;refreshSelectedLabel();updateImageControls();draw()}};
-$('clear').onclick=()=>{addHistory();elements=[];selected=-1;updateImageControls();draw()};$('undo').onclick=undo;$('redo').onclick=redo;
+$('clear').onclick=()=>{addHistory();elements=[];selected=-1;refreshSelectedLabel();updateImageControls();draw()};$('undo').onclick=undo;$('redo').onclick=redo;
 $('rotationDeg').addEventListener('input',e=>setPrintRotation(e.target.value));
 $('rotationReset').onclick=()=>setPrintRotation(DEFAULT_PRINT_ROTATION_DEG);
 $('rotateMinus').onclick=()=>setPrintRotation(printRotationDeg-5);
@@ -170,8 +179,8 @@ $('rotatePlus').onclick=()=>setPrintRotation(printRotationDeg+5);
 $('rotationViewFront').onclick=focusDesignFront;
 $('rotationNumber').addEventListener('change',e=>setPrintRotation(e.target.value));
 $('widthCm').onchange=()=>{updateDimensions();buildModel()};$('heightCm').onchange=updateDimensions;$('product').onchange=()=>{setDimForProduct();updateRotationToolbar();syncFinishUI()};
-$('save').onclick=()=>{const out={version:1,product:$('product').value,color:$('productColor').value,width:+$('widthCm').value,height:+$('heightCm').value,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,magicHeat,elements:elements.map(({img,...e})=>e)};saveBlob(new Blob([JSON.stringify(out)],{type:'application/json'}),'proyecto-estudio3d.json')};
-$('load').onclick=()=>$('projectFile').click();$('projectFile').onchange=async ev=>{try{const f=ev.target.files[0],data=JSON.parse(await f.text());if(!Array.isArray(data.elements))throw Error('Formato inválido');$('product').value=dimensions[data.product]?data.product:'mug';$('productColor').value=data.color||'#ffffff';finishMode=['standard','glitter','magic'].includes(data.finishMode)?data.finishMode:'standard';magicHeat=Number.isFinite(data.magicHeat)?Math.max(0,Math.min(100,data.magicHeat)):0;$('finishMode').value=finishMode;$('magicHeat').value=magicHeat;updateMagicCoating();syncFinishUI();$('mirrorModeIndividual').checked=data.mirrorMode!=='normal' && data.mirrorMode!=='none' && data.mirrorPrint!==false;refreshIndividualPreview();$('widthCm').value=data.width||20;$('heightCm').value=data.height||8.5;history=[];redoStack=[];printRotationDeg=Number.isFinite(Number(data.printRotationDeg)) && data.printRotationDeg!==undefined ? ((Number(data.printRotationDeg)%360)+360)%360 : DEFAULT_PRINT_ROTATION_DEG;$('rotationDeg').value=String(printRotationDeg);$('rotationValue').textContent=`${Math.round(printRotationDeg)}°`;
+$('save').onclick=()=>{const out={version:2,glitter:readGlitterControls(),product:$('product').value,color:$('productColor').value,width:+$('widthCm').value,height:+$('heightCm').value,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,magicHeat,elements:elements.map(({img,...e})=>e)};saveBlob(new Blob([JSON.stringify(out)],{type:'application/json'}),'proyecto-estudio3d.json')};
+$('load').onclick=()=>$('projectFile').click();$('projectFile').onchange=async ev=>{try{const f=ev.target.files[0];if(!f)return;if(f.size>30_000_000)throw Error('Proyecto demasiado grande');const data=validateProject(JSON.parse(await f.text()));applyGlitterControls(data.glitter);$('product').value=dimensions[data.product]?data.product:'mug';$('productColor').value=data.color||'#ffffff';finishMode=['standard','glitter','magic'].includes(data.finishMode)?data.finishMode:'standard';magicHeat=Number.isFinite(data.magicHeat)?Math.max(0,Math.min(100,data.magicHeat)):0;$('finishMode').value=finishMode;$('magicHeat').value=magicHeat;updateMagicCoating();syncFinishUI();$('mirrorModeIndividual').checked=data.mirrorMode!=='normal' && data.mirrorMode!=='none' && data.mirrorPrint!==false;refreshIndividualPreview();$('widthCm').value=data.width||20;$('heightCm').value=data.height||8.5;history=[];redoStack=[];printRotationDeg=Number.isFinite(Number(data.printRotationDeg)) && data.printRotationDeg!==undefined ? ((Number(data.printRotationDeg)%360)+360)%360 : DEFAULT_PRINT_ROTATION_DEG;$('rotationDeg').value=String(printRotationDeg);$('rotationValue').textContent=`${Math.round(printRotationDeg)}°`;
   if($('rotationNumber'))$('rotationNumber').value=String(Math.round(printRotationDeg));restore(JSON.stringify(data.elements));updateDimensions();buildModel();focusDesignFront();updateRotationToolbar();notify('Proyecto cargado')}catch(e){notify('No se pudo abrir el proyecto: '+e.message)}};
 function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
 // Reflejo REAL: toda la imagen ya rasterizada, no invierte el orden del texto.
@@ -272,7 +281,7 @@ let finishMode='standard', magicHeat=0;
 const glitterCanvas=document.createElement('canvas'); glitterCanvas.width=512;glitterCanvas.height=256;
 const glitterCtx=glitterCanvas.getContext('2d');
 // Brillos deterministas, sin aleatorizar cada fotograma ni alterar la impresión.
-(function createGlitter(){const g=glitterCtx;g.clearRect(0,0,512,256);let seed=1769;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};for(let n=0;n<2200;n++){const x=rand()*512,y=rand()*256,r=.25+rand()*.95,a=.13+rand()*.42;g.fillStyle=`rgba(255,255,255,${a})`;g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fill()}})();
+paintGlitter(glitterCtx,512,256,glitterSettings(),{material:true});
 const glitterTexture=new THREE.CanvasTexture(glitterCanvas);glitterTexture.colorSpace=THREE.SRGBColorSpace;glitterTexture.flipY=true;
 const magicCanvas=document.createElement('canvas');magicCanvas.width=512;magicCanvas.height=256;
 const magicCtx=magicCanvas.getContext('2d');
@@ -358,7 +367,7 @@ function focusPrintEdge(edge){
 
 function init3D(){const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,node.clientWidth/430,.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(node.clientWidth,430);node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();window.addEventListener('resize',()=>{let w=node.clientWidth;camera.aspect=w/430;camera.updateProjectionMatrix();renderer.setSize(w,430)})}
 function addGeo(geo,mat,x=0,y=0,z=0,rotateX=0){let o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);o.rotation.x=rotateX;modelRoot.add(o);return o}
-function buildModel(){if(!scene)return;if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material&&o.material!==baseMat&&o.material!==window.printMat)o.material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,plain=new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});let printMat=new THREE.MeshStandardMaterial({map:texture,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;let p=$('product').value;
+function buildModel(){if(!scene)return;if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material]))material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,plain=new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});let printMat=new THREE.MeshStandardMaterial({map:texture,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;let p=$('product').value;
 if(p==='mug'||p==='tumbler'){let r=p==='mug'?.93:.66,h=p==='mug'?2.05:3;// Cuerpo completo sin arte: evita repetir el archivo en toda la taza.
 if(p==='mug'){
   // Taza 11 oz de paredes lisas, base discreta y labio delgado (foto de referencia).
@@ -386,7 +395,7 @@ const printSurface=addGeo(
 printSurface.rotation.y=THREE.MathUtils.degToRad(printRotationDeg);
 // Segunda superficie puramente decorativa: jamás se usa para exportar arte plano.
 if(finishMode==='glitter'){
- const glossMat=new THREE.MeshBasicMaterial({map:glitterTexture,transparent:true,opacity:.7,depthWrite:false,side:THREE.FrontSide});
+ const glossMat=new THREE.MeshStandardMaterial({map:glitterTexture,bumpMap:glitterTexture,bumpScale:.025,transparent:true,opacity:1,roughness:({gloss:.16,satin:.45,matte:.8})[readGlitterControls().finish],metalness:.65,depthWrite:false,side:THREE.FrontSide});
  const sparkles=addGeo(new THREE.CylinderGeometry(r+.024,r+.024,h-.29,128,1,true,-printArc/2,printArc),glossMat);
  sparkles.rotation.y=THREE.MathUtils.degToRad(printRotationDeg);
  printMat.roughness=.28;printMat.metalness=.06;
@@ -502,7 +511,7 @@ function refreshTextureNow(){
   if(modelRoot)modelRoot.traverse(o=>{
     if(!o.isMesh)return;
     for(const m of (Array.isArray(o.material)?o.material:[o.material])){
-      if(m && m.map){m.map=current;m.needsUpdate=true;}
+      if(m && m.map===previous){m.map=current;m.needsUpdate=true;}
     }
   });
   if(previous && previous!==current)previous.dispose();
@@ -604,7 +613,7 @@ $('exportVideo').addEventListener('click',async()=>{
   finally{if(stream)stream.getTracks().forEach(t=>t.stop());camera.position.copy(start);controls.target.copy(target);controls.enabled=true;controls.enableDamping=true;controls.update();if(show){$('showGuides').checked=true;buildModel()}recording=false;button.disabled=false;button.textContent='Grabar giro 360° (WebM)';requestAnimationFrame(()=>resync3D());}
 });
 
-updateDimensions();init3D();syncFinishUI();updateRotationToolbar();focusDesignFront();
+updateDimensions();try{init3D()}catch(error){scene=null;renderer=null;notify('Visor 3D no disponible. El editor y la impresión 2D siguen disponibles.')}syncFinishUI();updateRotationToolbar();focusDesignFront();
 
 // API interna de impresión: la plancha recibe el arte limpio y los codificadores de 300 ppp.
 const savedMirrorMode=localStorage.getItem('estudio-mirror-mode');
@@ -613,3 +622,24 @@ $('mirrorModeIndividual').addEventListener('change',()=>{localStorage.setItem('e
 $('refreshMirrorPreview').onclick=refreshIndividualPreview;
 requestAnimationFrame(refreshIndividualPreview);
 window.__estudioPrintAPI={renderToExportCanvas, cmPrint, pngWithDpi, jpegWithDpi, pdfAtPhysicalSize, saveBlob};
+
+for(const id of ['delete','applyText','quickCenter','quickContain','quickCover']){
+ const button=$(id),handler=button.onclick;if(handler)button.onclick=ev=>{if(elements[selected]?.locked){notify('La capa está bloqueada.');return}handler(ev)};
+}
+
+function readGlitterControls(){return glitterSettings({palette:$('glitterPalette').value,color:$('glitterColor').value,size:+$('glitterSize').value,intensity:+$('glitterIntensity').value,finish:$('glitterFinish').value})}
+function applyGlitterControls(value){const s=glitterSettings(value);for(const [id,key]of [['glitterPalette','palette'],['glitterColor','color'],['glitterSize','size'],['glitterIntensity','intensity'],['glitterFinish','finish']])$(id).value=s[key];paintGlitter(glitterCtx,512,256,s,{material:true});glitterTexture.needsUpdate=true;}
+for(const id of ['glitterPalette','glitterColor','glitterSize','glitterIntensity','glitterFinish'])$(id).onchange=()=>{applyGlitterControls(readGlitterControls());buildModel()};
+$('applyGlitterLayer').onclick=()=>{const e=elements[selected];if(e?.type!=='glitter'||e.locked){notify('Selecciona una capa glitter desbloqueada.');return}addHistory();e.glitter=readGlitterControls();draw()};
+$('addGlitterLayer').onclick=()=>{addHistory();elements.unshift({type:'glitter',x:.5,y:.5,locked:true,glitter:readGlitterControls()});selected=0;draw();notify('Glitter simulado añadido al arte imprimible, debajo del diseño.');};
+function refreshLayers(){
+ const list=$('layerList');if(!list)return;list.replaceChildren();
+ for(let i=elements.length-1;i>=0;i--){const e=elements[i],row=document.createElement('div');row.className='btnrow';
+ const choose=document.createElement('button');choose.textContent=(selected===i?'✓ ':'')+(e.type==='text'?e.text.slice(0,24):e.type==='glitter'?'Glitter imprimible':'Imagen');choose.onclick=()=>{selected=i;if(e.type==='glitter')applyGlitterControls(e.glitter);loadSelectedTextIntoInputs();updateImageControls();draw()};row.append(choose);
+ for(const [key,label] of [['visible','Visible'],['locked','Bloquear']]){const lab=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.checked=key==='visible'?e.visible!==false:!!e.locked;input.setAttribute('aria-label',label+' '+i);input.onchange=()=>{addHistory();e[key]=input.checked;draw()};lab.append(input,document.createTextNode(label));row.append(lab)}list.append(row);
+ }
+ $('layerOpacity').value=String(Math.round((elements[selected]?.opacity??1)*100));
+}
+$('layerOpacity').onchange=ev=>{const e=elements[selected];if(!e||e.locked)return;addHistory();e.opacity=Number(ev.target.value)/100;draw()};
+$('layerDuplicate').onclick=()=>{const e=elements[selected];if(!e)return;addHistory();elements.splice(selected+1,0,JSON.parse(JSON.stringify({...e,img:undefined})));selected++;draw()};
+for(const [id,delta] of [['layerUp',1],['layerDown',-1]])$(id).onclick=()=>{const i=selected,j=i+delta;if(i<0||j<0||j>=elements.length||elements[i].locked)return;addHistory();[elements[i],elements[j]]=[elements[j],elements[i]];selected=j;draw()};
