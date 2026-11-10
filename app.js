@@ -1,32 +1,36 @@
-import {encodeVideoFrames} from './src/video-frames.js?v=fase3f-20261110';
-import {normalizeMockup} from './src/mockup-settings.js?v=fase3f-20261110';
-import {createMockupControls} from './src/mockup-controls.js?v=fase3f-20261110';
-import {validateCreative,validatePatternBudget,paintCreativeText,creativeTextBounds,paintCreativeImage,CREATIVE_TEMPLATES} from './src/creative.js?v=fase3f-20261110';
-import {createCreativeControls} from './src/creative-controls.js?v=fase3f-20261110';
-import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById} from './src/product-profiles.js?v=fase3f-20261110';
-import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=fase3f-20261110';
-import {createVectorControls} from './src/vector-controls.js?v=fase3f-20261110';
-import {getSticker} from './src/stickers.js?v=fase3f-20261110';
-import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=fase3f-20261110';
-import {createFreeControls} from './src/free-controls.js?v=fase3f-20261110';
-import {validateStickerLayer} from './src/project.js?v=fase3f-20261110';
-import {createLayerList,layerName} from './src/layer-ui.js?v=fase3f-20261110';
-import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fase3f-20261110';
-import {createGlitterCache} from './src/glitter-cache.js?v=fase3f-20261110';
-import {createGlitterControls} from './src/glitter-controls.js?v=fase3f-20261110';
-import {prepareProject} from './src/imports.js?v=fase3f-20261110';
-import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js?v=fase3f-20261110';
-import {openDocumentStore,createAutosave} from './src/persistence.js?v=fase3f-20261110';
+import {zonesFor,emptyZones,zoneCanvasWidth,copyZoneLayers,allProjectLayers} from './src/zones.js?v=zonas1-20261110';
+import {createTextileMaps} from './src/textile-materials.js?v=zonas1-20261110';
+import {zipFiles} from './src/zip-store.js?v=zonas1-20261110';
+import {encodeVideoFrames} from './src/video-frames.js?v=zonas1-20261110';
+import {normalizeMockup} from './src/mockup-settings.js?v=zonas1-20261110';
+import {createMockupControls} from './src/mockup-controls.js?v=zonas1-20261110';
+import {validateCreative,validatePatternBudget,paintCreativeText,creativeTextBounds,paintCreativeImage,CREATIVE_TEMPLATES} from './src/creative.js?v=zonas1-20261110';
+import {createCreativeControls} from './src/creative-controls.js?v=zonas1-20261110';
+import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById} from './src/product-profiles.js?v=zonas1-20261110';
+import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=zonas1-20261110';
+import {createVectorControls} from './src/vector-controls.js?v=zonas1-20261110';
+import {getSticker} from './src/stickers.js?v=zonas1-20261110';
+import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=zonas1-20261110';
+import {createFreeControls} from './src/free-controls.js?v=zonas1-20261110';
+import {validateProject,validateStickerLayer} from './src/project.js?v=zonas1-20261110';
+import {createLayerList,layerName} from './src/layer-ui.js?v=zonas1-20261110';
+import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=zonas1-20261110';
+import {createGlitterCache} from './src/glitter-cache.js?v=zonas1-20261110';
+import {createGlitterControls} from './src/glitter-controls.js?v=zonas1-20261110';
+import {prepareProject} from './src/imports.js?v=zonas1-20261110';
+import {prepareImageFile,enforceDocumentBudget as enforceLayerBudget,ASSET_LIMITS} from './src/assets.js?v=zonas1-20261110';
+import {openDocumentStore,createAutosave} from './src/persistence.js?v=zonas1-20261110';
 let sceneSettings=normalizeMockup(),sceneController,photoBusy=false;
 let materialVariant='original';
 let THREE,OrbitControls,resizeViewer=()=>{};
 let recovering=true,stickerController,stickerPainter,stickerGeometry,stickerReady;
-if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fase3f-20261110')).initInterface()}catch{}}
+if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=zonas1-20261110')).initInterface()}catch{}}
 const ui=window.__fepUI||{refresh(){}};
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 let dragStart=null,gestureHistory=false,importGeneration=0;
 let documentWidth=20,documentHeight=8.5,editorMode='product',freeDesign=normalizeFreeDesign(),freeController,vectorController,creativeController;
 let queueAutosave=()=>{},preferredGuides=$('showGuides').checked;
+let freeDocument=null,freeSession=null,productZones={},zoneProduct=null,zoneBusy=false,textileMaps;
 let elements=[],selected=-1,dragging=false,resizing=false,resizeStart=null,history=[],redoStack=[],meshGroup,texture,renderer,scene,camera,controls,animRequest,renderQueued=false;
 // Lienzo exclusivo para texturas: nunca contiene bordes de selección.
 const textureCanvas=document.createElement('canvas');
@@ -36,11 +40,12 @@ const glitterTiles=createGlitterCache({width:1024,height:512,limit:glitterResolu
 const notify=s=>{$('notice').textContent=s};
 const dimensions=Object.fromEntries(PRODUCT_PROFILES.map(p=>[p.id,p.printCm]));
 for(const profile of PRODUCT_PROFILES)if(![...$('product').options].some(o=>o.value===profile.id)){const option=document.createElement('option');option.value=profile.id;option.textContent=profile.name;$('product').append(option)}
+for(const profile of PRODUCT_PROFILES)if(profile.multiZone)$('product').querySelector(`option[value=${profile.id}]`).textContent=profile.name;
 for(const[id,v]of Object.entries(PRODUCT_VARIANTS)){const option=document.createElement('option');option.value=id;option.textContent=v.name;$('profileVariant').append(option)}
 $('productColor').oninput=()=>{buildModel()};
 $('profileVariant').onchange=()=>{materialVariant=$('profileVariant').value;buildModel();queueAutosave()};
-function setDimForProduct(){let p=$('product').value, d=dimensions[p];if(!d)return;
-  if(p==='mug'||p==='tumbler')setPrintRotation(DEFAULT_PRINT_ROTATION_DEG);$('widthCm').value=d[0];$('heightCm').value=d[1]; updateDimensions(); buildModel();focusDesignFront();sceneController?.refresh({camera:true})}
+function setDimForProduct(){++importGeneration;captureZone();let p=$('product').value, d=dimensions[p];if(!d)return;
+  if(editorMode==='product'&&zonesFor(p).length){openZoneProduct(p);return}else if(zoneProduct){elements=copyElements();history=[];redoStack=[];zoneProduct=null;syncZoneUI()}if(p==='mug'||p==='tumbler')setPrintRotation(DEFAULT_PRINT_ROTATION_DEG);$('widthCm').value=d[0];$('heightCm').value=d[1]; updateDimensions(); buildModel();focusDesignFront();sceneController?.refresh({camera:true})}
 function updateDimensions(){let w=+($('widthCm').value)||20,h=+($('heightCm').value)||8.5;w=Math.max(1,Math.min(100,w));h=Math.max(1,Math.min(100,h));try{validatePatternBudget(elements,w,h)}catch(error){$('widthCm').value=documentWidth;$('heightCm').value=documentHeight;notify(error.message);return false}$('widthCm').value=w;$('heightCm').value=h;documentWidth=w;documentHeight=h;canvas.width=Math.min(1200,Math.round(4096*w/h));canvas.height=Math.round(canvas.width*h/w);
 textureCanvas.width=canvas.width;textureCanvas.height=canvas.height;
 $('canvasWrap').style.aspectRatio=`${w} / ${h}`;
@@ -59,11 +64,11 @@ function redo(){if(!redoStack.length)return;history.push(copyElements());restore
 function getImage(e){if(!e.img && e.data){e.img=new Image();e.img.onload=()=>{draw();requestAnimationFrame(()=>resync3D());};e.img.src=e.data}return e.img}
 
 // Compatibilidad: las imágenes guardadas en V0.5 solo tenían scale.
-function imageFractions(e){
+function imageFractions(e,referenceWidth=canvas.width,referenceHeight=canvas.height){
   const im=getImage(e);
   const ratio=(im?.naturalWidth&&im?.naturalHeight)?im.naturalHeight/im.naturalWidth:1;
   const fw=Number.isFinite(e.widthFrac)?e.widthFrac:(Number(e.scale)||.38);
-  const fh=Number.isFinite(e.heightFrac)?e.heightFrac:fw*canvas.width/canvas.height*ratio;
+  const fh=Number.isFinite(e.heightFrac)?e.heightFrac:fw*referenceWidth/referenceHeight*ratio;
   return {fw,fh,ratio};
 }
 function imageCm(e){const {fw,fh}=imageFractions(e);return {w:fw*(Number($('widthCm').value)||20),h:fh*(Number($('heightCm').value)||8.5)}}
@@ -96,27 +101,27 @@ $('imageHeightCm').addEventListener('change',()=>{
   setImageSize($('keepImageRatio').checked?h*old.w/old.h:Number($('imageWidthCm').value),h);
 });
 
-function paintDesign(target,width,height,{transparent=editorMode==='free'&&freeDesign.background==='transparent',onlyLayer=null}={}){
+function paintDesign(target,width,height,{transparent=!!zoneProduct||(editorMode==='free'&&freeDesign.background==='transparent'),onlyLayer=null,source=elements,pageWidth=documentWidth,pageHeight=documentHeight,referenceWidth=canvas.width}={}){
   target.clearRect(0,0,width,height);
   if(!transparent){target.fillStyle='#ffffff';target.fillRect(0,0,width,height)}
-  const sourceElements=onlyLayer?[onlyLayer]:elements;
+  const sourceElements=onlyLayer?[onlyLayer]:source;
   for(let i=0;i<sourceElements.length;i++){
     const e=sourceElements[i];if(e.visible===false)continue;target.save();target.globalAlpha=e.opacity??1;
     if(e.type==='glitter'){const tile=glitterTiles.get(e.glitter);target.drawImage(tile,0,0,width,height);target.restore();continue;}
     if(e.type==='vector'){if(e.role!=='cut')paintVector(target,e,width,height);target.restore();continue;}
-    if(e.type==='text'&&(e.typography||e.gradient)){paintCreativeText(target,e,width,height,canvas.width);target.restore();continue;}
-    if(e.type==='image'&&(e.repeat||e.crop||e.mask)){const f=imageFractions(e);paintCreativeImage(target,e,getImage(e),width,height,documentWidth,f.fw,f.fh);target.restore();continue;}
+    if(e.type==='text'&&(e.typography||e.gradient)){paintCreativeText(target,e,width,height,referenceWidth);target.restore();continue;}
+    if(e.type==='image'&&(e.repeat||e.crop||e.mask)){const f=imageFractions(e,referenceWidth,referenceWidth*pageHeight/pageWidth);paintCreativeImage(target,e,getImage(e),width,height,pageWidth,f.fw,f.fh);target.restore();continue;}
     if(e.type==='shape'){paintShape(target,e,width,height);target.restore();continue;}
     if(e.type==='sticker'){if(stickerPainter)stickerPainter(target,e,width,height);target.restore();continue;}
     target.translate(e.x*width,e.y*height);
     if(e.type==='text'){
-      target.font=`bold ${e.size*width/canvas.width}px Arial`;
+      target.font=`bold ${e.size*width/referenceWidth}px Arial`;
       target.textAlign='center';target.textBaseline='middle';target.fillStyle=e.color;
       target.fillText(e.text,0,0,width*.9);
     }else{
       const im=getImage(e);
       if(im?.complete&&im.naturalWidth){
-        const {fw,fh}=imageFractions(e);let w=fw*width,h=fh*height;
+        const {fw,fh}=imageFractions(e,referenceWidth,referenceWidth*pageHeight/pageWidth);let w=fw*width,h=fh*height;
         target.drawImage(im,-w/2,-h/2,w,h);
       }
     }
@@ -124,6 +129,7 @@ function paintDesign(target,width,height,{transparent=editorMode==='free'&&freeD
   }
 }
 function draw(){
+  captureZone();syncZoneUI();syncTextileMaps();
   trimHistory();queueAutosave();
   refreshLayers();
   paintDesign(ctx,canvas.width,canvas.height);
@@ -229,24 +235,42 @@ $('rotatePlus').onclick=()=>setPrintRotation(printRotationDeg+5);
 $('rotationViewFront').onclick=focusDesignFront;
 $('rotationNumber').addEventListener('change',e=>setPrintRotation(e.target.value));
 $('widthCm').onchange=()=>{updateDimensions();buildModel()};$('heightCm').onchange=()=>{updateDimensions();if(profileById($('product').value)?.kind==='glb')buildModel()};$('product').onchange=()=>{setDimForProduct();updateRotationToolbar()};
-function projectSnapshot(){return {version:2,mode:editorMode,freeDesign:normalizeFreeDesign(freeDesign),glitterSchema:GLITTER_SCHEMA,glitter:glitterControls.material(),glitterDraft:glitterControls.draft(),glitterMode:glitterControls.mode(),product:$('product').value,color:$('productColor').value,profileVariant:materialVariant,mockup:normalizeMockup(sceneSettings),width:documentWidth,height:documentHeight,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,viewerBackground:$('viewerBackground').value,showGuides:preferredGuides,keepImageRatio:$('keepImageRatio').checked,elements:elements.map(({img,...e})=>e)}}
+const zoneHistories=new Map();
+function captureZone(){if(!zoneProduct||editorMode!=='product')return;const g=productZones[zoneProduct];if(!g)return;g.zones[g.active]={width:documentWidth,height:documentHeight,elements};zoneHistories.set(zoneProduct+':'+g.active,{history,redoStack,selected})}
+function captureFree(){if(editorMode==='free'&&(freeDocument||Object.keys(productZones).length)){freeDocument={width:documentWidth,height:documentHeight,elements,freeDesign:normalizeFreeDesign(freeDesign)};freeSession={history,redoStack,selected}}}
+function serializeZoneBank(){return Object.fromEntries(Object.entries(productZones).map(([p,g])=>[p,{active:g.active,zones:Object.fromEntries(Object.entries(g.zones).map(([id,z])=>[id,{width:z.width,height:z.height,elements:copyElements(z.elements).map(({img,...e})=>e)}]))}]))}
+function enforceDocumentBudget(candidate){const others=Object.entries(productZones).flatMap(([p,g])=>Object.entries(g.zones).filter(([id])=>!(zoneProduct===p&&id===g.active)).flatMap(([,z])=>z.elements));enforceLayerBudget([...candidate,...others,...(editorMode!=='free'&&freeDocument?freeDocument.elements:[])])}
+function syncZoneUI(){const defs=zoneProduct?zonesFor(zoneProduct):[];if(!$('zoneBar'))return;$('zoneBar').hidden=!defs.length;$('zoneViews').hidden=!defs.length;for(const id of ['zoneTools','zonePrintTools'])$(id).hidden=!defs.length;if(!defs.length)return;const g=productZones[zoneProduct],select=$('zoneSelect');if(select.dataset.product!==zoneProduct){select.replaceChildren(...defs.map(z=>new Option(z.name,z.id)));select.dataset.product=zoneProduct}select.value=g.active;$('zoneCopyTarget').replaceChildren(...defs.filter(z=>z.id!==g.active).map(z=>new Option(z.name,z.id)));$('zoneActiveName').textContent=defs.find(z=>z.id===g.active).name;$('zoneSizeNote').textContent=`${documentWidth} × ${documentHeight} cm · capas independientes`;for(const id of ['zoneSelect','zoneCopy','zoneExportAll','zoneAddSheet'])$(id).disabled=zoneBusy||recovering;$('zoneViews').disabled=zoneBusy||recovering||!renderer||recording||photoBusy||['loading','failed'].includes($('profileStatus').dataset.state);const def=defs.find(z=>z.id===g.active);$('zoneWarning').textContent=documentWidth>def.surface[0]||documentHeight>def.surface[1]?'Aviso: el lienzo excede la superficie de este modelo; el mockup recorta el sobrante. Verifica las medidas.':'';}
+function fitTextileView(){if(!renderer||!camera||!modelRoot?.children.length||!profileById($('product').value)?.multiZone)return;const sphere=new THREE.Box3().setFromObject(modelRoot).getBoundingSphere(new THREE.Sphere()),direction=camera.position.clone().sub(controls.target).normalize(),half=Math.min(THREE.MathUtils.degToRad(camera.fov/2),Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect)),distance=sphere.radius/Math.sin(half)*1.06;controls.target.copy(sphere.center);camera.position.copy(sphere.center).addScaledVector(direction,distance);camera.lookAt(sphere.center);controls.update()}
+function focusZone(){const def=zonesFor(zoneProduct).find(z=>z.id===productZones[zoneProduct]?.active);if(!def||!camera)return;camera.position.set(...def.camera);controls.target.set(0,0,0);controls.update();fitTextileView();renderer.render(scene,camera)}
+function openZoneProduct(product,id){++importGeneration;const previous=zoneProduct;captureZone();const fresh=!productZones[product],g=productZones[product]??=emptyZones(product);if(fresh&&elements.length&&!previous)g.zones[g.active].elements=copyElements();if(id&&!zonesFor(product).some(z=>z.id===id))throw Error('Zona no disponible');g.active=id||g.active;zoneProduct=product;const z=g.zones[g.active];elements=z.elements;const past=zoneHistories.get(product+':'+g.active);history=past?.history||[];redoStack=past?.redoStack||[];selected=past?.selected??-1;$('widthCm').value=z.width;$('heightCm').value=z.height;documentWidth=z.width;documentHeight=z.height;updateDimensions();refreshSelectedLabel();syncZoneUI();if(previous!==product||!modelRoot?.children.length)buildModel();focusZone();updateRotationToolbar();queueAutosave();}
+function paintZone(target,w,h,doc){paintDesign(target,w,h,{source:doc.elements,pageWidth:doc.width,pageHeight:doc.height,referenceWidth:zoneCanvasWidth(doc.width,doc.height),transparent:true})}
+function syncTextileMaps(product=zoneProduct){if(!textileMaps||!product||!productZones[product])return;captureZone();textileMaps.update(product,productZones[product],$('productColor').value,paintZone)}
+function renderZoneCanvas(doc,mirror=false){const c=document.createElement('canvas');c.width=Math.round(doc.width/2.54*300);c.height=Math.round(doc.height/2.54*300);if(c.width*c.height>40e6)throw Error('La zona supera 40 megapíxeles a 300 ppp');paintZone(c.getContext('2d'),c.width,c.height,doc);return mirror?mirrorFinishedImage(c):c}
+$('zoneSelect').onchange=()=>{if(!zoneBusy)openZoneProduct(zoneProduct,$('zoneSelect').value)};
+$('zoneCopy').onclick=()=>{try{captureZone();const g=productZones[zoneProduct],target=g.zones[$('zoneCopyTarget').value],source=g.zones[g.active];if(!target)throw Error('Selecciona destino');const additions=copyZoneLayers(source,target,copyElements);if(target.elements.length+additions.length>500)throw Error('Máximo 500 capas por zona');const all=Object.values(productZones).flatMap(g=>Object.values(g.zones).flatMap(z=>z.elements));enforceLayerBudget([...all,...additions,...(freeDocument?freeDocument.elements:[])]);const candidate=[...target.elements,...additions];validateProject({width:target.width,height:target.height,elements:candidate});const key=zoneProduct+':'+$('zoneCopyTarget').value,past=zoneHistories.get(key)||{history:[],redoStack:[],selected:-1};past.history.push(copyElements(target.elements));if(past.history.length>40)past.history.shift();past.redoStack=[];zoneHistories.set(key,past);target.elements=candidate;syncTextileMaps();renderer?.render(scene,camera);queueAutosave();notify('Diseño copiado como capas independientes; medidas físicas conservadas')}catch(e){notify(e.message)}};
+$('zoneExportAll').onclick=async()=>{if(zoneBusy||!zoneProduct)return;captureZone();zoneBusy=true;syncZoneUI();try{const product=zoneProduct,project=projectSnapshot(),mirror=getMirrorMode(),docs=Object.fromEntries(Object.entries(productZones[product].zones).map(([id,z])=>[id,{...z,elements:copyElements(z.elements)}])),files=[],manifest={product,dpi:300,mirror,zones:[]};for(const def of zonesFor(product)){const doc=docs[def.id],c=renderZoneCanvas(doc,mirror==='espejo'),raw=await canvasBlob(c,'image/png');files.push({name:def.id+'.png',data:pngWithDpi(await raw.arrayBuffer())});manifest.zones.push({id:def.id,widthCm:doc.width,heightCm:doc.height,filename:def.id+'.png'});c.width=c.height=1}files.push({name:'manifest.json',data:JSON.stringify(manifest,null,2)},{name:'proyecto-completo.json',data:JSON.stringify(project,null,2)});saveBlob(await zipFiles(files),product+'-zonas-impresion.zip');notify('Zonas exportadas · PNG transparentes a 300 ppp · sin escenario')}catch(e){notify('No se pudieron exportar las zonas: '+e.message)}finally{zoneBusy=false;syncZoneUI()}};
+$('zoneAddSheet').onclick=async()=>{if(zoneBusy||!zoneProduct)return;captureZone();zoneBusy=true;syncZoneUI();try{const descriptors=zonesFor(zoneProduct).map(def=>({...productZones[zoneProduct].zones[def.id],elements:copyElements(productZones[zoneProduct].zones[def.id].elements),name:$('product').selectedOptions[0].textContent+' · '+def.name}));if(!window.__fepSheetAPI)throw Error('La plancha aún no está disponible');await window.__fepSheetAPI.addZones(descriptors);$('openPrintSheet').click();notify('Zonas añadidas a la plancha. Selecciona papel y ordena automáticamente.')}catch(e){notify(e.message)}finally{zoneBusy=false;syncZoneUI()}};
+
+function projectSnapshot(){captureZone();captureFree();return {...(freeDocument?{freeDocument:{...freeDocument,elements:copyElements(freeDocument.elements).map(({img,...e})=>e)}}:{}),...(Object.keys(productZones).length?{zoneSchema:1,productZones:serializeZoneBank()}:{}),version:2,mode:editorMode,freeDesign:normalizeFreeDesign(freeDesign),glitterSchema:GLITTER_SCHEMA,glitter:glitterControls.material(),glitterDraft:glitterControls.draft(),glitterMode:glitterControls.mode(),product:$('product').value,color:$('productColor').value,profileVariant:materialVariant,mockup:normalizeMockup(sceneSettings),width:documentWidth,height:documentHeight,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,viewerBackground:$('viewerBackground').value,showGuides:preferredGuides,keepImageRatio:$('keepImageRatio').checked,elements:elements.map(({img,...e})=>e)}}
 function applyPreparedProject({data,warnings}){
- if(data.elements.some(e=>e.type==='sticker')&&!stickerPainter)throw Error('El motor de stickers no está disponible; el documento abierto se conserva');
+ if(allProjectLayers(data).some(e=>e.type==='sticker')&&!stickerPainter)throw Error('El motor de stickers no está disponible; el documento abierto se conserva');
+ zoneProduct=null;freeDocument=data.freeDocument||null;freeSession=null;zoneHistories.clear();productZones=data.productZones||{};
  sceneSettings=normalizeMockup(data.mockup,data.viewerBackground);sceneController?.sync();editorMode=data.mode;freeDesign=normalizeFreeDesign(data.freeDesign);document.body.dataset.mode=editorMode;freeController?.sync();
  glitterControls.restore({material:data.glitter,draft:data.glitterDraft,mode:data.glitterMode});$('product').value=data.product;materialVariant=data.profileVariant;$('profileVariant').value=materialVariant;$('productColor').value=data.color;finishMode=data.finishMode;$('finishMode').value=finishMode;
  $('mirrorModeIndividual').checked=data.mirrorMode==='espejo';$('widthCm').value=data.width;$('heightCm').value=data.height;
- elements=data.elements;selected=-1;history=[];redoStack=[];printRotationDeg=data.printRotationDeg;
+ elements=data.elements;if(editorMode==='free'&&freeDocument)freeDocument.elements=elements;if(editorMode==='product'&&zonesFor(data.product).length){zoneProduct=data.product;const g=productZones[zoneProduct]??=emptyZones(zoneProduct);g.zones[g.active]={width:data.width,height:data.height,elements};}syncZoneUI();selected=-1;history=[];redoStack=[];printRotationDeg=data.printRotationDeg;
  if(['#17253a','#e6eaf0','#ffffff'].includes(data.viewerBackground)){$('viewerBackground').value=data.viewerBackground;if(scene)scene.background=new THREE.Color(data.viewerBackground)}
  if(typeof data.showGuides==='boolean'){preferredGuides=data.showGuides;$('showGuides').checked=data.showGuides}if(typeof data.keepImageRatio==='boolean')$('keepImageRatio').checked=data.keepImageRatio;
  $('rotationDeg').value=String(printRotationDeg);$('rotationValue').textContent=`${Math.round(printRotationDeg)}°`;$('rotationNumber').value=String(Math.round(printRotationDeg));
- updateDimensions();refreshSelectedLabel();buildModel();focusDesignFront();updateRotationToolbar();queueAutosave();sceneController?.refresh({camera:true});notify(warnings.length?'Proyecto cargado. '+warnings.join(' '):'Proyecto cargado');
+ updateDimensions();refreshSelectedLabel();buildModel();focusDesignFront();updateRotationToolbar();queueAutosave();sceneController?.refresh({camera:true});if(zoneProduct)focusZone();notify(warnings.length?'Proyecto cargado. '+warnings.join(' '):'Proyecto cargado');
 }
 $('save').onclick=()=>saveBlob(new Blob([JSON.stringify(projectSnapshot())],{type:'application/json'}),'proyecto-estudio3d.json');
 $('load').onclick=()=>$('projectFile').click();
 $('projectFile').onchange=async ev=>{
  const f=ev.target.files?.[0];ev.target.value='';if(!f)return;const generation=++importGeneration,before=JSON.stringify(projectSnapshot());
- try{if(f.size>ASSET_LIMITS.projectBytes)throw Error('Proyecto demasiado grande (máximo 30 MB)');let raw;try{raw=JSON.parse(await f.text())}catch{throw Error('El archivo no contiene JSON válido')}
- const prepared=await prepareProject(raw);if(prepared.data.elements.some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(generation!==importGeneration)return;if(JSON.stringify(projectSnapshot())!==before)throw Error('El documento cambió durante la importación; vuelve a abrir el archivo');applyPreparedProject(prepared)
+ try{if(f.size>100_000_000)throw Error('Proyecto demasiado grande (máximo 100 MB para zonas)');let raw;try{raw=JSON.parse(await f.text())}catch{throw Error('El archivo no contiene JSON válido')}
+ if(f.size>ASSET_LIMITS.projectBytes&&raw.zoneSchema!==1)throw Error('Proyecto de una zona demasiado grande (máximo 30 MB)');const prepared=await prepareProject(raw);if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(generation!==importGeneration)return;if(JSON.stringify(projectSnapshot())!==before)throw Error('El documento cambió durante la importación; vuelve a abrir el archivo');applyPreparedProject(prepared)
  }catch(error){notify('No se pudo abrir el proyecto: '+error.message)}
 };
 function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
@@ -262,6 +286,7 @@ function mirrorFinishedImage(source){
   context.restore();
   return output;
 }
+function zoneSuffix(){return zoneProduct?'-'+zoneProduct+'-'+productZones[zoneProduct].active:''}
 function getMirrorMode(){return $('mirrorModeIndividual').checked ? 'espejo' : 'normal'}
 function renderToExportCanvas(mode='normal'){
   const source=document.createElement('canvas');
@@ -320,8 +345,11 @@ function jpegWithDpi(buffer,dpi=300){
   return new Blob([a.subarray(0,2),app0,a.subarray(2)],{type:'image/jpeg'});
 }
 // PDF independiente del diálogo de impresión: tamaño de página = tamaño del lienzo.
+function whiteCanvas(source){const c=document.createElement('canvas');c.width=source.width;c.height=source.height;const x=c.getContext('2d');x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);x.drawImage(source,0,0);return c}
 async function pdfAtPhysicalSize(canvas,wCm,hCm){
+  const original=canvas;if(zoneProduct)canvas=whiteCanvas(canvas);
   const jpg=new Uint8Array(await (await canvasBlob(canvas,'image/jpeg',.98)).arrayBuffer());
+  if(canvas!==original)canvas.width=canvas.height=1;
   const pageW=(wCm*72/2.54).toFixed(5),pageH=(hCm*72/2.54).toFixed(5);
   const enc=new TextEncoder(),parts=[];let length=0,offsets=[0];
   const append=x=>{let b=typeof x==='string'?enc.encode(x):x;parts.push(b);length+=b.length};
@@ -330,7 +358,7 @@ async function pdfAtPhysicalSize(canvas,wCm,hCm){
   obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
   obj(2,'<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
   obj(3,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`);
-  offsets[4]=length;append(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n`);append(jpg);append('\nendstream\nendobj\n');
+  offsets[4]=length;append(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${original.width} /Height ${original.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n`);append(jpg);append('\nendstream\nendobj\n');
   const commands=`q\n${pageW} 0 0 ${pageH} 0 0 cm\n/Im0 Do\nQ\n`;
   obj(5,`<< /Length ${enc.encode(commands).length} >>\nstream\n${commands}endstream`);
   const startxref=length;append('xref\n0 6\n0000000000 65535 f \n');for(let k=1;k<=5;k++)append(String(offsets[k]).padStart(10,'0')+' 00000 n \n');
@@ -338,8 +366,8 @@ async function pdfAtPhysicalSize(canvas,wCm,hCm){
   return new Blob(parts,{type:'application/pdf'});
 }
 $('exportPrint').onclick=async()=>{
-  try{const {w,h}=cmPrint();const canvas=renderToExportCanvas(getMirrorMode());const blob=await canvasBlob(canvas,'image/png');
-    saveBlob(pngWithDpi(await blob.arrayBuffer()),`impresion_${w}x${h}cm_${getMirrorMode()}_300ppp.png`);
+  try{const {w,h}=cmPrint(),zoneTag=zoneSuffix();const canvas=renderToExportCanvas(getMirrorMode());const blob=await canvasBlob(canvas,'image/png');
+    saveBlob(pngWithDpi(await blob.arrayBuffer()),`impresion_${w}x${h}cm_${getMirrorMode()}${zoneTag}_300ppp.png`);
     notify(`PNG generado: ${w} × ${h} cm a 300 ppp (${canvas.width} × ${canvas.height} píxeles).`);
   }catch(e){notify('Error PNG: '+e.message)}
 };
@@ -427,17 +455,17 @@ function focusPrintEdge(edge){
   controls.update();
 }
 
-function init3D(){const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,Math.max(1,node.clientWidth)/Math.max(1,node.clientHeight),.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(Math.max(1,node.clientWidth),Math.max(1,node.clientHeight));node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;controls.addEventListener('change',()=>{if(!recording&&!photoBusy&&scene&&editorMode==='product')renderer.render(scene,camera)});scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE?.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);if(!recording&&!photoBusy&&editorMode==='product')controls.update()}animate();const resize=()=>{if(recording||photoBusy)return;const w=node.clientWidth,h=node.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);renderer.render(scene,camera)};resizeViewer=resize;typeof ResizeObserver==='function'?new ResizeObserver(resize).observe(node):window.addEventListener('resize',resize)}
+function init3D(){textileMaps=createTextileMaps(THREE);const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,Math.max(1,node.clientWidth)/Math.max(1,node.clientHeight),.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(Math.max(1,node.clientWidth),Math.max(1,node.clientHeight));node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;controls.addEventListener('change',()=>{if(!recording&&!photoBusy&&scene&&editorMode==='product')renderer.render(scene,camera)});scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE?.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);if(!recording&&!photoBusy&&editorMode==='product')controls.update()}animate();const resize=()=>{if(recording||photoBusy)return;const w=node.clientWidth,h=node.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);renderer.render(scene,camera)};resizeViewer=resize;typeof ResizeObserver==='function'?new ResizeObserver(resize).observe(node):window.addEventListener('resize',resize)}
 async function loadProductGLB(profile,root,bodyMaterial,printMaterial){
- try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js?v=fase3f-20261110');const loader=new GLTFLoader();let gltf;try{gltf=await deadline(loader.loadAsync(profile.url),15000,'No respondió el modelo GLB')}catch(error){if(!profile.gltfURL)throw error;gltf=await deadline(loader.loadAsync(profile.gltfURL),15000,'No respondió el modelo glTF de respaldo')}
+ try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js?v=zonas1-20261110');const loader=new GLTFLoader();let gltf;try{gltf=await deadline(loader.loadAsync(profile.url),15000,'No respondió el modelo GLB')}catch(error){if(!profile.gltfURL)throw error;gltf=await deadline(loader.loadAsync(profile.gltfURL),15000,'No respondió el modelo glTF de respaldo')}
   if(root!==modelRoot){gltf.scene.traverse(o=>{o.geometry?.dispose();if(o.material)for(const m of(Array.isArray(o.material)?o.material:[o.material]))m.dispose()});bodyMaterial.dispose();printMaterial.dispose();return}
   gltf.scene.scale.setScalar(profile.worldScale);printMaterial.map=texture;printMaterial.needsUpdate=true;let printMeshes=0;
-  gltf.scene.traverse(mesh=>{if(!mesh.isMesh)return;const old=mesh.material;if(mesh.name===profile.printMesh){printMeshes++;mesh.material=printMaterial;mesh.scale.set(Math.min(1,documentWidth/profile.printCm[0]),Math.min(1,documentHeight/profile.printCm[1]),1)}else mesh.material=bodyMaterial;for(const material of(Array.isArray(old)?old:[old]))material.dispose()});
-  if(!printMeshes)throw Error('El GLB no contiene su superficie imprimible');root.add(gltf.scene);$('profileStatus').dataset.state='ready';$('profileStatus').textContent=documentWidth>profile.printCm[0]||documentHeight>profile.printCm[1]?'Área solicitada mayor que la placa; el visor limita al tamaño físico. Revisa medidas.':'Modelo propio · 100 × 100 × 3 mm · calibración digital';resizeViewer();sceneController?.refresh();resync3D({silent:true});
+  gltf.scene.traverse(mesh=>{if(!mesh.isMesh)return;const old=mesh.material;if(profile.multiZone){const def=zonesFor(profile.id).find(z=>z.mesh===mesh.name);mesh.material=textileMaps.material(profile.id,def?.id,$('productColor').value);const v=PRODUCT_VARIANTS[materialVariant];if(materialVariant!=='original'){mesh.material.roughness=v.roughness;mesh.material.metalness=v.metalness}if(def)printMeshes++;}else if(mesh.name===profile.printMesh){printMeshes++;mesh.material=printMaterial;mesh.scale.set(Math.min(1,documentWidth/profile.printCm[0]),Math.min(1,documentHeight/profile.printCm[1]),1)}else mesh.material=bodyMaterial;for(const material of(Array.isArray(old)?old:[old]))material.dispose()});
+  if(!printMeshes)throw Error('El GLB no contiene su superficie imprimible');if(profile.multiZone&&printMeshes!==zonesFor(profile.id).length)throw Error('Faltan superficies de zona');root.add(gltf.scene);if(profile.multiZone){bodyMaterial.dispose();printMaterial.dispose();fitTextileView()}$('profileStatus').dataset.state='ready';$('profileStatus').textContent=profile.multiZone?'Modelo textil propio · superficies curvas · '+printMeshes+' zonas independientes':documentWidth>profile.printCm[0]||documentHeight>profile.printCm[1]?'Área solicitada mayor que la placa; el visor limita al tamaño físico. Revisa medidas.':'Modelo propio · 100 × 100 × 3 mm · calibración digital';resizeViewer();sceneController?.refresh();resync3D({silent:true});
  }catch(error){if(root===modelRoot){$('profileStatus').dataset.state='failed';$('profileStatus').textContent='No se pudo cargar el modelo: '+error.message;notify('Modelo no disponible; diseño y exportación 2D conservados')}}finally{update3DControls()}
 }
 function addGeo(geo,mat,x=0,y=0,z=0,rotateX=0){let o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);o.rotation.x=rotateX;modelRoot.add(o);return o}
-function buildModel(){if(!scene)return;const profile=profileById($('product').value);$('profileStatus').dataset.state=profile?.kind==='glb'?'loading':'ready';$('profileStatus').textContent=profile?.kind==='glb'?'Cargando modelo 3D…':'Perfil original · medidas configurables';update3DControls();if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material]))material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&['mug','tumbler'].includes(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';let printMat=new THREE.MeshStandardMaterial({map:physical?physicalArtTexture:texture,transparent:physical,depthWrite:!physical,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;const variant=PRODUCT_VARIANTS[materialVariant];if(!physical&&variant.roughness!==null){plain.roughness=variant.roughness;plain.metalness=variant.metalness}if(profile?.kind==='glb'){loadProductGLB(profile,modelRoot,plain,printMat);return;}
+function buildModel(){if(!scene)return;const profile=profileById($('product').value);$('profileStatus').dataset.state=profile?.kind==='glb'?'loading':'ready';$('profileStatus').textContent=profile?.kind==='glb'?'Cargando modelo 3D…':'Perfil original · medidas configurables';update3DControls();if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material]))material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&['mug','tumbler'].includes(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';let printMat=new THREE.MeshStandardMaterial({map:physical?physicalArtTexture:texture,transparent:physical,depthWrite:!physical,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;const variant=PRODUCT_VARIANTS[materialVariant];if(!physical&&variant.roughness!==null){plain.roughness=variant.roughness;plain.metalness=variant.metalness}if(profile?.multiZone){productZones[p]??=emptyZones(p);syncTextileMaps(p)}if(profile?.kind==='glb'){loadProductGLB(profile,modelRoot,plain,printMat);return;}
 if(p==='mug'||p==='tumbler'){let r=p==='mug'?.93:.66,h=p==='mug'?2.05:3;// Cuerpo completo sin arte: evita repetir el archivo en toda la taza.
 if(p==='mug'){
   // Taza 11 oz de paredes lisas, base discreta y labio delgado (foto de referencia).
@@ -498,23 +526,6 @@ if(p==='mug'){
   addGeo(new THREE.CylinderGeometry(r,r,.08,96),plain,0,-h/2,0);
   addGeo(new THREE.CylinderGeometry(.77,.7,.14,96),new THREE.MeshStandardMaterial({color:'#cbd5df',metalness:.4,roughness:.35}),0,h/2+.09,0)
 }}
-else if(p==='shirt'){
-  // Polera frontal mejorada con mangas, hombros, cuello hueco y espesor visible.
-  const shape=new THREE.Shape();
-  [[-1.04,-1.5],[1.04,-1.5],[1.00,.80],[1.50,.57],[1.88,1.17],[1.22,1.56],[.63,1.39],[.40,1.28],[-.40,1.28],[-.63,1.39],[-1.22,1.56],[-1.88,1.17],[-1.50,.57],[-1.00,.80]].forEach(([x,y],i)=>i?shape.lineTo(x,y):shape.moveTo(x,y));
-  shape.closePath();
-  // Cuello curvado con hueco real en la silueta.
-  const collarHole=new THREE.Path();
-  collarHole.absellipse(0,1.36,.39,.19,0,Math.PI*2,true,0);
-  shape.holes.push(collarHole);
-  const fabric=new THREE.MeshStandardMaterial({color:c,roughness:.94,metalness:0,side:THREE.DoubleSide});
-  const body=addGeo(new THREE.ExtrudeGeometry(shape,{depth:.10,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.035,bevelThickness:.025,curveSegments:20}),fabric,0,0,-.08);
-  // La impresión se presenta como un parche plano provisional sobre el pecho.
-  addGeo(new THREE.PlaneGeometry(1.76,1.88),printMat,0,-.25,.096);
-  // Borde de cuello con costura discreta.
-  const neck=addGeo(new THREE.TorusGeometry(.32,.042,10,42,Math.PI),new THREE.MeshStandardMaterial({color:c,roughness:.9}),0,1.37,.055);
-  neck.scale.y=.58;
-}
 else if(p==='tote'){
   const cloth=new THREE.MeshStandardMaterial({color:c,roughness:.93,side:THREE.DoubleSide});
   addGeo(new THREE.BoxGeometry(2.65,2.55,.22),cloth,0,-.25,0);
@@ -534,18 +545,6 @@ else if(p==='mousepad'){
   const geo=new THREE.BoxGeometry(3.1,.065,2.28);addGeo(geo,mat,0,0,0);
   addGeo(new THREE.PlaneGeometry(3.02,2.2),printMat,0,.038,0,-Math.PI/2);
   modelRoot.rotation.x=-.65;
-}
-else if(p==='cushion'){
-  const cloth=new THREE.MeshStandardMaterial({color:c,roughness:1,side:THREE.DoubleSide});
-  const cush=addGeo(new THREE.BoxGeometry(2.55,2.55,.4,8,8,3),cloth);
-  const pos=cush.geometry.attributes.position;
-  for(let i=0;i<pos.count;i++){
-    let x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);
-    const bulge=Math.max(0,(1-Math.pow(x/1.35,4))*(1-Math.pow(y/1.35,4)));
-    pos.setZ(i,z+Math.sign(z)*.12*bulge);
-  }
-  pos.needsUpdate=true;cush.geometry.computeVertexNormals();
-  addGeo(new THREE.PlaneGeometry(2.23,2.23),printMat,0,0,.34);
 }
 else if(p==='keychain'){
   const ring=new THREE.MeshStandardMaterial({color:'#c2ccd9',metalness:.8,roughness:.26});
@@ -627,18 +626,20 @@ $('exportMockup').onclick=async()=>{
  finally{renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);camera.aspect=aspect;camera.updateProjectionMatrix();controls.enabled=enabled;if(show){$('showGuides').checked=true;buildModel()}photoBusy=false;resizeViewer();update3DControls();requestAnimationFrame(()=>resync3D({silent:true}))}
 };
 
+$('zoneViews').onclick=async()=>{if(!renderer||recording||photoBusy||zoneBusy||!zoneProduct)return;photoBusy=true;zoneBusy=true;update3DControls();const locked=[...document.querySelectorAll('button,input,select')].map(n=>[n,n.disabled]);for(const [n]of locked)n.disabled=true;const size=renderer.getSize(new THREE.Vector2()),ratio=renderer.getPixelRatio(),aspect=camera.aspect,position=camera.position.clone(),target=controls.target.clone(),enabled=controls.enabled,product=zoneProduct;try{controls.enabled=false;await waitForProduct();await sceneController.ready();const width=sceneSettings.photoWidth,height=Math.round(width*9/16),files=[];renderer.setPixelRatio(1);renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();for(const def of zonesFor(product)){camera.position.set(...def.camera);camera.lookAt(0,0,0);fitTextileView();renderer.render(scene,camera);files.push({name:def.id+'-mockup.png',data:await canvasBlob(renderer.domElement,'image/png')})}saveBlob(await zipFiles(files),product+'-vistas-HD.zip');notify('Vistas HD exportadas con todas las zonas diseñadas')}catch(error){notify('No se pudieron exportar las vistas: '+error.message)}finally{renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);camera.aspect=aspect;camera.updateProjectionMatrix();camera.position.copy(position);controls.target.copy(target);controls.enabled=enabled;photoBusy=false;zoneBusy=false;for(const [n,disabled]of locked)n.disabled=disabled;controls.update();resizeViewer();update3DControls()}};
+
 // V0.8: herramientas de exportación y presentación sin servidor ni pagos.
 $('viewerBackground').addEventListener('change',e=>{if(scene)scene.background=new THREE.Color(e.target.value)});
 $('showGuides').addEventListener('change',()=>{preferredGuides=$('showGuides').checked;buildModel()});
 $('exportJpg').addEventListener('click',async()=>{
-  try{const {w,h}=cmPrint(),c=renderToExportCanvas(getMirrorMode()),raw=await canvasBlob(c,'image/jpeg',.97);
-    saveBlob(jpegWithDpi(await raw.arrayBuffer()),`impresion_${w}x${h}cm_${getMirrorMode()}_300ppp.jpg`);
+  try{const {w,h}=cmPrint(),c=renderToExportCanvas(getMirrorMode()),zoneTag=zoneSuffix(),output=zoneProduct?whiteCanvas(c):c,raw=await canvasBlob(output,'image/jpeg',.97);if(output!==c)output.width=output.height=1;
+    saveBlob(jpegWithDpi(await raw.arrayBuffer()),`impresion_${w}x${h}cm_${getMirrorMode()}${zoneTag}_300ppp.jpg`);
     notify(`JPEG generado: ${w} × ${h} cm a 300 ppp (${c.width} × ${c.height} píxeles).`);
   }catch(e){notify('Error JPEG: '+e.message)}
 });
 $('exportPDF').addEventListener('click',async()=>{
-  try{const {w,h}=cmPrint(),c=renderToExportCanvas(getMirrorMode());
-    saveBlob(await pdfAtPhysicalSize(c,w,h),`impresion_${w}x${h}cm_${getMirrorMode()}_escala-real.pdf`);
+  try{const {w,h}=cmPrint(),c=renderToExportCanvas(getMirrorMode()),zoneTag=zoneSuffix();
+    saveBlob(await pdfAtPhysicalSize(c,w,h),`impresion_${w}x${h}cm_${getMirrorMode()}${zoneTag}_escala-real.pdf`);
     notify(`PDF generado con página de ${w} × ${h} cm. Imprimir al 100 %, sin ajustar a página.`);
   }catch(e){notify('Error PDF: '+e.message)}
 });
@@ -689,7 +690,7 @@ freeController=createFreeControls({
  state:()=>({mode:editorMode,page:freeDesign,w:documentWidth,h:documentHeight,selected:elements[selected],hasLayers:elements.length>0,storageFailed:window.__fepBoot?.stages.storage.state==='failed'}),notify,
  settings:patch=>{freeDesign=normalizeFreeDesign({...freeDesign,...patch});draw();ui.refresh();queueAutosave()},
  format:(size,patch={})=>{if(!Number.isFinite(size.w)||!Number.isFinite(size.h)||size.w<1||size.h<1||size.w>100||size.h>100)throw Error('Las dimensiones deben estar entre 1 y 100 cm');freeDesign=normalizeFreeDesign({...freeDesign,...patch});$('widthCm').value=size.w;$('heightCm').value=size.h;updateDimensions();buildModel();ui.refresh()},
- switchMode:mode=>{if(recovering)return;const previous=editorMode;editorMode=mode;document.body.dataset.mode=mode;if(mode==='free'&&previous!=='free'&&!elements.length){const size=pageSize(freeDesign.preset==='custom'?'A4':freeDesign.preset);$('widthCm').value=size.w;$('heightCm').value=size.h;$('mirrorModeIndividual').checked=false}else if(mode==='free'&&previous!=='free')freeDesign=normalizeFreeDesign({...freeDesign,preset:'custom'});updateDimensions();update3DControls();ui.refresh();requestAnimationFrame(()=>{resizeViewer();resync3D({silent:true})});queueAutosave()},
+ switchMode:mode=>{if(recovering)return;++importGeneration;captureZone();captureFree();const previous=editorMode,restoringFree=mode==='free'&&!!zoneProduct&&!!freeDocument;if(mode==='free'&&zoneProduct){if(freeDocument){elements=copyElements(freeDocument.elements);freeDesign=normalizeFreeDesign(freeDocument.freeDesign);$('widthCm').value=freeDocument.width;$('heightCm').value=freeDocument.height;history=freeSession?.history||[];redoStack=freeSession?.redoStack||[];selected=freeSession?.selected??-1}else{elements=copyElements();history=[];redoStack=[]}zoneProduct=null}editorMode=mode;if(mode==='product'&&zonesFor($('product').value).length){openZoneProduct($('product').value);document.body.dataset.mode=mode;ui.refresh();queueAutosave();return}syncZoneUI();document.body.dataset.mode=mode;if(mode==='free'&&previous!=='free'&&!restoringFree&&!elements.length){const size=pageSize(freeDesign.preset==='custom'?'A4':freeDesign.preset);$('widthCm').value=size.w;$('heightCm').value=size.h;$('mirrorModeIndividual').checked=false}else if(mode==='free'&&previous!=='free'&&!restoringFree)freeDesign=normalizeFreeDesign({...freeDesign,preset:'custom'});updateDimensions();update3DControls();ui.refresh();requestAnimationFrame(()=>{resizeViewer();resync3D({silent:true})});queueAutosave()},
  insertShape:(shape,color)=>{if(recovering)return;if(elements.length>=500){notify('Máximo 500 capas');return}const layer={type:'shape',shape,color,outlineColor:'#163b62',outlineWidth:1,rotation:0,x:.5,y:.5,...initialLayerSize(.3,1)};validateShape(layer);addHistory();elements.push(layer);selected=elements.length-1;draw();updateImageControls();notify('Figura añadida')},
  editShape:patch=>{const layer=elements[selected];if(layer?.type!=='shape'||layer.locked)return;const next={...layer,...patch};validateShape(next);addHistory();elements[selected]=next;draw()},
  align:action=>{const layer=elements[selected];if(!layer||layer.locked||layer.type==='glitter'){notify('Selecciona una capa desbloqueada para alinear');return}const {dx,dy}=alignedPosition(bounds(layer),canvas.width,canvas.height,action);addHistory();layer.x+=dx;layer.y+=dy;draw()}
@@ -703,7 +704,7 @@ creativeController=createCreativeControls({state:()=>({elements,selected,w:docum
  apply:patch=>{const current=elements[selected];if(!current||current.locked)throw Error('Selecciona una capa desbloqueada');const next={...current,...patch};for(const key of ['gradient','typography','crop','mask','repeat'])if(next[key]===null)delete next[key];validateCreative(next);const list=elements.map((e,i)=>i===selected?next:e);validatePatternBudget(list,documentWidth,documentHeight);addHistory();elements[selected]=next;draw();updateImageControls()},
  template:id=>{const template=CREATIVE_TEMPLATES[id];if(!template)throw Error('Plantilla no disponible');const additions=JSON.parse(JSON.stringify(template.elements));if(elements.length+additions.length>500)throw Error('Máximo 500 capas');enforceDocumentBudget([...elements,...additions]);addHistory();elements.push(...additions);selected=elements.length-1;draw();notify('Plantilla añadida como capas editables; diseño anterior conservado')}
 });
-sceneController=createMockupControls({state:()=>sceneSettings,context:()=>({THREE,scene,renderer,camera,controls,modelRoot,texture,physicalArtTexture}),notify,patch:(values,options={})=>{sceneSettings=normalizeMockup({...sceneSettings,...values});sceneController.refresh(options);queueAutosave()}});
+sceneController=createMockupControls({state:()=>sceneSettings,context:()=>({THREE,scene,renderer,camera,controls,modelRoot,texture,physicalArtTexture,fitView:fitTextileView}),notify,patch:(values,options={})=>{sceneSettings=normalizeMockup({...sceneSettings,...values});sceneController.refresh(options);queueAutosave()}});
 updateDimensions();updateRotationToolbar();
 async function startThree(){
  try{
@@ -715,7 +716,7 @@ async function startThree(){
  }catch(error){window.__fepBoot?.stage('three','failed',error);scene=null;renderer=null;$('viewerFallback').hidden=false;$('liveStatus').textContent='Solo 2D';$('liveStatus').parentElement.dataset.state='offline';notify('Visor 3D no disponible. El editor y la impresión 2D siguen disponibles.')}
  finally{update3DControls();stickerController?.sync();if(!stickerController&&$('stickerInsert'))$('stickerInsert').disabled=true}
 }
-function update3DControls(){for(const id of ['exportMockup','exportVideo']){$(id).disabled=!renderer||editorMode==='free'||recording||photoBusy||['loading','failed'].includes($('profileStatus').dataset.state);$(id).title=editorMode==='free'?'Disponible en Personalizar producto 3D':renderer?'':'Requiere visor 3D disponible'}}
+function update3DControls(){syncZoneUI();for(const id of ['exportMockup','exportVideo']){$(id).disabled=!renderer||editorMode==='free'||recording||photoBusy||['loading','failed'].includes($('profileStatus').dataset.state);$(id).title=editorMode==='free'?'Disponible en Personalizar producto 3D':renderer?'':'Requiere visor 3D disponible'}}
 
 
 // API interna de impresión: la plancha recibe el arte limpio y los codificadores de 300 ppp.
@@ -724,7 +725,7 @@ $('mirrorModeIndividual').checked=savedMirrorMode!=='normal' && savedMirrorMode!
 $('mirrorModeIndividual').addEventListener('change',()=>{try{localStorage.setItem('estudio-mirror-mode',getMirrorMode())}catch{}refreshIndividualPreview()});
 $('refreshMirrorPreview').onclick=refreshIndividualPreview;
 requestAnimationFrame(refreshIndividualPreview);
-window.__estudioPrintAPI={renderToExportCanvas, cmPrint, pngWithDpi, jpegWithDpi, pdfAtPhysicalSize, saveBlob};
+window.__estudioPrintAPI={renderZoneCanvas, renderToExportCanvas, cmPrint, pngWithDpi, jpegWithDpi, pdfAtPhysicalSize, saveBlob};
 
 for(const id of ['delete','applyText','quickCenter','quickContain','quickCover']){
  const button=$(id),handler=button.onclick;if(handler)button.onclick=ev=>{if(elements[selected]?.locked){notify('La capa está bloqueada.');return}handler(ev)};
@@ -753,14 +754,14 @@ const startupControls=[...document.querySelectorAll('button,input,select')].filt
 try{
  documentStore=await openDocumentStore();
  const current=await deadline(documentStore.read(),6000,'La lectura del guardado local no respondió');
- if(current){try{const prepared=await deadline(prepareProject(current.document),10000,'No terminó la recuperación de imágenes');if(prepared.data.elements.some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');applyPreparedProject(prepared);$('startScreen').close();showSaveStatus('saved')}catch(error){window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);notify('La copia actual no se pudo recuperar. Usa Restaurar versión anterior o abre un JSON; no se sobrescribió la copia.')}}
+ if(current){try{const prepared=await deadline(prepareProject(current.document),10000,'No terminó la recuperación de imágenes');if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');applyPreparedProject(prepared);$('startScreen').close();showSaveStatus('saved')}catch(error){window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);notify('La copia actual no se pudo recuperar. Usa Restaurar versión anterior o abre un JSON; no se sobrescribió la copia.')}}
  else autosaveStatus.textContent='Autoguardado local activo';
  autosave=createAutosave({store:documentStore,snapshot:projectSnapshot,status:showSaveStatus});
  if(window.__fepBoot?.stages.storage.state!=='failed')window.__fepBoot?.stage('storage','ready');
- const assetIDs=new WeakMap();let nextID=0;const fingerprint=()=>{const state=projectSnapshot();state.elements=elements.map(({img,data,...e})=>{if(img&&!assetIDs.has(img))assetIDs.set(img,++nextID);return {...e,asset:img?assetIDs.get(img):null}});return JSON.stringify(state)};let observed=fingerprint();queueAutosave=()=>{const next=fingerprint();if(next!==observed){observed=next;autosave.schedule()}};
+ const assetIDs=new WeakMap();let nextID=0;const fingerprint=()=>{const state=projectSnapshot();const light=list=>list.map(({img,data,...e})=>{if(img&&!assetIDs.has(img))assetIDs.set(img,++nextID);return {...e,asset:img?assetIDs.get(img):null}});state.elements=light(elements);if(state.freeDocument)state.freeDocument.elements=light(freeDocument.elements);if(state.productZones)for(const[p,g]of Object.entries(productZones))for(const[id,z]of Object.entries(g.zones))state.productZones[p].zones[id].elements=light(z.elements);return JSON.stringify(state)};let observed=fingerprint();queueAutosave=()=>{const next=fingerprint();if(next!==observed){observed=next;autosave.schedule()}};
  for(const event of ['input','change','click'])document.addEventListener(event,()=>queueMicrotask(queueAutosave));
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autosave.flush()});window.addEventListener('pagehide',()=>autosave.flush());
- $('restorePrevious').onclick=async()=>{try{const old=await documentStore.read('previous');if(!old){notify('Todavía no hay una versión anterior.');return}const before=JSON.stringify(projectSnapshot()),prepared=await prepareProject(old.document);if(prepared.data.elements.some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(before!==JSON.stringify(projectSnapshot()))throw Error('El documento cambió; vuelve a intentarlo');applyPreparedProject(prepared);await autosave.flush();notify('Versión anterior restaurada; la versión reemplazada queda como respaldo.')}catch(error){notify('No se pudo restaurar: '+error.message)}};
+ $('restorePrevious').onclick=async()=>{try{const old=await documentStore.read('previous');if(!old){notify('Todavía no hay una versión anterior.');return}const before=JSON.stringify(projectSnapshot()),prepared=await prepareProject(old.document);if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(before!==JSON.stringify(projectSnapshot()))throw Error('El documento cambió; vuelve a intentarlo');applyPreparedProject(prepared);await autosave.flush();notify('Versión anterior restaurada; la versión reemplazada queda como respaldo.')}catch(error){notify('No se pudo restaurar: '+error.message)}};
 }catch(error){window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);$('restorePrevious').title='Almacenamiento local no disponible'}
 finally{recovering=false;freeController?.ready();startupControls.forEach(([node,disabled])=>node.disabled=disabled);if(!autosave)$('restorePrevious').disabled=true;updateImageControls();glitterControls.switchMode(glitterControls.mode());update3DControls();stickerController?.sync();if(!stickerController&&$('stickerInsert'))$('stickerInsert').disabled=true}
 
@@ -768,7 +769,7 @@ function deadline(promise,ms,message){let timer;return Promise.race([promise,new
 
 async function loadStickers(){
  try{
-  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fase3f-20261110'),import('./src/sticker-renderer.js?v=fase3f-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fase3f-20261110');
+  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=zonas1-20261110'),import('./src/sticker-renderer.js?v=zonas1-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=zonas1-20261110');
   stickerController=uiModule.createStickerControls({selected:()=>elements[selected],dimensions:cmPrint,busy:()=>recovering,notify,insert:definition=>{
    if(recovering)return;if(elements.length>=500){notify('Máximo 500 capas');return}
    const layer={type:'sticker',stickerId:definition.id,stickerName:definition.name,x:.5,y:.5,...initialLayerSize(.28,.75),color:'#e6eef9',outlineColor:'#52697e',outlineWidth:definition.shapes[0].stroke?1.5:0,rotation:0,flipX:false,flipY:false,shadow:false,...(definition.textBox?{label:{text:'',size:14,color:'#172b4d'}}:{})};validateStickerLayer(layer);addHistory();elements.push(layer);selected=elements.length-1;loadSelectedTextIntoInputs();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Sticker añadido: '+definition.name)

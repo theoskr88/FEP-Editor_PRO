@@ -1,0 +1,46 @@
+
+> fep-editor-pro@0.9.5 test:package
+> node tests/package-browser.mjs
+
+{
+  archive: 'FEP_EDITOR_PRO_ZONAS1_PAGES.zip',
+  sha256: '92711c8332c57d719dd8658e15da7ef9ac978f556836db3706cacb9212f4f3df',
+  passed: true,
+  checks: [
+    'static imports from extracted ZIP',
+    'WebGL canvas',
+    'text editing',
+    'autosave across reload',
+    'no external requests',
+    'no missing dependencies',
+    'no JS errors',
+    'gold to free blue control',
+    'printable glitter raster',
+    'glitter state recovered from IndexedDB',
+    'six tabs and packaged local stylesheet',
+    'desktop previews visible across all tabs',
+    'all startup stages ready',
+    '80 packaged local stickers and associated text',
+    'mug pixels rendered',
+    'cold mobile startup and text insertion',
+    'packaged free design and shared layers',
+    'A3 landscape in millimetres',
+    'free shape PNG download',
+    'packaged vector conversion and physical cut SVG',
+    'local GLB profile loads from extracted ZIP',
+    'creative gradient applied to native vector from static ZIP',
+    'HD photo PNG from packaged renderer',
+    'local video encoder and WebM download from packaged dependencies',
+    'multipage A4 print job with exact physical page boxes from static ZIP',
+    'packaged shirt GLB and four independent documents',
+    'packaged all-zone PNG ZIP export',
+    'inactive face autosave recovery from actual static ZIP',
+    'consolidated four-zone A2 PDF at actual physical dimensions',
+    'packaged cushion GLB and both faces'
+  ]
+}
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

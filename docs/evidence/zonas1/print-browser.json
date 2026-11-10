@@ -1,0 +1,66 @@
+{
+  "passed": 12,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "batch copies pack into multiple A3 sheets with physical margins, gap, bleed and marks",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "PDF job downloads all three pages with exact A3 physical boxes; PNG and JPEG retain 300 ppp",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "mirror reflects the complete sheet exactly, including crop marks, without changing artwork",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "low resolution warning survives export and missing DPI remains explicit; bleed extends edges",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "PNG metadata preserves different physical resolution on each axis",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "oversize and bad spacing block export; failed arrangement preserves every placement",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "batch copies pack into multiple A3 sheets with physical margins, gap, bleed and marks",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "PDF job downloads all three pages with exact A3 physical boxes; PNG and JPEG retain 300 ppp",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "mirror reflects the complete sheet exactly, including crop marks, without changing artwork",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "low resolution warning survives export and missing DPI remains explicit; bleed extends edges",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "PNG metadata preserves different physical resolution on each axis",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "oversize and bad spacing block export; failed arrangement preserves every placement",
+      "passed": true
+    }
+  ],
+  "physicalPrintingTested": false
+}

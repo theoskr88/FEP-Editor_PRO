@@ -1,0 +1,174 @@
+{
+  "passed": 15,
+  "results": [
+    {
+      "mode": "desktop",
+      "product": "shirt",
+      "passed": true,
+      "name": "transparent flower inks into full curved cloth surface without a white rectangular patch",
+      "colors": {
+        "outside": [
+          197,
+          215,
+          207,
+          255
+        ],
+        "blankInsideZone": [
+          197,
+          215,
+          207,
+          255
+        ],
+        "centre": [
+          237,
+          193,
+          171,
+          255
+        ]
+      }
+    },
+    {
+      "mode": "desktop",
+      "product": "shirt",
+      "passed": true,
+      "name": "individual JPEG and physical PDF flatten transparency on white"
+    },
+    {
+      "mode": "desktop",
+      "product": "shirt",
+      "passed": true,
+      "name": "invalid hidden face import preserves the entire open project"
+    },
+    {
+      "mode": "desktop",
+      "product": "cushion",
+      "passed": true,
+      "name": "transparent flower inks into full curved cloth surface without a white rectangular patch",
+      "colors": {
+        "outside": [
+          197,
+          215,
+          207,
+          255
+        ],
+        "blankInsideZone": [
+          197,
+          215,
+          207,
+          255
+        ],
+        "centre": [
+          138,
+          102,
+          70,
+          255
+        ]
+      }
+    },
+    {
+      "mode": "desktop",
+      "product": "cushion",
+      "passed": true,
+      "name": "individual JPEG and physical PDF flatten transparency on white"
+    },
+    {
+      "mode": "desktop",
+      "product": "cushion",
+      "passed": true,
+      "name": "invalid hidden face import preserves the entire open project"
+    },
+    {
+      "mode": "mobile",
+      "product": "shirt",
+      "passed": true,
+      "name": "transparent flower inks into full curved cloth surface without a white rectangular patch",
+      "colors": {
+        "outside": [
+          197,
+          215,
+          207,
+          255
+        ],
+        "blankInsideZone": [
+          197,
+          215,
+          207,
+          255
+        ],
+        "centre": [
+          237,
+          193,
+          171,
+          255
+        ]
+      }
+    },
+    {
+      "mode": "mobile",
+      "product": "shirt",
+      "passed": true,
+      "name": "individual JPEG and physical PDF flatten transparency on white"
+    },
+    {
+      "mode": "mobile",
+      "product": "shirt",
+      "passed": true,
+      "name": "invalid hidden face import preserves the entire open project"
+    },
+    {
+      "mode": "mobile",
+      "product": "cushion",
+      "passed": true,
+      "name": "transparent flower inks into full curved cloth surface without a white rectangular patch",
+      "colors": {
+        "outside": [
+          197,
+          215,
+          207,
+          255
+        ],
+        "blankInsideZone": [
+          197,
+          215,
+          207,
+          255
+        ],
+        "centre": [
+          138,
+          102,
+          70,
+          255
+        ]
+      }
+    },
+    {
+      "mode": "mobile",
+      "product": "cushion",
+      "passed": true,
+      "name": "individual JPEG and physical PDF flatten transparency on white"
+    },
+    {
+      "mode": "mobile",
+      "product": "cushion",
+      "passed": true,
+      "name": "invalid hidden face import preserves the entire open project"
+    },
+    {
+      "mode": "fallback",
+      "product": "shirt",
+      "passed": true,
+      "name": "embedded glTF fallback preserves all mapped faces"
+    },
+    {
+      "mode": "fallback",
+      "product": "cushion",
+      "passed": true,
+      "name": "embedded glTF fallback preserves all mapped faces"
+    },
+    {
+      "mode": "noWebGL",
+      "passed": true,
+      "name": "independent zone editing and print remain available without 3D"
+    }
+  ]
+}

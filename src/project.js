@@ -1,9 +1,10 @@
-import {normalizeMockup} from './mockup-settings.js?v=fase3f-20261110';
-import {validateCreative,validatePatternBudget} from './creative.js?v=fase3f-20261110';
-import {profileById,profileVariant} from './product-profiles.js?v=fase3f-20261110';
-import {validateVector} from './vector.js?v=fase3f-20261110';
-import {normalizeFreeDesign,validateShape} from './free-design.js?v=fase3f-20261110';
-import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase3f-20261110';
+import {normalizeZoneBank} from './zones.js?v=zonas1-20261110';
+import {normalizeMockup} from './mockup-settings.js?v=zonas1-20261110';
+import {validateCreative,validatePatternBudget} from './creative.js?v=zonas1-20261110';
+import {profileById,profileVariant} from './product-profiles.js?v=zonas1-20261110';
+import {validateVector} from './vector.js?v=zonas1-20261110';
+import {normalizeFreeDesign,validateShape} from './free-design.js?v=zonas1-20261110';
+import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=zonas1-20261110';
 // Validate before changing any live editor state. Legacy V1 remains readable.
 export function validateProject(data){
  if(!data||typeof data!=='object'||![undefined,1,2].includes(data.version)||!Array.isArray(data.elements)||data.elements.length>500)throw Error('Formato o número de capas inválido');
@@ -46,6 +47,8 @@ export function normalizeProject(input){
  data.mirrorMode=data.mirrorMode==='normal'||data.mirrorMode==='none'||data.mirrorPrint===false?'normal':'espejo';
  // A glitter background is always below artwork, preserving relative order.
  data.elements=[...data.elements.filter(e=>e.type==='glitter'),...data.elements.filter(e=>e.type!=='glitter')];
+ if(data.freeDocument!==undefined){validateProject(data.freeDocument);data.freeDocument={width:data.freeDocument.width??data.width,height:data.freeDocument.height??data.height,elements:data.freeDocument.elements,freeDesign:normalizeFreeDesign(data.freeDocument.freeDesign)};for(const e of data.freeDocument.elements)if(e.type==='glitter')e.glitter=normalizeGlitter(e.glitter);if(data.mode==='free')data.freeDocument={width:data.width,height:data.height,elements:data.elements,freeDesign:data.freeDesign}}
+ const bank=normalizeZoneBank(data,doc=>{validateProject(doc);for(const e of doc.elements)if(e.type==='glitter')e.glitter=normalizeGlitter(e.glitter)});if(Object.keys(bank).length){data.productZones=bank;data.zoneSchema=1}else{delete data.productZones;delete data.zoneSchema}
  return {data,warnings};
 }
 

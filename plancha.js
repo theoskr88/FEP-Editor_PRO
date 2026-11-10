@@ -1,9 +1,9 @@
-import {packSheets,printQuality,printSettings,readPrintDpi,PRINT_LIMITS} from './src/print-layout.js?v=fase3f-20261110';
-import {pdfPrintJob} from './src/print-pdf.js?v=fase3f-20261110';
-import {imageInfo} from './src/assets.js?v=fase3f-20261110';
+import {packSheets,printQuality,printSettings,readPrintDpi,PRINT_LIMITS} from './src/print-layout.js?v=zonas1-20261110';
+import {pdfPrintJob} from './src/print-pdf.js?v=zonas1-20261110';
+import {imageInfo} from './src/assets.js?v=zonas1-20261110';
 /* Plancha de impresión — V0.9.0, independiente del visor 3D. */
 const el=id=>document.getElementById(id);
-const presets={A4:[21,29.7],Carta:[21.59,27.94],Oficio:[21.6,33],A3:[29.7,42]};
+const presets={A4:[21,29.7],Carta:[21.59,27.94],Oficio:[21.6,33],A3:[29.7,42],A2:[42,59.4]};
 let items=[],selected=-1,drag=null,objectCount=0,previewScale=1,currentPage=0,exportBusy=false,disabledBefore=[];
 const preview=el('sheetPreview'),pc=preview.getContext('2d');
 const fmt=n=>Number(n.toFixed(2)).toLocaleString('es-CL');
@@ -99,3 +99,6 @@ el('sheetPrint').onclick=async()=>{if(!checkExport())return;
 selectItem(-1);draw();
 
 el('sheetMirrorMode').checked=true;el('sheetMirrorMode').addEventListener('change',()=>msg('Espejo: '+(el('sheetMirrorMode').checked?'activado':'desactivado')+'. El lienzo sigue normal.'));
+
+// Atomic batch from independent editor zones. Artwork only; no scene pixels.
+window.__fepSheetAPI={async addZones(docs){if(exportBusy)throw Error('Espera a que termine la exportación');if(items.length+docs.length>PRINT_LIMITS.items)throw Error('Máximo 500 piezas');const unique=new Map(items.map(v=>[v.url,v.img.naturalWidth*v.img.naturalHeight])),pixels=docs.reduce((n,d)=>n+Math.round(d.width/2.54*300)*Math.round(d.height/2.54*300),0);if([...unique.values()].reduce((a,b)=>a+b,0)+pixels>PRINT_LIMITS.totalImagePixels)throw Error('El trabajo supera 80 megapíxeles');const prepared=[];exportBusy=true;setExportButtons(true);try{for(const doc of docs){const canvas=window.__estudioPrintAPI.renderZoneCanvas(doc),b=await blob(canvas,'image/png');canvas.width=canvas.height=1;prepared.push(await photo(b,doc.name,doc.width,doc.height))}for(const item of prepared){const p=findSpace(item);item.x=p.x;item.y=p.y;items.push(item)}selectItem(items.length-1);msg('Zonas incorporadas. Elige papel y ordena automáticamente.')}catch(e){for(const item of prepared)if(!items.includes(item))URL.revokeObjectURL(item.url);throw e}finally{exportBusy=false;setExportButtons(false)}}};

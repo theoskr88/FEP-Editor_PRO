@@ -1,0 +1,12 @@
+PASS floral false shirt
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.waitForFunction: Timeout 30000ms exceeded.
+    at Proxy.<anonymous> (/workspace/FEP-Editor_PRO/tests/navigation.mjs:12:272)
+    at /workspace/FEP-Editor_PRO/tests/zones-visual.mjs:3:2818 {
+  name: 'TimeoutError'
+}
+
+Node.js v24.22.1

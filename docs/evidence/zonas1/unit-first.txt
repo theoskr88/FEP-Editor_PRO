@@ -1,0 +1,134 @@
+
+> fep-editor-pro@0.9.5 test
+> node --test tests/*.test.mjs
+
+✔ legacy project remains readable (2.133053ms)
+✔ reject nullLayer (1.090098ms)
+✔ reject badSize (0.589942ms)
+✔ reject hugeSize (0.608149ms)
+✔ reject unknownLayer (0.145099ms)
+✔ reject remoteImage (0.250448ms)
+✔ reject badOpacity (1.798238ms)
+✔ reject badPosition (0.134514ms)
+✔ reject futureVersion (0.209927ms)
+✔ reject tooMany (0.685256ms)
+✔ palette pink (0.512304ms)
+✔ palette gold (0.147333ms)
+✔ palette silver (0.074853ms)
+✔ palette blue (0.100292ms)
+✔ palette multi (0.093952ms)
+✔ palette custom (0.078448ms)
+✔ glitter controls have finite limits (0.149636ms)
+✔ deterministic printable and material textures differ (211.603302ms)
+✔ gold then a free blue color is authoritative and becomes custom (0.219942ms)
+✔ quick palettes supply their own synchronized color (0.117077ms)
+✔ legacy named palettes preserve their formerly effective color (0.264339ms)
+✔ legacy V1/V2 migrate printable and physical settings without losing artwork (1.001343ms)
+✔ new schema roundtrips independent material, draft and printable layer colors (0.356759ms)
+✔ reject future glitter schema without guessing color semantics (0.267734ms)
+✔ adaptive maps have fixed desktop and touch memory bounds (0.109686ms)
+✔ finish properties are finite and matte is rougher than gloss (0.207563ms)
+✔ irregular printable flakes use paths instead of square particle fills (60.081985ms)
+✔ normal and roughness maps align identical deterministic flake geometry (51.92589ms)
+✔ LRU tile reuse is stable and evicts allocated canvases at its cap (34.632706ms)
+✔ creative styles, masks and crop validate without mutating legacy art (2.501971ms)
+✔ curved glyph layout has finite positions and visible geometric arc (1.066992ms)
+✔ repeat budget rejects excessive density before allocating tiles (0.380525ms)
+✔ professional templates are independent native editable layers and roundtrip (3.941937ms)
+✔ physical formats and unit roundtrips preserve exact centimetres (2.360928ms)
+✔ legacy projects use product mode; free settings roundtrip without altering art (5.587974ms)
+✔ malformed page, zoom and guides fail before document replacement (0.391772ms)
+✔ editable shapes validate and rotated bounds align geometrically (0.44387ms)
+✔ ruler labels represent physical units and stay bounded at extreme zoom (2.447869ms)
+✔ layout fits wide and tall art without changing its physical aspect (1.63442ms)
+✔ four recipes preserve free colors except explicit holographic multicolor (0.867511ms)
+✔ physical metallic and holographic properties stay out of ordinary glitter (0.279693ms)
+✔ JSON V2 roundtrips printable and physical recipes independently (1.38303ms)
+✔ thumbnail fits an image in 48px and never mutates layer data (0.500226ms)
+✔ metallic and holographic recipes honor matte instead of silently forcing gloss (0.160152ms)
+✔ mockup defaults preserve original camera, lights and legacy background (1.796975ms)
+✔ invalid scene values fail before replacing a project (1.581249ms)
+✔ scene and video settings roundtrip without changing artwork or 270 degree position (3.028677ms)
+✔ deterministic video spans an exact full turn with timed frames and fallback support (0.627128ms)
+✔ packing seven full sized mug designs uses three A4 pages and never scales source (6.363095ms)
+✔ packing reserves physical bleed, crop marks and gap on every page (0.518163ms)
+✔ 90 degree optimization retains source rotation and dimensions, and oversize is atomic (0.989835ms)
+✔ print quality blocks overlap, insufficient separation, edges and invalid paper (0.250529ms)
+✔ effective source resolution tracks rotations; absent DPI is a warning, not a size claim (0.197809ms)
+✔ multipage PDF has exact physical boxes, independent image streams and correct xref offsets (1.394628ms)
+✔ print image preflight allows A3 at 300 ppp while original editor limits remain unchanged (0.422378ms)
+✔ heterogeneous packing keeps every piece and never overlaps for seeded workloads (8.653587ms)
+✔ print physical resolution preserves separate X/Y density and rejects absent or zero density (0.484332ms)
+✖ catalogue retains the eight approved profiles and adds one licensed original GLB (2.082877ms)
+✔ original GLB has exact physical body bounds, self contained buffers and calibrated UV (0.607278ms)
+✔ legacy and GLB product documents preserve valid material variants atomically (1.43565ms)
+✔ legacy finish migration preserves art without mutating input (2.92482ms)
+✔ normalizes printable glitter under artwork and retains V2 settings (0.263938ms)
+✔ image dimensions preflight rejects huge allocation and corrupt headers (0.744184ms)
+✔ corrupt embedded image rejects preparation without mutating input (1.026321ms)
+✔ invalid material payload rejects before state application (0.846048ms)
+✔ autosave debounces to latest snapshot and reports failure (25.186747ms)
+✔ autosave serializes in-flight writes to preserve backup ordering (0.50284ms)
+✔ 80 stable local vectors, 16 in each of five categories, including required shapes (1.149628ms)
+✔ search handles accents, categories, unknown and empty results (0.718506ms)
+✔ internal SVG previews contain no remote sources or executable markup (0.508388ms)
+✔ sticker schema rejects malformed styles and text atomically (0.775822ms)
+✔ rotated sticker bounds track transformed dimensions and preserve center (0.241525ms)
+✔ V1/V2 and magic migration preserve older artwork alongside sticker data (1.281086ms)
+✔ catalog lookup rejects unknown IDs before any project state changes (1.357842ms)
+✔ valid project roundtrip normalizes sticker display names without raster assets (0.438443ms)
+✔ boolean union, subtraction and intersection conserve analytic rectangle area (4.833614ms)
+✔ offset expands outer boundaries and shrinks inner holes with physical millimetres (2.217792ms)
+✔ vector transform and save/reopen preserve geometry, holes and role (2.67404ms)
+✔ font outlines retain counters; unavailable glyphs reject explicitly (1.010847ms)
+✔ SVG has physical units, native paths and isolated cut group without photos (0.678395ms)
+✔ invalid vector data is rejected before document replacement (4.954367ms)
+ℹ tests 81
+ℹ suites 0
+ℹ pass 80
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 863.937169
+
+✖ failing tests:
+
+test at tests/profiles.test.mjs:3:1
+✖ catalogue retains the eight approved profiles and adds one licensed original GLB (2.082877ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'mug',
+      'tumbler',
+  -   'shirt',
+      'tote',
+      'notebook',
+      'mousepad',
+  -   'cushion',
+      'keychain'
+    ]
+  
+      at TestContext.<anonymous> (file:///workspace/FEP-Editor_PRO/tests/profiles.test.mjs:3:101)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'mug', 'tumbler', 'tote', 'notebook', 'mousepad', 'keychain' ],
+    expected: [
+      'mug',      'tumbler',
+      'shirt',    'tote',
+      'notebook', 'mousepad',
+      'cushion',  'keychain'
+    ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

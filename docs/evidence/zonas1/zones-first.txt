@@ -1,0 +1,35 @@
+
+> fep-editor-pro@0.9.5 test:zones
+> node tests/zones-browser.mjs
+
+PASS zones desktop shirt independent canvases, dimensions, layers and curved UV materials
+PASS zones desktop shirt copy appends independent layers with physical size and per-zone undo
+PASS zones desktop shirt real before-after presentation, front/back rotation and transparent print
+PASS zones desktop shirt all-zone ZIP contains correct PNGs, independent physical dimensions and no scene
+PASS zones desktop shirt autosave, JSON and inactive face recovery are identical
+PASS zones desktop shirt multi-view HD ZIP and real 360 video include all mapped faces
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+1 !== 0
+
+    at file:///workspace/FEP-Editor_PRO/tests/zones-browser.mjs:5:203
+    at async check (file:///workspace/FEP-Editor_PRO/tests/zones-browser.mjs:3:252)
+    at async file:///workspace/FEP-Editor_PRO/tests/zones-browser.mjs:5:2 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 1,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

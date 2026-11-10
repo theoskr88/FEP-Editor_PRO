@@ -1,0 +1,136 @@
+{
+  "passed": 26,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "shirt independent canvases, dimensions, layers and curved UV materials",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "shirt copy appends independent layers with physical size and per-zone undo",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "shirt real before-after presentation, front/back rotation and transparent print",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "shirt all-zone ZIP contains correct PNGs, independent physical dimensions and no scene",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "shirt autosave, JSON and inactive face recovery are identical",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "shirt multi-view HD ZIP and real 360 video include all mapped faces",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "cushion independent canvases, dimensions, layers and curved UV materials",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "cushion copy appends independent layers with physical size and per-zone undo",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "cushion real before-after presentation, front/back rotation and transparent print",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "cushion all-zone ZIP contains correct PNGs, independent physical dimensions and no scene",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "cushion autosave, JSON and inactive face recovery are identical",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "cushion multi-view HD ZIP and real 360 video include all mapped faces",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "consolidated sheet keeps zone sizes, mirror and free mode leaves stored faces unchanged",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "shirt independent canvases, dimensions, layers and curved UV materials",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "shirt copy appends independent layers with physical size and per-zone undo",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "shirt real before-after presentation, front/back rotation and transparent print",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "shirt all-zone ZIP contains correct PNGs, independent physical dimensions and no scene",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "shirt autosave, JSON and inactive face recovery are identical",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "shirt multi-view HD ZIP and real 360 video include all mapped faces",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "cushion independent canvases, dimensions, layers and curved UV materials",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "cushion copy appends independent layers with physical size and per-zone undo",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "cushion real before-after presentation, front/back rotation and transparent print",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "cushion all-zone ZIP contains correct PNGs, independent physical dimensions and no scene",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "cushion autosave, JSON and inactive face recovery are identical",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "cushion multi-view HD ZIP and real 360 video include all mapped faces",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "consolidated sheet keeps zone sizes, mirror and free mode leaves stored faces unchanged",
+      "passed": true
+    }
+  ],
+  "realDevicesTested": false
+}

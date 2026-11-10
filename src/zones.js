@@ -1,0 +1,17 @@
+// Optional V2 extension. One editor viewport; independent documents and GPU maps.
+export const ZONE_PROFILES={
+ shirt:[{id:'front',name:'Frente',cm:[30,35],mesh:'Zone_front',surface:[52,70],center:[.5,.56],camera:[0,.5,5.7]},{id:'back',name:'Espalda',cm:[30,35],mesh:'Zone_back',surface:[52,70],center:[.5,.56],camera:[0,.5,-5.7]},{id:'leftSleeve',name:'Manga izquierda',cm:[12,10],mesh:'Zone_leftSleeve',surface:[48,22],center:[.5,.5],camera:[3.8,1,4.8]},{id:'rightSleeve',name:'Manga derecha',cm:[12,10],mesh:'Zone_rightSleeve',surface:[48,22],center:[.5,.5],camera:[-3.8,1,4.8]}],
+ cushion:[{id:'a',name:'Lado A',cm:[28,28],mesh:'Zone_a',surface:[40,40],center:[.5,.5],camera:[0,.5,5.7]},{id:'b',name:'Lado B',cm:[28,28],mesh:'Zone_b',surface:[40,40],center:[.5,.5],camera:[0,.5,-5.7]}]
+};
+export const zonesFor=id=>ZONE_PROFILES[id]||[];
+export const zoneCanvasWidth=(w,h)=>Math.min(1200,Math.round(4096*w/h));
+export const emptyZones=product=>({active:zonesFor(product)[0].id,zones:Object.fromEntries(zonesFor(product).map(z=>[z.id,{width:z.cm[0],height:z.cm[1],elements:[]}]))});
+export function normalizeZoneBank(data,validate){
+ if(data.zoneSchema!==undefined&&data.zoneSchema!==1)throw Error('Versión de zonas no compatible');
+ const input=data.productZones;if(input!==undefined&&(!input||typeof input!=='object'||Array.isArray(input)))throw Error('Zonas inválidas');const bank={};
+ for(const product of Object.keys(input||{})){if(!Object.hasOwn(ZONE_PROFILES,product))throw Error('Producto de zonas no disponible');const group=input[product];if(!group||!group.zones||typeof group.zones!=='object'||Array.isArray(group.zones))throw Error('Documentos de zona inválidos');const defs=zonesFor(product),ids=defs.map(z=>z.id);if(!ids.includes(group.active)||Object.keys(group.zones).some(id=>!ids.includes(id)))throw Error('Zona no disponible');const normalized=emptyZones(product);normalized.active=group.active;for(const def of defs){const doc=group.zones[def.id];if(doc){validate(doc);normalized.zones[def.id]={width:doc.width??def.cm[0],height:doc.height??def.cm[1],elements:doc.elements}}}bank[product]=normalized}
+ if(data.mode!=='free'&&zonesFor(data.product).length){const group=bank[data.product]??emptyZones(data.product);group.zones[group.active]={width:data.width,height:data.height,elements:data.elements};bank[data.product]=group}
+ return bank;
+}
+export function allProjectLayers(data){return [...data.elements,...(data.mode!=='free'&&data.freeDocument?data.freeDocument.elements:[]),...Object.entries(data.productZones||{}).flatMap(([product,g])=>Object.entries(g.zones).filter(([id])=>!(data.mode!=='free'&&product===data.product&&id===g.active)).flatMap(([,z])=>z.elements))]}
+export function copyZoneLayers(source,target,clone){return clone(source.elements).map(e=>{if(e.type==='glitter')return e;const sx=source.width/target.width,sy=source.height/target.height;if(e.type==='text'){const factor=sx*zoneCanvasWidth(target.width,target.height)/zoneCanvasWidth(source.width,source.height);e.size*=factor;if(e.typography){e.typography.tracking*=factor;e.typography.strokeWidth*=factor;}if(e.size>500)throw Error('El texto copiado supera el tamaño permitido en la zona de destino')}else{const fw=e.widthFrac??e.scale??.38,fh=e.heightFrac??fw*source.width/source.height*((e.img?.naturalHeight||1)/(e.img?.naturalWidth||1));e.widthFrac=fw*sx;e.heightFrac=fh*sy;delete e.scale;if(e.widthFrac>3||e.heightFrac>3)throw Error('El diseño es demasiado grande para esa zona. Reduce sus medidas antes de copiar.')}return e})}

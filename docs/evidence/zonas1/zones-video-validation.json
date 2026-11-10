@@ -1,0 +1,38 @@
+{
+  "passed": 2,
+  "results": [
+    {
+      "product": "shirt",
+      "passed": true,
+      "frames": 45,
+      "fps": 15,
+      "duration": "2.933000",
+      "size": [
+        570,
+        681
+      ],
+      "frontBackSha256": [
+        "6d24c02efc9e7e6d91254cee440d2cb7d7926ae5ca381e9b6237d29f8a806107",
+        "78f3860f1df69616654d348a59ad349ab0a9a4948000c0da6f81dc87ebd606ee"
+      ],
+      "sha256": "773b0ebff3eb0b9861c8d4838921acefbcd17d4745d3a0ace98020d72a24483a"
+    },
+    {
+      "product": "cushion",
+      "passed": true,
+      "frames": 45,
+      "fps": 15,
+      "duration": "2.933000",
+      "size": [
+        570,
+        681
+      ],
+      "frontBackSha256": [
+        "a5c724a9cba660ed10f0295739870e43e975f531997807638acb101bfe23c415",
+        "09ede0b4540af16d9e02acf1dae252b6c968758d39ef1b335abd3fcb367d5bd4"
+      ],
+      "sha256": "d49ed749bf3bbf132afb731fcc9045f80973b1beca815ddd3d35d84c6245dbb7"
+    }
+  ],
+  "hardwarePerformanceCertified": false
+}

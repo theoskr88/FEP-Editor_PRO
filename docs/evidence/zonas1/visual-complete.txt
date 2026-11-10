@@ -1,0 +1,8 @@
+PASS floral false shirt
+PASS atomic hidden face false shirt
+PASS floral false cushion
+PASS atomic hidden face false cushion
+PASS floral true shirt
+PASS atomic hidden face true shirt
+PASS floral true cushion
+PASS atomic hidden face true cushion

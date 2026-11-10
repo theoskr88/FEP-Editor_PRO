@@ -1,0 +1,15 @@
+{
+  "passed": 2,
+  "results": [
+    {
+      "mode": "desktop",
+      "passed": true,
+      "name": "late image decode is cancelled at zone switch and subsequent import lands only in selected face"
+    },
+    {
+      "mode": "mobile",
+      "passed": true,
+      "name": "late image decode is cancelled at zone switch and subsequent import lands only in selected face"
+    }
+  ]
+}

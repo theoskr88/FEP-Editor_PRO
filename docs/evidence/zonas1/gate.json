@@ -1,0 +1,26 @@
+{
+  "phase": "zonas1",
+  "base": "4b78e28",
+  "gate": "passed locally",
+  "reports": {
+    "acceptance.json": 20,
+    "zones-browser.json": 26,
+    "zones-visual.json": 15,
+    "zones-migration.json": 6,
+    "zones-race.json": 2,
+    "free-zone-recovery.json": 2,
+    "profiles-browser.json": 4,
+    "print-browser.json": 12,
+    "interface/interface-browser.json": 24,
+    "boot.json": 8,
+    "zones-video-validation.json": 2,
+    "zones-pdf-validation.json": 1
+  },
+  "unitTests": 89,
+  "staticPackageChecks": 30,
+  "testedRuntimeSha256": "49d063115dcd3871216684b68bc72c29d69a70827c33ad6f2ab3c68584a3a1f2",
+  "deployed": false,
+  "physicalDevicesTested": false,
+  "physicalPrintingTested": false,
+  "hardwarePlotterTested": false
+}

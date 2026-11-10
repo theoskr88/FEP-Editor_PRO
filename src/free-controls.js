@@ -1,4 +1,4 @@
-import {fromCm,toCm,pageSize,rulerTicks,SHAPE_NAMES} from './free-design.js?v=fase3f-20261110';
+import {fromCm,toCm,pageSize,rulerTicks,SHAPE_NAMES} from './free-design.js?v=zonas1-20261110';
 export function createFreeControls({state,settings,format,switchMode,insertShape,editShape,align,notify}){
  const get=id=>document.getElementById(id),dialog=get('startScreen');let guideSignature='',lastShape;
  function close(){dialog.close();document.getElementById('tab-product').focus()}

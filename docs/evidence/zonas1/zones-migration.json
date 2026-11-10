@@ -1,0 +1,41 @@
+{
+  "passed": 6,
+  "results": [
+    {
+      "mode": "desktop",
+      "product": "shirt",
+      "passed": true,
+      "name": "legacy JSON retains text, image, sticker, glitter, physical dimensions and recovers all faces"
+    },
+    {
+      "mode": "desktop",
+      "product": "cushion",
+      "passed": true,
+      "name": "legacy JSON retains text, image, sticker, glitter, physical dimensions and recovers all faces"
+    },
+    {
+      "mode": "mobile",
+      "product": "shirt",
+      "passed": true,
+      "name": "legacy JSON retains text, image, sticker, glitter, physical dimensions and recovers all faces"
+    },
+    {
+      "mode": "mobile",
+      "product": "cushion",
+      "passed": true,
+      "name": "legacy JSON retains text, image, sticker, glitter, physical dimensions and recovers all faces"
+    },
+    {
+      "mode": "model-error",
+      "product": "shirt",
+      "passed": true,
+      "name": "failed GLB and glTF retain independent face editing and real PNG download"
+    },
+    {
+      "mode": "model-error",
+      "product": "cushion",
+      "passed": true,
+      "name": "failed GLB and glTF retain independent face editing and real PNG download"
+    }
+  ]
+}

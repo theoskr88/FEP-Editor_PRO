@@ -1,0 +1,2 @@
+PASS decoded 45-frame complete orbit: shirt
+PASS decoded 45-frame complete orbit: cushion

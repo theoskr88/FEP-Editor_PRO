@@ -1,0 +1,6 @@
+{
+  "passed": 1,
+  "tool": "Poppler pdfinfo",
+  "pdfinfo": "Custom Metadata: no\nMetadata Stream: no\nTagged:          no\nUserProperties:  no\nSuspects:        no\nForm:            none\nJavaScript:      no\nPages:           2\nEncrypted:       no\nPage size:       1190.55 x 1683.78 pts (A2)\nPage rot:        0\nFile size:       461491 bytes\nOptimized:       no\nPDF version:     1.4\n",
+  "physicalPrintingTested": false
+}

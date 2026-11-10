@@ -1,0 +1,6 @@
+PASS migration false shirt
+PASS migration false cushion
+PASS migration true shirt
+PASS migration true cushion
+PASS absent model shirt
+PASS absent model cushion
