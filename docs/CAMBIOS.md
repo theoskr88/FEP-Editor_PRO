@@ -1,3 +1,9 @@
+# Fase 2A — glitter
+
+La entrega actual parte de Fase 1 en `60c2781`, en rama `mejora/glitter-fase2a`. Cambios de color, material, compatibilidad, pruebas y procedimiento de reversión: [GLITTER_FASE2A.md](GLITTER_FASE2A.md). Resultados actuales: [RESULTADOS.md](RESULTADOS.md). Sin despliegues.
+
+---
+
 # Consolidación Fase 1
 
 Base verificada: `0b5633e000f6062300ac3f6e75f9768249a14b55`, rama remota `auditoria/editor-v095`. Rama de trabajo: `consolidacion/fase-1`. No se incorporó la primera entrega alternativa de este chat; se preservó fuera del checkout antes de usar la base autorizada. Sin despliegues.

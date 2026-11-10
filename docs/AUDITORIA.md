@@ -1,3 +1,5 @@
+> Actualización Fase 2A: color, destinos independientes, caché y material glitter se describen en [GLITTER_FASE2A.md](GLITTER_FASE2A.md); resultados actuales en [RESULTADOS.md](RESULTADOS.md). La tabla inferior conserva contexto de Fase 1.
+
 # Auditoría del editor existente
 
 ## Procedencia y alcance

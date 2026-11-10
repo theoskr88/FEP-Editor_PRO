@@ -15,7 +15,7 @@ let elements=[],selected=-1,dragging=false,resizing=false,resizeStart=null,histo
 const textureCanvas=document.createElement('canvas');
 const textureCtx=textureCanvas.getContext('2d');
 const glitterResolution=glitterTextureSize({touch:navigator.maxTouchPoints>0,deviceMemory:navigator.deviceMemory??8,viewportWidth:window.innerWidth});
-const glitterTiles=createGlitterCache({...glitterResolution,limit:glitterResolution.cacheEntries});
+const glitterTiles=createGlitterCache({width:1024,height:512,limit:glitterResolution.cacheEntries});
 const notify=s=>{$('notice').textContent=s};
 const dimensions={mug:[20,8.5],tumbler:[23,21],shirt:[30,35],tote:[28,30],notebook:[15,21],mousepad:[22,18],cushion:[28,28],keychain:[4,4]};
 function setDimForProduct(){let p=$('product').value, d=dimensions[p];if(!d)return;
@@ -583,7 +583,7 @@ $('exportMockup').onclick=()=>{
 };
 
 // V0.8: herramientas de exportación y presentación sin servidor ni pagos.
-$('viewerBackground').addEventListener('change',e=>scene.background=new THREE.Color(e.target.value));
+$('viewerBackground').addEventListener('change',e=>{if(scene)scene.background=new THREE.Color(e.target.value)});
 $('showGuides').addEventListener('change',()=>{preferredGuides=$('showGuides').checked;buildModel()});
 $('exportJpg').addEventListener('click',async()=>{
   try{const {w,h}=cmPrint(),c=renderToExportCanvas(getMirrorMode()),raw=await canvasBlob(c,'image/jpeg',.97);

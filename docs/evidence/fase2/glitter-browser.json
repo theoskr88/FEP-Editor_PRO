@@ -1,0 +1,170 @@
+{
+  "passed": 33,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "all glitter controls stay in the left tool column",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "gold → #1249FF turns preview blue; applying changes only selected layer",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "layer visibility, opacity, lock, duplicate and undo remain independent",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "physical blue changes mockup only, excluding material from PNG/JPEG/PDF",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "palettes synchronize color; resets and mode switches never apply a draft to another layer",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "HOLA and a photo stay above printable glitter in canvas and export",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "stable rendering and bounded texture cache; lighting changes without regenerating maps",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "JSON and autosave roundtrip material, draft and layer colors independently",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "image added after export updates artwork and physical texture",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "20×9 cm pieces keep scale and browser print receives a decoded sheet",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "no errors or external dependencies; editor still usable without WebGL",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "all glitter controls stay in the left tool column",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "gold → #1249FF turns preview blue; applying changes only selected layer",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "layer visibility, opacity, lock, duplicate and undo remain independent",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "physical blue changes mockup only, excluding material from PNG/JPEG/PDF",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "palettes synchronize color; resets and mode switches never apply a draft to another layer",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "HOLA and a photo stay above printable glitter in canvas and export",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "stable rendering and bounded texture cache; lighting changes without regenerating maps",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "JSON and autosave roundtrip material, draft and layer colors independently",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "image added after export updates artwork and physical texture",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "20×9 cm pieces keep scale and browser print receives a decoded sheet",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "no errors or external dependencies; editor still usable without WebGL",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "all glitter controls stay in the left tool column",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "gold → #1249FF turns preview blue; applying changes only selected layer",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "layer visibility, opacity, lock, duplicate and undo remain independent",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "physical blue changes mockup only, excluding material from PNG/JPEG/PDF",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "palettes synchronize color; resets and mode switches never apply a draft to another layer",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "HOLA and a photo stay above printable glitter in canvas and export",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "stable rendering and bounded texture cache; lighting changes without regenerating maps",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "JSON and autosave roundtrip material, draft and layer colors independently",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "image added after export updates artwork and physical texture",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "20×9 cm pieces keep scale and browser print receives a decoded sheet",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "no errors or external dependencies; editor still usable without WebGL",
+      "passed": true
+    }
+  ]
+}

@@ -1,45 +1,50 @@
-# Resultados — consolidación Fase 1
+# Resultados — Fase 2A: glitter
 
-Base: `0b5633e000f6062300ac3f6e75f9768249a14b55`, rama `auditoria/editor-v095`. Trabajo: `consolidacion/fase-1`. Entorno Linux con Node 24, Python 3 y Chromium `/usr/bin/chromium`, WebGL mediante SwiftShader. Fecha de revisión: 10 de noviembre de 2026. No hubo despliegues.
+Base oficial: `60c27819008984db124046cec669a8c87f24c9c3`, rama `consolidacion/fase-1`; ZIP fuente verificado contra los archivos versionados. Rama actual: `mejora/glitter-fase2a`. Se conserva el mismo editor. Linux, Node 24, Python 3 y Chromium `/usr/bin/chromium` con SwiftShader. No hubo despliegues ni cambios en FEP Market.
 
-## Línea base y verificación posterior
+## Tareas y evidencia
 
-| Comando | Antes | Después | Alcance |
-|---|---:|---:|---|
-| `npm ci` | Instalación correcta | Dependencias sin cambios | Three 0.170.0 y playwright-core 1.58.2, lockfile conservado |
-| `npm test` | 18 aprobadas | 25 aprobadas | Validación, límites, migración, guardado diferido y orden de escrituras |
-| `npm run test:regressions` | 3 aprobadas | 3 aprobadas | Arrastre sin salto y separación de ambas modalidades glitter |
-| `npm run test:browser` | 29 aprobadas | 29 aprobadas | Escritorio, viewport táctil y sin WebGL; capas, JSON, glitter y rotación real de plancha |
-| `npm run test:reliability` | No existía | 16 escenarios aprobados | Persistencia, recuperación, importación, impresión, WebGL, video y móvil |
-| `npm run test:package` | No existía | 1 escenario, 7 verificaciones | ZIP extraído servido con HTTP estático, sin inyectar módulos de pruebas ni solicitar CDN |
+| Tarea | Resultado | Qué verifica |
+|---|---:|---|
+| `npm test` | 36 aprobadas | 25 previas más 11 de color, migración V1/V2, esquema nuevo, determinismo, geometría irregular, mapas y caché acotada |
+| `npm run test:regressions` | 3 aprobadas | Arrastre, material excluido del raster, glitter imprimible incluido |
+| `npm run test:browser` | 29 aprobadas | Capas, JSON, ocho productos, rotación real de plancha, escritorio/táctil/sin WebGL |
+| `npm run test:reliability` | 16 escenarios aprobados | Importación atómica, persistencia/respaldo, medidas/espejo, WebGL, PNG mockup y WebM con material físico glitter activo |
+| `npm run test:glitter` | 33 escenarios UI + 3 comprobaciones de archivos | Color y capa en tres modos; PNG/JPEG/PDF descargados realmente y decodificados |
+| `npm run package` | Pendiente de empaquetado final | ZIP de Pages y ZIP fuente separados, sin despliegue |
+| `npm run test:package` | Pendiente de ejecución | Se servirá el ZIP extraído sin instrumentación de pruebas |
 
-Estos números describen escenarios y pruebas, no herramientas terminadas ni certificación comercial. Los comandos fallan con código de salida no nulo ante una aserción fallida; los informes de cada ejecución se guardan al terminar. Un intento inicial de la nueva prueba usó nombres de botones incorrectos y terminó por timeout; se corrigió el selector de prueba y se ejecutó completa. No se ocultó ni deshabilitó ninguna aserción para aprobar.
+Los escenarios de UI se ejecutan en escritorio 1500×980, viewport táctil 390×844 y escritorio con WebGL deshabilitado. Las 3 comprobaciones de archivos son en escritorio. Los resultados combinan pruebas y escenarios de integración; no equivalen a funciones terminadas o certificación comercial. No se deshabilitaron aserciones de las suites anteriores.
 
-## Evidencia funcional
+Log de tareas: `evidence/fase2/tasks.log`. Informes estructurados: `evidence/fase2/glitter-browser.json`, `evidence/fase2/print-files.json`, `evidence/browser.json`, `evidence/regressions.json`, `evidence/fase1-reliability.json`. La prueba del ZIP genera `evidence/fase2/package.json` con el SHA-256 exacto probado. Las suites conservan algunos nombres históricos de salida de Fase 1; corresponden a la ejecución actual. Para evidencia histórica exacta usar el ZIP de Fase 1 conservado.
 
-- Migración de JSON V1 con acabado antiguo: ocho productos conservados, arte intacto, acabado normal, aviso no bloqueante; sin controles/handlers/material de revelado por calor.
-- Importación PNG/JPEG/WebP decodificada antes de añadir capas. Imagen corrupta, cabecera de 50000 px y proyecto con un activo válido seguido de otro corrupto no cambian el documento. No se redimensionan automáticamente los activos.
-- Cambiar tamaño de imagen, añadir texto, glitter y posición: recuperación exacta del snapshot, incluidos los parámetros del producto, al recargar el mismo origen. Un campo de medida a medio escribir no invalida el documento guardado. Se comprueban copia anterior, copia actual dañada, cuota agotada y almacenamiento deshabilitado. Guardar JSON sigue funcionando cuando falla IndexedDB.
-- Texto `HOLA`: cada canal de cada píxel de la salida espejo coincide con su posición horizontalmente reflejada. El lienzo/textura y el raster del visor mantienen la orientación normal al alternar espejo.
-- PNG: dimensiones en píxeles de 20×9 cm a 300 ppp y pHYs=11811 píxeles/metro; JPEG: unidades JFIF en pulgadas y 300×300 ppp; PDF: MediaBox=20×9 cm convertido a puntos. No se confunde generación de archivo con prueba física.
-- Plancha: dos artes de 20×9 cm caben en A4 con margen 0,5 cm y separación 0,3 cm, sin variar medidas; colisión y salida de márgenes se rechazan. Espejo verificado píxel a píxel sobre la hoja completa una sola vez. La prueba previa verifica rojo/azul tras rotación de 90°.
-- Textura de taza: el texto editado cambia tanto el canvas como los píxeles WebGL renderizados. Tras exportar PNG, reabrir JSON, generar video y volver a editar, conserva la asignación de textura. PNG mockup con contenido y WebM con datos, decodificación y dimensiones de video válidas. La prueba no certifica calidad comercial de cada fotograma.
-- Cámara frontal, iluminación y geometrías iniciales conservadas; 270° por defecto. A ese ángulo un elemento puede estar en la cara lateral/posterior: Ver elemento seleccionado permite verlo sin cambiar el ángulo del arte. Se corrigió el signo usado por ese botón para apuntar al elemento real.
-- Viewport táctil 390×844: botones de texto, lienzo y vista frontal alcanzables con tap y scroll; herramientas con scroll independiente y foco visible. No hay dispositivos físicos conectados.
+## Prueba decisiva y aislamiento
 
-## Archivos de evidencia
+- Seleccionar Dorado sincroniza el selector a `#d5ab42`. Cambiarlo a `#1249FF` activa Personalizado y el promedio de píxeles de la miniatura pasa a azul. Antes de Aplicar, el documento conserva ambas capas; después cambia solo la seleccionada. Undo/Redo conserva las demás. Comprobado en los tres modos de navegador.
+- El material físico tiene su propio estado. Su cambio a azul produce píxeles azules en WebGL, sin cambiar los hashes de PNG/JPEG/PDF del arte. Sin WebGL se mantienen edición, miniatura y exportación 2D; no se afirma que el material se renderice allí.
+- Los parámetros de material, borrador imprimible y capa aplicada pueden ser diferentes. Se conservan al guardar/abrir JSON y al recuperar IndexedDB, tanto en modo imprimible como en modo material. Aplicar queda deshabilitado al recuperar modo material.
+- Ocultar, bloquear, duplicar, opacidad y Undo/Redo de glitter no cambian otra capa. Restablecer en cada destino no modifica el otro. Texto HOLA y fotografía sintética rojo/azul quedan por encima de la base y se comprueban sus píxeles en exportación. Una segunda imagen verde añadida tras exportar actualiza el arte y sigue asignada al material de impresión del modelo.
+- La escena se puede girar sin regenerar mapas ni mosaicos de la caché. Se comprueban límites de resolución y entradas. El patrón imprimible se conserva al repintar y no incorpora aleatoriedad por fotograma.
 
-- Antes: `evidence/fase1-baseline/browser.json` y `regressions.json`; el código exacto de base permanece en Git. `evidence/original-v095.png` corresponde al diagnóstico histórico anterior, no a una nueva ejecución de ese diagnóstico.
-- Después: `evidence/browser.json`, `regressions.json`, `fase1-reliability.json` y `fase1-package.json` (incluye SHA-256 del ZIP de Pages probado).
-- Escritorio, arte 2D, espejo y cámara frontal: `evidence/fase1-desktop-2d-3d.png`.
-- Diseño visto sobre la taza: `evidence/fase1-design-on-product.png`.
-- Plancha: `evidence/fase1-plancha.png`.
-- Móvil: `evidence/fase1-mobile.png`; también se conservan capturas de la suite anterior.
+## Impresión, medidas y video
 
-## Entregas y límites
+- Los botones reales descargan PNG, JPEG y PDF normales y en espejo. Se decodifican los dos rasters de cada formato, incluido el JPEG incrustado en PDF. Para HOLA a 20×9 cm, cada posición se compara con su reflejo horizontal: PNG coincide en todos los canales; en JPEG/PDF se compara geometría de tinta con tolerancia del 3 % por compresión con pérdida. La ejecución final observó 0 píxeles de máscara discordantes en PNG, 16 sobre 80664 en JPEG y 12 sobre 80660 en PDF; las pequeñas diferencias de JPEG/PDF son compatibles con su compresión con pérdida.
+- Se conservan 2362×1063 píxeles a 300 ppp para 20×9 cm; pHYs de PNG, JFIF de JPEG y MediaBox físico del PDF se comprueban en la suite de fiabilidad. La comparación geométrica no invierte solo el orden de los caracteres. La textura del editor y el visor no cambian al alternar espejo.
+- Dos piezas de 20×9 cm caben en A4 con margen de 0,5 cm y separación 0,3 cm, sin escalado automático. Rotación real de píxeles, colisión, márgenes y espejo una sola vez siguen cubiertos. La nueva prueba abre la ventana de impresión, espera que se decodifique el PNG y comprueba la llamada a `window.print` con un espía. El diálogo nativo y la salida de impresora no están comprobados.
+- PNG mockup y WebM se generan después de editar/reabrir; el video se prueba con material glitter activado y se decodifica con dimensiones positivas. Después se vuelve a editar para verificar la asignación de textura. No se certifican FPS ni calidad de cada fotograma, especialmente en dispositivos físicos.
 
-`scripts/package.py` genera ZIP de Pages con index.html en la raíz, app.js, plancha.js, src/ y vendor/, y ZIP de fuente con pruebas/documentación. Excluye node_modules, .git, cachés y paquetes generados. El ZIP estático fue extraído y probado con sus propias rutas; no solo con `node --check`. Los paquetes de esta rama se guardan en `entregables/` para permitir descarga desde GitHub privado.
+## Capturas actuales
 
-Pendientes: impresora real y tolerancias físicas de sublimación; calibración comercial de UV/materiales/modelos; revisión humana de la apariencia comercial; Safari/iOS/Android físicos; carga prolongada y memoria en dispositivos de gama baja. La prueba automatizada móvil no equivale a compatibilidad física. No se añadió agrupación, selección múltiple, nuevos productos o efectos, backend, autenticación, pagos ni infraestructura remota. La plancha no se autoguarda. Almacenamiento local compartido entre pestañas: la última escritura prevalece; usar una sola pestaña por documento. Ver límites de memoria y reversión en CAMBIOS.md.
+- `evidence/fase2/desktop-editor.png`: selector personalizado azul, miniatura, arte, espejo y diseño sobre taza. La cámara se giró para mostrar simultáneamente texto/foto; la posición inicial aprobada no cambió.
+- `evidence/fase2/desktop-physical-blue.png`: producto azul sin capa glitter imprimible.
+- `evidence/fase2/touch-editor.png` y `touch-physical-blue.png`: viewport móvil táctil.
+- `evidence/fase2/noWebGL-editor.png`: composición utilizable sin WebGL.
+- `evidence/fase2/plancha.png`: A4 con dos artes a escala.
 
-Estado: **prototipo validado en este entorno**, listo para revisión; no versión comercial certificada ni publicación a producción.
+Las imágenes cargadas son figuras sintéticas de prueba, no fotos de clientes. Los cambios y límites de implementación están en [GLITTER_FASE2A.md](GLITTER_FASE2A.md).
+
+## Pendientes y alcance comercial
+
+No se probaron impresoras reales, sublimación física, Safari/iOS/Android físicos ni rendimiento prolongado en teléfonos. La rugosidad, metalicidad y clearcoat son una aproximación PBR de la purpurina; no una calibración óptica. No hay HDR, microgeometría, refracción ni validación comercial de los modelos. El glitter imprimible sigue siendo color raster, no un material reflectante producido por una impresora corriente. El rendimiento comprobado es el de este entorno y viewport emulado.
+
+Se conservan los límites de activos, autoguardado local, importación atómica y ocho productos. La plancha no se persiste; usar una sola pestaña por documento. No se añadieron cuentas, pagos, suscripciones, servicios remotos, modelos nuevos ni otros efectos. Estado: prototipo validado para revisión, no versión comercial certificada. Reversión a `60c2781` documentada, sin publicar a producción.
