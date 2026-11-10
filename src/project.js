@@ -1,3 +1,4 @@
+import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js';
 // Validate before changing any live editor state. Legacy V1 remains readable.
 export function validateProject(data){
  if(!data||typeof data!=='object'||![undefined,1,2].includes(data.version)||!Array.isArray(data.elements)||data.elements.length>500)throw Error('Formato o número de capas inválido');
@@ -17,7 +18,12 @@ export function validateProject(data){
 export function normalizeProject(input){
  validateProject(input);
  if(input.glitter!==undefined&&(!input.glitter||typeof input.glitter!=='object'||Array.isArray(input.glitter)))throw Error('Parámetros del material inválidos');
+ if(input.glitterSchema!==undefined&&![1,GLITTER_SCHEMA].includes(input.glitterSchema))throw Error('Versión de parámetros glitter no compatible');
+ if(input.glitterDraft!==undefined&&(!input.glitterDraft||typeof input.glitterDraft!=='object'||Array.isArray(input.glitterDraft)))throw Error('Borrador glitter inválido');
  const data=structuredClone(input),warnings=[];
+ const normalizeGlitter=input.glitterSchema===GLITTER_SCHEMA?glitterSettings:migrateLegacyGlitter;
+ data.glitter=normalizeGlitter(data.glitter);data.glitterDraft=input.glitterSchema===GLITTER_SCHEMA?glitterSettings(data.glitterDraft??data.glitter):{...data.glitter};data.glitterMode=data.glitterMode==='material'?'material':'print';data.glitterSchema=GLITTER_SCHEMA;
+ for(const e of data.elements)if(e.type==='glitter')e.glitter=normalizeGlitter(e.glitter);
  if(data.finishMode==='magic'){warnings.push('El acabado antiguo se sustituyó por normal; el diseño se conservó.');data.finishMode='standard'}
  delete data.magicHeat;
  data.version=2;data.finishMode=['standard','glitter'].includes(data.finishMode)?data.finishMode:'standard';
