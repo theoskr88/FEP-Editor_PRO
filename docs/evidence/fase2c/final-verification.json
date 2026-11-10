@@ -1,0 +1,21 @@
+{
+  "baseCommit": "a8d6dcd8e788a4c05764f904baaf1b00a853f760",
+  "branch": "desarrollo/interfaz-fase2b",
+  "unitTests": 50,
+  "unexpectedFailures": 0,
+  "integrationReports": {
+    "compat/regressions.json": 3,
+    "compat/browser.json": 29,
+    "compat/reliability.json": 16,
+    "compat/glitter/glitter-browser.json": 33,
+    "compat/glitter/print-files.json": 3,
+    "interface/interface-browser.json": 24,
+    "stickers-browser.json": 27
+  },
+  "bootPositive": 8,
+  "bootReproducedFaults": 4,
+  "packageChecks": 16,
+  "testedRuntimeSha256": "09f983cad67f0b80e6da5c0c73c621e175894df1e63f7fa316b7e5c81bd716a6",
+  "deployed": false,
+  "liveUrlsVerified": false
+}
