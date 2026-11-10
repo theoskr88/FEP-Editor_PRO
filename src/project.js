@@ -1,6 +1,7 @@
-import {validateVector} from './vector.js?v=fase3b-20261110';
-import {normalizeFreeDesign,validateShape} from './free-design.js?v=fase3b-20261110';
-import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase3b-20261110';
+import {profileById,profileVariant} from './product-profiles.js?v=fase3c-20261110';
+import {validateVector} from './vector.js?v=fase3c-20261110';
+import {normalizeFreeDesign,validateShape} from './free-design.js?v=fase3c-20261110';
+import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase3c-20261110';
 // Validate before changing any live editor state. Legacy V1 remains readable.
 export function validateProject(data){
  if(!data||typeof data!=='object'||![undefined,1,2].includes(data.version)||!Array.isArray(data.elements)||data.elements.length>500)throw Error('Formato o número de capas inválido');
@@ -32,8 +33,7 @@ export function normalizeProject(input){
  delete data.magicHeat;
  data.mode=data.mode||'product';data.freeDesign=normalizeFreeDesign(data.freeDesign);
  data.version=2;data.finishMode=['standard','glitter'].includes(data.finishMode)?data.finishMode:'standard';
- const products=['mug','tumbler','shirt','tote','notebook','mousepad','cushion','keychain'];
- data.product=products.includes(data.product)?data.product:'mug';
+ data.product=profileById(data.product)?data.product:'mug';data.profileVariant=profileVariant(data.profileVariant);
  data.width??=20;data.height??=8.5;
  if(data.width/data.height>100||data.width/data.height<.01)throw Error('Proporción inválida');
  data.color=/^#[0-9a-f]{6}$/i.test(data.color||'')?data.color:'#ffffff';

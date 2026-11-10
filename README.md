@@ -1,8 +1,8 @@
-# FEP Editor PRO · Fase 3B · Vector y plotter
+# FEP Editor PRO · Fase 3C · Catálogo modular
 
 Diseño libre y personalización 3D comparten el mismo documento, capas, guardado e impresión. Se conserva el editor recibido, sus ocho modelos, lienzo y módulo de planchas. La interfaz original se amplía con controles de capas y glitter; no se sustituye por otro editor.
 
-[Cambios, diagnóstico del error de carga, biblioteca y reversión](docs/VECTOR_FASE3B.md). La corrección está validada localmente; la comprobación de las URLs públicas sigue pendiente por bloqueo de red del entorno. No se ha desplegado.
+[Cambios, diagnóstico del error de carga, biblioteca y reversión](docs/CATALOGO_FASE3C.md). La corrección está validada localmente; la comprobación de las URLs públicas sigue pendiente por bloqueo de red del entorno. No se ha desplegado.
 
 ## Ejecución local
 
@@ -36,9 +36,9 @@ npm run package
 npm run test:package
 ```
 
-Las pruebas de navegador requieren Chromium instalado. Las suites anteriores navegan las pestañas/acordeones reales mediante un ayudante; `test:interface` recorre la interfaz directamente. La evidencia actual se escribe en `docs/evidence/fase3b`, sin sobrescribir Fase 2A. Bloquean conexiones externas; las pruebas normales usan los archivos locales del paquete. `test:package` extrae el ZIP de Pages y lo sirve sin inyección de código de pruebas. `tests/baseline.mjs` es un diagnóstico histórico del commit `175591e`, no parte de las pruebas normales.
+Las pruebas de navegador requieren Chromium instalado. Las suites anteriores navegan las pestañas/acordeones reales mediante un ayudante; `test:interface` recorre la interfaz directamente. La evidencia actual se escribe en `docs/evidence/fase3c`, sin sobrescribir Fase 2A. Bloquean conexiones externas; las pruebas normales usan los archivos locales del paquete. `test:package` extrae el ZIP de Pages y lo sirve sin inyección de código de pruebas. `tests/baseline.mjs` es un diagnóstico histórico del commit `175591e`, no parte de las pruebas normales.
 
-`npm run package` escribe los ZIP `FEP_EDITOR_PRO_FASE3B_PAGES.zip` y `FEP_EDITOR_PRO_FASE3B_FUENTE.zip` en `/workspace/deliverables` (alternativa: `python3 scripts/package.py --out /ruta/de/salida`). Generar desde una copia de trabajo limpia para una entrega reproducible. No despliega. El ZIP de fuente incluye archivos versionados y excluye ZIP generados, cachés y `node_modules`; ejecutar `npm ci` para las pruebas. El ZIP de Pages se sirve directamente con `index.html` en la raíz.
+`npm run package` escribe los ZIP `FEP_EDITOR_PRO_FASE3C_PAGES.zip` y `FEP_EDITOR_PRO_FASE3C_FUENTE.zip` en `/workspace/deliverables` (alternativa: `python3 scripts/package.py --out /ruta/de/salida`). Generar desde una copia de trabajo limpia para una entrega reproducible. No despliega. El ZIP de fuente incluye archivos versionados y excluye ZIP generados, cachés y `node_modules`; ejecutar `npm ci` para las pruebas. El ZIP de Pages se sirve directamente con `index.html` en la raíz.
 
 ## Seis pestañas, un mismo editor
 
@@ -46,7 +46,7 @@ Producto, Diseño, Capas, Efectos, Escena e Imprimir. En escritorio, herramienta
 
 Fino, grueso, metálico y holográfico son preajustes del motor glitter existente. El holográfico imprimible simula colores; el material 3D aproxima iridescencia. El arte de sublimación no incorpora el revestimiento físico. No hay modelos nuevos ni Taza mágica.
 
-[Diseño, compatibilidad, límites y reversión](docs/VECTOR_FASE3B.md) · [Pruebas y capturas](docs/RESULTADOS.md).
+[Diseño, compatibilidad, límites y reversión](docs/CATALOGO_FASE3C.md) · [Pruebas y capturas](docs/RESULTADOS.md).
 
 ## Glitter: un selector de color, dos destinos
 

@@ -1,0 +1,81 @@
+
+> fep-editor-pro@0.9.5 test
+> node --test tests/*.test.mjs
+
+✔ legacy project remains readable (1.957279ms)
+✔ reject nullLayer (1.244992ms)
+✔ reject badSize (0.382969ms)
+✔ reject hugeSize (0.320224ms)
+✔ reject unknownLayer (0.170407ms)
+✔ reject remoteImage (0.203568ms)
+✔ reject badOpacity (0.792598ms)
+✔ reject badPosition (0.080111ms)
+✔ reject futureVersion (0.116125ms)
+✔ reject tooMany (0.195836ms)
+✔ palette pink (0.398172ms)
+✔ palette gold (0.132481ms)
+✔ palette silver (0.107012ms)
+✔ palette blue (0.10548ms)
+✔ palette multi (0.092911ms)
+✔ palette custom (0.083676ms)
+✔ glitter controls have finite limits (0.144649ms)
+✔ deterministic printable and material textures differ (238.179094ms)
+✔ gold then a free blue color is authoritative and becomes custom (0.353504ms)
+✔ quick palettes supply their own synchronized color (0.226773ms)
+✔ legacy named palettes preserve their formerly effective color (0.333504ms)
+✔ legacy V1/V2 migrate printable and physical settings without losing artwork (1.076397ms)
+✔ new schema roundtrips independent material, draft and printable layer colors (0.435468ms)
+✔ reject future glitter schema without guessing color semantics (0.363459ms)
+✔ adaptive maps have fixed desktop and touch memory bounds (0.187733ms)
+✔ finish properties are finite and matte is rougher than gloss (0.263619ms)
+✔ irregular printable flakes use paths instead of square particle fills (61.889379ms)
+✔ normal and roughness maps align identical deterministic flake geometry (57.506033ms)
+✔ LRU tile reuse is stable and evicts allocated canvases at its cap (24.951115ms)
+✔ physical formats and unit roundtrips preserve exact centimetres (16.07644ms)
+✔ legacy projects use product mode; free settings roundtrip without altering art (1.672909ms)
+✔ malformed page, zoom and guides fail before document replacement (0.505984ms)
+✔ editable shapes validate and rotated bounds align geometrically (0.556872ms)
+✔ ruler labels represent physical units and stay bounded at extreme zoom (1.860352ms)
+✔ layout fits wide and tall art without changing its physical aspect (1.688422ms)
+✔ four recipes preserve free colors except explicit holographic multicolor (0.829263ms)
+✔ physical metallic and holographic properties stay out of ordinary glitter (0.273073ms)
+✔ JSON V2 roundtrips printable and physical recipes independently (1.305984ms)
+✔ thumbnail fits an image in 48px and never mutates layer data (0.397881ms)
+✔ metallic and holographic recipes honor matte instead of silently forcing gloss (0.307635ms)
+✔ catalogue retains the eight approved profiles and adds one licensed original GLB (11.90182ms)
+✔ original GLB has exact physical body bounds, self contained buffers and calibrated UV (0.475689ms)
+✔ legacy and GLB product documents preserve valid material variants atomically (4.271947ms)
+✔ legacy finish migration preserves art without mutating input (2.735084ms)
+✔ normalizes printable glitter under artwork and retains V2 settings (0.279613ms)
+✔ image dimensions preflight rejects huge allocation and corrupt headers (0.856876ms)
+✔ corrupt embedded image rejects preparation without mutating input (1.129817ms)
+✔ invalid material payload rejects before state application (0.217819ms)
+✔ autosave debounces to latest snapshot and reports failure (22.100236ms)
+✔ autosave serializes in-flight writes to preserve backup ordering (0.448779ms)
+✔ 60 stable local vectors, 12 in each of five categories, including required shapes (1.713874ms)
+✔ search handles accents, categories, unknown and empty results (0.757802ms)
+✔ internal SVG previews contain no remote sources or executable markup (0.706945ms)
+✔ sticker schema rejects malformed styles and text atomically (0.79595ms)
+✔ rotated sticker bounds track transformed dimensions and preserve center (0.32521ms)
+✔ V1/V2 and magic migration preserve older artwork alongside sticker data (1.100539ms)
+✔ catalog lookup rejects unknown IDs before any project state changes (1.454202ms)
+✔ valid project roundtrip normalizes sticker display names without raster assets (0.465642ms)
+✔ boolean union, subtraction and intersection conserve analytic rectangle area (6.478212ms)
+✔ offset expands outer boundaries and shrinks inner holes with physical millimetres (2.487219ms)
+✔ vector transform and save/reopen preserve geometry, holes and role (2.626881ms)
+✔ font outlines retain counters; unavailable glyphs reject explicitly (0.611754ms)
+✔ SVG has physical units, native paths and isolated cut group without photos (0.604885ms)
+✔ invalid vector data is rejected before document replacement (4.175572ms)
+ℹ tests 64
+ℹ suites 0
+ℹ pass 64
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 689.361309
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

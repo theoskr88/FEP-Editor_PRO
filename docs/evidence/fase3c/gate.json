@@ -1,0 +1,18 @@
+{
+  "phase": "fase3c",
+  "base": "ec00383",
+  "gate": "passed locally",
+  "reports": {
+    "acceptance.json": 20,
+    "profiles-browser.json": 4,
+    "free-recovery.json": 2,
+    "consolidation.json": 5
+  },
+  "unitTests": 64,
+  "staticPackageChecks": 21,
+  "testedRuntimeSha256": "e9f994bd10152fba37cddc03e28d15293fbce8afa49c43c2bae047fb8a5c9b34",
+  "deployed": false,
+  "physicalDevicesTested": false,
+  "physicalPrintingTested": false,
+  "hardwarePlotterTested": false
+}

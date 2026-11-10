@@ -1,19 +1,21 @@
-import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=fase3b-20261110';
-import {createVectorControls} from './src/vector-controls.js?v=fase3b-20261110';
-import {getSticker} from './src/stickers.js?v=fase3b-20261110';
-import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=fase3b-20261110';
-import {createFreeControls} from './src/free-controls.js?v=fase3b-20261110';
-import {validateStickerLayer} from './src/project.js?v=fase3b-20261110';
-import {createLayerList,layerName} from './src/layer-ui.js?v=fase3b-20261110';
-import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fase3b-20261110';
-import {createGlitterCache} from './src/glitter-cache.js?v=fase3b-20261110';
-import {createGlitterControls} from './src/glitter-controls.js?v=fase3b-20261110';
-import {prepareProject} from './src/imports.js?v=fase3b-20261110';
-import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js?v=fase3b-20261110';
-import {openDocumentStore,createAutosave} from './src/persistence.js?v=fase3b-20261110';
+import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById} from './src/product-profiles.js?v=fase3c-20261110';
+import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=fase3c-20261110';
+import {createVectorControls} from './src/vector-controls.js?v=fase3c-20261110';
+import {getSticker} from './src/stickers.js?v=fase3c-20261110';
+import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=fase3c-20261110';
+import {createFreeControls} from './src/free-controls.js?v=fase3c-20261110';
+import {validateStickerLayer} from './src/project.js?v=fase3c-20261110';
+import {createLayerList,layerName} from './src/layer-ui.js?v=fase3c-20261110';
+import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fase3c-20261110';
+import {createGlitterCache} from './src/glitter-cache.js?v=fase3c-20261110';
+import {createGlitterControls} from './src/glitter-controls.js?v=fase3c-20261110';
+import {prepareProject} from './src/imports.js?v=fase3c-20261110';
+import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js?v=fase3c-20261110';
+import {openDocumentStore,createAutosave} from './src/persistence.js?v=fase3c-20261110';
+let materialVariant='original';
 let THREE,OrbitControls,resizeViewer=()=>{};
 let recovering=true,stickerController,stickerPainter,stickerGeometry,stickerReady;
-if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fase3b-20261110')).initInterface()}catch{}}
+if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fase3c-20261110')).initInterface()}catch{}}
 const ui=window.__fepUI||{refresh(){}};
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 let dragStart=null,gestureHistory=false,importGeneration=0;
@@ -26,7 +28,11 @@ const textureCtx=textureCanvas.getContext('2d');
 const glitterResolution=glitterTextureSize({touch:navigator.maxTouchPoints>0,deviceMemory:navigator.deviceMemory??8,viewportWidth:window.innerWidth});
 const glitterTiles=createGlitterCache({width:1024,height:512,limit:glitterResolution.cacheEntries});
 const notify=s=>{$('notice').textContent=s};
-const dimensions={mug:[20,8.5],tumbler:[23,21],shirt:[30,35],tote:[28,30],notebook:[15,21],mousepad:[22,18],cushion:[28,28],keychain:[4,4]};
+const dimensions=Object.fromEntries(PRODUCT_PROFILES.map(p=>[p.id,p.printCm]));
+for(const profile of PRODUCT_PROFILES)if(![...$('product').options].some(o=>o.value===profile.id)){const option=document.createElement('option');option.value=profile.id;option.textContent=profile.name;$('product').append(option)}
+for(const[id,v]of Object.entries(PRODUCT_VARIANTS)){const option=document.createElement('option');option.value=id;option.textContent=v.name;$('profileVariant').append(option)}
+$('productColor').oninput=()=>{buildModel()};
+$('profileVariant').onchange=()=>{materialVariant=$('profileVariant').value;buildModel();queueAutosave()};
 function setDimForProduct(){let p=$('product').value, d=dimensions[p];if(!d)return;
   if(p==='mug'||p==='tumbler')setPrintRotation(DEFAULT_PRINT_ROTATION_DEG);$('widthCm').value=d[0];$('heightCm').value=d[1]; updateDimensions(); buildModel();focusDesignFront()}
 function updateDimensions(){let w=+($('widthCm').value)||20,h=+($('heightCm').value)||8.5;w=Math.max(1,Math.min(100,w));h=Math.max(1,Math.min(100,h));$('widthCm').value=w;$('heightCm').value=h;documentWidth=w;documentHeight=h;canvas.width=Math.min(1200,Math.round(4096*w/h));canvas.height=Math.round(canvas.width*h/w);
@@ -213,12 +219,12 @@ $('rotateMinus').onclick=()=>setPrintRotation(printRotationDeg-5);
 $('rotatePlus').onclick=()=>setPrintRotation(printRotationDeg+5);
 $('rotationViewFront').onclick=focusDesignFront;
 $('rotationNumber').addEventListener('change',e=>setPrintRotation(e.target.value));
-$('widthCm').onchange=()=>{updateDimensions();buildModel()};$('heightCm').onchange=updateDimensions;$('product').onchange=()=>{setDimForProduct();updateRotationToolbar()};
-function projectSnapshot(){return {version:2,mode:editorMode,freeDesign:normalizeFreeDesign(freeDesign),glitterSchema:GLITTER_SCHEMA,glitter:glitterControls.material(),glitterDraft:glitterControls.draft(),glitterMode:glitterControls.mode(),product:$('product').value,color:$('productColor').value,width:documentWidth,height:documentHeight,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,viewerBackground:$('viewerBackground').value,showGuides:preferredGuides,keepImageRatio:$('keepImageRatio').checked,elements:elements.map(({img,...e})=>e)}}
+$('widthCm').onchange=()=>{updateDimensions();buildModel()};$('heightCm').onchange=()=>{updateDimensions();if(profileById($('product').value)?.kind==='glb')buildModel()};$('product').onchange=()=>{setDimForProduct();updateRotationToolbar()};
+function projectSnapshot(){return {version:2,mode:editorMode,freeDesign:normalizeFreeDesign(freeDesign),glitterSchema:GLITTER_SCHEMA,glitter:glitterControls.material(),glitterDraft:glitterControls.draft(),glitterMode:glitterControls.mode(),product:$('product').value,color:$('productColor').value,profileVariant:materialVariant,width:documentWidth,height:documentHeight,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,viewerBackground:$('viewerBackground').value,showGuides:preferredGuides,keepImageRatio:$('keepImageRatio').checked,elements:elements.map(({img,...e})=>e)}}
 function applyPreparedProject({data,warnings}){
  if(data.elements.some(e=>e.type==='sticker')&&!stickerPainter)throw Error('El motor de stickers no está disponible; el documento abierto se conserva');
  editorMode=data.mode;freeDesign=normalizeFreeDesign(data.freeDesign);document.body.dataset.mode=editorMode;freeController?.sync();
- glitterControls.restore({material:data.glitter,draft:data.glitterDraft,mode:data.glitterMode});$('product').value=data.product;$('productColor').value=data.color;finishMode=data.finishMode;$('finishMode').value=finishMode;
+ glitterControls.restore({material:data.glitter,draft:data.glitterDraft,mode:data.glitterMode});$('product').value=data.product;materialVariant=data.profileVariant;$('profileVariant').value=materialVariant;$('productColor').value=data.color;finishMode=data.finishMode;$('finishMode').value=finishMode;
  $('mirrorModeIndividual').checked=data.mirrorMode==='espejo';$('widthCm').value=data.width;$('heightCm').value=data.height;
  elements=data.elements;selected=-1;history=[];redoStack=[];printRotationDeg=data.printRotationDeg;
  if(['#17253a','#e6eaf0','#ffffff'].includes(data.viewerBackground)){$('viewerBackground').value=data.viewerBackground;if(scene)scene.background=new THREE.Color(data.viewerBackground)}
@@ -412,8 +418,16 @@ function focusPrintEdge(edge){
 }
 
 function init3D(){const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,Math.max(1,node.clientWidth)/Math.max(1,node.clientHeight),.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(Math.max(1,node.clientWidth),Math.max(1,node.clientHeight));node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE?.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();const resize=()=>{const w=node.clientWidth,h=node.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)};resizeViewer=resize;typeof ResizeObserver==='function'?new ResizeObserver(resize).observe(node):window.addEventListener('resize',resize)}
+async function loadProductGLB(profile,root,bodyMaterial,printMaterial){
+ try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js?v=fase3c-20261110');const loader=new GLTFLoader();let gltf;try{gltf=await deadline(loader.loadAsync(profile.url),15000,'No respondió el modelo GLB')}catch(error){if(!profile.gltfURL)throw error;gltf=await deadline(loader.loadAsync(profile.gltfURL),15000,'No respondió el modelo glTF de respaldo')}
+  if(root!==modelRoot){gltf.scene.traverse(o=>{o.geometry?.dispose();if(o.material)for(const m of(Array.isArray(o.material)?o.material:[o.material]))m.dispose()});bodyMaterial.dispose();printMaterial.dispose();return}
+  gltf.scene.scale.setScalar(profile.worldScale);printMaterial.map=texture;printMaterial.needsUpdate=true;let printMeshes=0;
+  gltf.scene.traverse(mesh=>{if(!mesh.isMesh)return;const old=mesh.material;if(mesh.name===profile.printMesh){printMeshes++;mesh.material=printMaterial;mesh.scale.set(Math.min(1,documentWidth/profile.printCm[0]),Math.min(1,documentHeight/profile.printCm[1]),1)}else mesh.material=bodyMaterial;for(const material of(Array.isArray(old)?old:[old]))material.dispose()});
+  if(!printMeshes)throw Error('El GLB no contiene su superficie imprimible');root.add(gltf.scene);$('profileStatus').dataset.state='ready';$('profileStatus').textContent=documentWidth>profile.printCm[0]||documentHeight>profile.printCm[1]?'Área solicitada mayor que la placa; el visor limita al tamaño físico. Revisa medidas.':'Modelo propio · 100 × 100 × 3 mm · calibración digital';resizeViewer();resync3D({silent:true});
+ }catch(error){if(root===modelRoot){$('profileStatus').dataset.state='failed';$('profileStatus').textContent='No se pudo cargar el modelo: '+error.message;notify('Modelo no disponible; diseño y exportación 2D conservados')}}finally{update3DControls()}
+}
 function addGeo(geo,mat,x=0,y=0,z=0,rotateX=0){let o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);o.rotation.x=rotateX;modelRoot.add(o);return o}
-function buildModel(){if(!scene)return;if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material]))material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&['mug','tumbler'].includes(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';let printMat=new THREE.MeshStandardMaterial({map:physical?physicalArtTexture:texture,transparent:physical,depthWrite:!physical,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;
+function buildModel(){if(!scene)return;const profile=profileById($('product').value);$('profileStatus').dataset.state=profile?.kind==='glb'?'loading':'ready';$('profileStatus').textContent=profile?.kind==='glb'?'Cargando modelo 3D…':'Perfil original · medidas configurables';update3DControls();if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material]))material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&['mug','tumbler'].includes(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';let printMat=new THREE.MeshStandardMaterial({map:physical?physicalArtTexture:texture,transparent:physical,depthWrite:!physical,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;const variant=PRODUCT_VARIANTS[materialVariant];if(!physical&&variant.roughness!==null){plain.roughness=variant.roughness;plain.metalness=variant.metalness}if(profile?.kind==='glb'){loadProductGLB(profile,modelRoot,plain,printMat);return;}
 if(p==='mug'||p==='tumbler'){let r=p==='mug'?.93:.66,h=p==='mug'?2.05:3;// Cuerpo completo sin arte: evita repetir el archivo en toda la taza.
 if(p==='mug'){
   // Taza 11 oz de paredes lisas, base discreta y labio delgado (foto de referencia).
@@ -530,7 +544,7 @@ else if(p==='keychain'){
   addGeo(new THREE.TorusGeometry(.19,.047,12,32),ring,0,1.18,0);
   addGeo(new THREE.TorusGeometry(.38,.075,12,42),ring,0,1.66,0);
 }
-$('productColor').oninput=()=>{buildModel()};notify('Vista 3D lista · '+$('product').selectedOptions[0].textContent)}
+if(materialVariant!=='original'&&!physical)modelRoot.traverse(o=>{for(const m of(o.material?(Array.isArray(o.material)?o.material:[o.material]):[]))if(m.isMeshStandardMaterial&&m.map!==texture&&m.map!==physicalArtTexture){m.roughness=variant.roughness;m.metalness=variant.metalness}});notify('Vista 3D lista · '+$('product').selectedOptions[0].textContent)}
 // V0.8.2: recargar los pixels en GPU tras cambios del editor.
 let lastCanvasRevision=0;
 // V0.8.4: crear un objeto de textura nuevo para cada revision del lienzo.
@@ -681,7 +695,7 @@ async function startThree(){
  }catch(error){window.__fepBoot?.stage('three','failed',error);scene=null;renderer=null;$('viewerFallback').hidden=false;$('liveStatus').textContent='Solo 2D';$('liveStatus').parentElement.dataset.state='offline';notify('Visor 3D no disponible. El editor y la impresión 2D siguen disponibles.')}
  finally{update3DControls();stickerController?.sync();if(!stickerController&&$('stickerInsert'))$('stickerInsert').disabled=true}
 }
-function update3DControls(){for(const id of ['exportMockup','exportVideo']){$(id).disabled=!renderer||editorMode==='free';$(id).title=editorMode==='free'?'Disponible en Personalizar producto 3D':renderer?'':'Requiere visor 3D disponible'}}
+function update3DControls(){for(const id of ['exportMockup','exportVideo']){$(id).disabled=!renderer||editorMode==='free'||['loading','failed'].includes($('profileStatus').dataset.state);$(id).title=editorMode==='free'?'Disponible en Personalizar producto 3D':renderer?'':'Requiere visor 3D disponible'}}
 
 
 // API interna de impresión: la plancha recibe el arte limpio y los codificadores de 300 ppp.
@@ -734,7 +748,7 @@ function deadline(promise,ms,message){let timer;return Promise.race([promise,new
 
 async function loadStickers(){
  try{
-  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fase3b-20261110'),import('./src/sticker-renderer.js?v=fase3b-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fase3b-20261110');
+  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fase3c-20261110'),import('./src/sticker-renderer.js?v=fase3c-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fase3c-20261110');
   stickerController=uiModule.createStickerControls({selected:()=>elements[selected],dimensions:cmPrint,busy:()=>recovering,notify,insert:definition=>{
    if(recovering)return;if(elements.length>=500){notify('Máximo 500 capas');return}
    const layer={type:'sticker',stickerId:definition.id,stickerName:definition.name,x:.5,y:.5,...initialLayerSize(.28,.75),color:'#e6eef9',outlineColor:'#52697e',outlineWidth:definition.shapes[0].stroke?1.5:0,rotation:0,flipX:false,flipY:false,shadow:false,...(definition.textBox?{label:{text:'',size:14,color:'#172b4d'}}:{})};validateStickerLayer(layer);addHistory();elements.push(layer);selected=elements.length-1;loadSelectedTextIntoInputs();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Sticker añadido: '+definition.name)

@@ -10,7 +10,7 @@ const upload=async data=>{await p.locator('#projectFile').setInputFiles({name:'p
 const snapshot=()=>p.evaluate(()=>window.__audit.snapshot());
 try{
  await check('legacy migration removes finish UI, retains eight products and art',async()=>{
- assert.equal(await p.locator('#finishMode option[value=magic],#magicHeat').count(),0);assert.equal(await p.locator('#product option').count(),8);
+ assert.equal(await p.locator('#finishMode option[value=magic],#magicHeat').count(),0);assert.equal(await p.locator('#product option').count(),9);
  await upload({version:1,finishMode:'magic',magicHeat:90,elements:[{type:'text',text:'HOLA',size:65,x:.35,y:.5,color:'#000000'}]});const s=await snapshot();assert.equal(s.finishMode,'standard');assert.equal(s.elements[0].text,'HOLA');assert.match(await p.locator('#notice').textContent(),/conservó/);
  });
  const image=await fixtureImage(p);

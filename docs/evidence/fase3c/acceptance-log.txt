@@ -1,0 +1,100 @@
+
+> fep-editor-pro@0.9.5 test:boot
+> node tests/boot.mjs
+
+REPRODUCED resize [ 'ResizeObserver is not a constructor' ]
+REPRODUCED media [ 'media.addEventListener is not a function' ]
+REPRODUCED hasOwn [ 'Object.hasOwn is not a function' ]
+REPRODUCED glitter-export [
+  "The requested module './glitter.js' does not provide an export named 'applyGlitterPreset'"
+]
+PASS boot normal
+PASS boot stale unversioned glitter cache
+PASS boot mobile
+PASS boot legacy APIs
+PASS boot missing Three MIME fallback
+PASS boot missing sticker module
+PASS boot stalled IndexedDB
+PASS boot asynchronous 3D loading
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+PASS acceptance desktop startup, six tabs and all product profiles render
+PASS acceptance desktop text, photo and sticker update artwork and actual 3D pixels
+PASS acceptance desktop layers preserve duplicate, opacity, lock, visibility, order and undo
+PASS acceptance desktop physical glitter is excluded from print while printable glitter is included
+PASS acceptance desktop autosave and JSON recover the same project
+PASS acceptance desktop PNG, JPEG, PDF and real horizontal mirror preserve physical dimensions
+PASS acceptance desktop print sheet preserves centimetres and downloads real sheet
+PASS acceptance desktop vector cut SVG remains paths only and excludes photographs
+PASS acceptance desktop 360 video generates, decodes and leaves editor responsive
+PASS acceptance desktop free design keeps all layers, physical units, guides and transparent export
+PASS acceptance mobile startup, six tabs and all product profiles render
+PASS acceptance mobile text, photo and sticker update artwork and actual 3D pixels
+PASS acceptance mobile layers preserve duplicate, opacity, lock, visibility, order and undo
+PASS acceptance mobile physical glitter is excluded from print while printable glitter is included
+PASS acceptance mobile autosave and JSON recover the same project
+PASS acceptance mobile PNG, JPEG, PDF and real horizontal mirror preserve physical dimensions
+PASS acceptance mobile print sheet preserves centimetres and downloads real sheet
+PASS acceptance mobile vector cut SVG remains paths only and excludes photographs
+PASS acceptance mobile 360 video generates, decodes and leaves editor responsive
+PASS acceptance mobile free design keeps all layers, physical units, guides and transparent export
+
+> fep-editor-pro@0.9.5 test:free:recovery
+> node tests/free-recovery-browser.mjs
+
+[
+  {
+    mode: 'desktop',
+    name: 'free project restores before delayed Three; product renders without ResizeObserver',
+    passed: true
+  },
+  {
+    mode: 'mobile',
+    name: 'free project restores before delayed Three; product renders without ResizeObserver',
+    passed: true
+  }
+]
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:consolidation
+> node tests/consolidation-browser.mjs
+
+[
+  {
+    mode: 'desktop',
+    name: '75 layers: stable scroll, canvas selection revealed, long title bounded',
+    passed: true
+  },
+  {
+    mode: '1024x600',
+    name: 'layer list retains a usable scrolling area on short desktop',
+    passed: true
+  },
+  {
+    mode: 'desktop',
+    name: 'pointer resize remains valid for JSON and recovery',
+    passed: true
+  },
+  {
+    mode: 'mobile',
+    name: '75 layers: stable scroll, canvas selection revealed, long title bounded',
+    passed: true
+  },
+  {
+    mode: 'mobile',
+    name: 'pointer resize remains valid for JSON and recovery',
+    passed: true
+  }
+]
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

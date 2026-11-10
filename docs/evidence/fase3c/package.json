@@ -1,0 +1,28 @@
+{
+  "archive": "FEP_EDITOR_PRO_FASE3C_PAGES.zip",
+  "sha256": "e9f994bd10152fba37cddc03e28d15293fbce8afa49c43c2bae047fb8a5c9b34",
+  "passed": true,
+  "checks": [
+    "static imports from extracted ZIP",
+    "WebGL canvas",
+    "text editing",
+    "autosave across reload",
+    "no external requests",
+    "no missing dependencies",
+    "no JS errors",
+    "gold to free blue control",
+    "printable glitter raster",
+    "glitter state recovered from IndexedDB",
+    "six tabs and packaged local stylesheet",
+    "desktop previews visible across all tabs",
+    "all startup stages ready",
+    "60 packaged local stickers and associated text",
+    "mug pixels rendered",
+    "cold mobile startup and text insertion",
+    "packaged free design and shared layers",
+    "A3 landscape in millimetres",
+    "free shape PNG download",
+    "packaged vector conversion and physical cut SVG",
+    "local GLB profile loads from extracted ZIP"
+  ]
+}

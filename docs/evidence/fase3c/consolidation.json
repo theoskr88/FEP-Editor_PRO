@@ -1,0 +1,30 @@
+{
+  "passed": 5,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "75 layers: stable scroll, canvas selection revealed, long title bounded",
+      "passed": true
+    },
+    {
+      "mode": "1024x600",
+      "name": "layer list retains a usable scrolling area on short desktop",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "pointer resize remains valid for JSON and recovery",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "75 layers: stable scroll, canvas selection revealed, long title bounded",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "pointer resize remains valid for JSON and recovery",
+      "passed": true
+    }
+  ]
+}

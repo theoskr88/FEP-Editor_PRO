@@ -1,32 +1,23 @@
-# Resultados · Fase 3B
+# Resultados · Fase 3C
 
-Base `5b56756`. Chromium Linux, escritorio y móvil emulado, SwiftShader; Inkscape 1.4 para SVG. No se ha desplegado ni probado un plotter físico.
+Base aceptada: `ec00383` (3B). No se inició esta fase hasta cerrar su puerta de aceptación y conservar sus ZIP. Sin despliegues.
 
-| Suite | Aprobadas |
+| Prueba | Aprobadas |
 |---|---:|
-| Unidades | 61 |
-| Arranque | 8 positivas y 4 fallos reproducidos deliberadamente |
-| Regresiones básicas | 3 |
-| Navegador previo | 29 |
-| Fiabilidad y recuperación | 16 |
-| Glitter y archivos de impresión | 33 UI + 3 archivos decodificados |
-| Interfaz | 24 |
-| Stickers | 27 |
-| Diseño libre | 27 |
-| Consolidación, recuperación lenta y límites | 5 + 2 + 2 |
-| Vector en escritorio/móvil/sin WebGL | 15 |
-| Aceptación crítica en escritorio y móvil, incluyendo video en ambos | 20 |
-| Validación externa Inkscape | 5 |
-| Paquete Pages extraído | 20 comprobaciones |
+| Unidades, incluidas geometría GLB, perfiles y variantes | 64 |
+| Arranque, escritorio/móvil/APIs antiguas/fallos provocados | 8 positivas + 4 reproducciones deliberadas |
+| Aceptación crítica escritorio y móvil | 20 |
+| GLB/glTF, textura real, materiales, medidas, recuperación y fallos | 4 |
+| Recuperación libre con Three lento y APIs antiguas | 2 |
+| Consolidación de capas y resize | 5 |
+| ZIP Pages extraído, incluido GLB y SVG de corte | 21 comprobaciones |
 
-Evidencias: [fase3b](evidence/fase3b/), `tasks.txt`, `vector-final.txt`, `vector-browser.json`, `svg-validation.json` e `inkscape-log.txt`. SVG reales descargados: [impresión](evidence/fase3b/print.svg), [corte](evidence/fase3b/cut.svg), [corte reflejado](evidence/fase3b/cut-mirror.svg), y sus reexportaciones planas por Inkscape.
+La aceptación crítica recorre todos los nueve perfiles, conservando los ocho IDs anteriores; comprueba inicio y seis pestañas, diseño libre, texto, imagen, stickers, capas (duplicado, opacidad, bloqueo, visibilidad, orden e historial), glitter físico excluido del arte, glitter imprimible incluido, JSON y autoguardado, PNG/JPEG/PDF, espejo de todos los píxeles, plancha a medidas reales y video 360° descargado y decodificado **en escritorio y móvil emulado**. También se descarga SVG de corte sin fotografías. Las suites extensas de las fases anteriores se conservan; esta fase ejecuta la aceptación crítica más las pruebas específicas y de arranque/recuperación.
 
-Se comparan áreas booleanas analíticas, agujeros de la O, offset con huecos, espejo y escala. El grupo de corte mide 44,1×40,1 mm incluyendo un trazo de 0,1 mm, resultado del offset de 2 mm sobre una figura de 40×36 mm. El reflejo cumple x+x_reflejado+ancho=200 mm. El corte no contiene imágenes ni texto vivo y no modifica el raster imprimible ni la textura 3D.
+Las pruebas específicas miden el cuerpo del GLB de 100×100×3 mm y sus UV [0,1], verifican textura vigente mediante píxeles renderizados, la malla Printable con escala 1×0,8 al reducir a 10×8 cm, color del material y metalness 0,75. Se comprueba recarga con variante y color, selección rápida, glTF JSON con buffer embebido como respaldo y fallo de ambos formatos sin impedir texto/exportación 2D.
 
-Se conservan inicio, navegación, modo libre, ocho productos, capas, stickers, glitter físico/imprimible, autoguardado, JSON, PNG/JPEG/PDF, espejo, planchas y video 360° con decodificación. La prueba de ZIP usa archivos extraídos y no inyecta código en la aplicación; exporta también SVG de corte desde móvil emulado.
+El primer recorrido falló porque la imagen no actualizaba el modelo: una carga asíncrona conservaba una textura anterior. Se vinculó la textura actual al adjuntar el recurso y se repitió la aserción de píxeles. El fallo original queda en `profiles-log.txt` y la repetición en `profiles-final.txt`. No se considera suficiente que exista un canvas.
 
-Fallos encontrados: la selección inicial de operandos conservaba A=B; se corrigió la elección predeterminada y el test usa controles para elegir dos capas distintas. Inkscape advertía sobre feDropShadow; se reemplazó por filtros SVG 1.1 y se repitió su validación. La caché de npm del usuario no era escribible; se utilizó caché local. No se han rebajado las áreas ni las tolerancias esperadas.
+Evidencia: [fase3c](evidence/fase3c/), `unit-final.txt`, `boot.json`, `acceptance.json`, `profiles-browser.json`, `free-recovery.json`, `consolidation.json`, `package.json` y logs. [Escritorio](evidence/fase3c/desktop-profile.png) · [Móvil](evidence/fase3c/mobile-profile.png) · [Flujo Producto](evidence/fase3c/desktop-acceptance-product.png) · [Diseño libre](evidence/fase3c/desktop-acceptance-free.png).
 
-[Captura escritorio](evidence/fase3b/desktop-vector-clean.png) · [Captura móvil](evidence/fase3b/mobile-vector-clean.png) · [Render por Inkscape](evidence/fase3b/inkscape-print.png).
-
-Pendientes: plotter físico y software/drivers específicos, dispositivos reales, impresión física e inspección de dominios publicados (bloqueados por el proxy del entorno). No se declara compatibilidad universal. [Informe técnico y reversión](VECTOR_FASE3B.md).
+La calibración es digital. **Pendientes:** medición del soporte físico, muestras e impresión real, dispositivos físicos, plotter y verificación de URLs públicas (bloqueadas por el proxy). No se afirma que el modelo sea una referencia certificada de fabricación. [Informe y reversión](CATALOGO_FASE3C.md).
