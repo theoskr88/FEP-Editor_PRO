@@ -4,7 +4,7 @@ import argparse,hashlib,subprocess
 from pathlib import Path
 from zipfile import ZipFile,ZIP_DEFLATED
 root=Path(__file__).resolve().parents[1]
-p=argparse.ArgumentParser();p.add_argument('--out',default='/workspace/deliverables');p.add_argument('--phase',default='FASE3E',choices=['FASE2D','FASE3A','FASE3B','FASE3C','FASE3D','FASE3E','FASE3F']);args=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--out',default='/workspace/deliverables');p.add_argument('--phase',default='FASE3F',choices=['FASE2D','FASE3A','FASE3B','FASE3C','FASE3D','FASE3E','FASE3F']);args=p.parse_args()
 out=Path(args.out).resolve();out.mkdir(parents=True,exist_ok=True)
 runtime=['index.html','app.js','plancha.js','_headers']+[str(p.relative_to(root)) for folder in ['src','vendor'] for p in (root/folder).rglob('*') if p.is_file()]
 source=[p for p in subprocess.check_output(['git','ls-files','-z'],cwd=root).decode().strip('\0').split('\0') if not p.startswith('entregables/')]

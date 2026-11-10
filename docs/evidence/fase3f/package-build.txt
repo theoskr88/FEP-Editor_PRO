@@ -1,0 +1,11 @@
+
+> fep-editor-pro@0.9.5 package
+> python3 scripts/package.py
+
+FEP_EDITOR_PRO_FASE3F_PAGES.zip 3c4bd54f85bce6acf24b86dd36969de20ee525a6cb7e54cf6a9af2444feb0fdf
+FEP_EDITOR_PRO_FASE3F_FUENTE.zip 95eeb3fa406a3cd0ee358bbd5867e7ff07107ff2f5da6e62894d4bac8c69bf3b
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

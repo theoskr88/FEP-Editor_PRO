@@ -1,0 +1,10 @@
+PASS print desktop batch copies pack into multiple A3 sheets with physical margins, gap, bleed and marks
+PASS print desktop PDF job downloads all three pages with exact A3 physical boxes; PNG and JPEG retain 300 ppp
+PASS print desktop mirror reflects the complete sheet exactly, including crop marks, without changing artwork
+PASS print desktop low resolution warning survives export and missing DPI remains explicit; bleed extends edges
+PASS print desktop oversize and bad spacing block export; failed arrangement preserves every placement
+PASS print mobile batch copies pack into multiple A3 sheets with physical margins, gap, bleed and marks
+PASS print mobile PDF job downloads all three pages with exact A3 physical boxes; PNG and JPEG retain 300 ppp
+PASS print mobile mirror reflects the complete sheet exactly, including crop marks, without changing artwork
+PASS print mobile low resolution warning survives export and missing DPI remains explicit; bleed extends edges
+PASS print mobile oversize and bad spacing block export; failed arrangement preserves every placement

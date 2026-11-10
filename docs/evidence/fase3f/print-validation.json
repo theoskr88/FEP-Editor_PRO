@@ -1,0 +1,11 @@
+{
+  "passed": 3,
+  "checks": [
+    "Poppler opens three-page PDF without errors",
+    "physical A3 MediaBox within 0.01 point",
+    "first page rasterizes at 72 dpi with visible content and crop marks"
+  ],
+  "sha256": "ec75ae71bd43cf8d478b1bd2135af2e4e444aca11811f828ef580ba1175702a0",
+  "pdfinfo": "Custom Metadata: no\nMetadata Stream: no\nTagged:          no\nUserProperties:  no\nSuspects:        no\nForm:            none\nJavaScript:      no\nPages:           3\nEncrypted:       no\nPage size:       841.89 x 1190.55 pts (A3)\nPage rot:        0\nFile size:       430798 bytes\nOptimized:       no\nPDF version:     1.4\n",
+  "physicalPrintingTested": false
+}

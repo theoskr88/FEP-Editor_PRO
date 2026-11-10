@@ -1,0 +1,7 @@
+/workspace/FEP-Editor_PRO/tests/validate-print.py:8: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  im=Image.open(out.with_suffix('.png')).convert('RGB');assert im.size==(842,1191);assert sum(1 for p in im.getdata() if max(p)-min(p)<20 and max(p)<100)>100
+Traceback (most recent call last):
+  File "/workspace/FEP-Editor_PRO/tests/validate-print.py", line 8, in <module>
+    im=Image.open(out.with_suffix('.png')).convert('RGB');assert im.size==(842,1191);assert sum(1 for p in im.getdata() if max(p)-min(p)<20 and max(p)<100)>100
+                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

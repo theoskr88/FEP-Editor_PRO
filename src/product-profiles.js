@@ -8,7 +8,7 @@ export const PRODUCT_PROFILES=[
  {id:'mousepad',name:'Mousepad rectangular',printCm:[22,18],kind:'legacy'},
  {id:'cushion',name:'Cojín cuadrado',printCm:[28,28],kind:'legacy'},
  {id:'keychain',name:'Llavero redondo',printCm:[4,4],kind:'legacy'},
- {id:'panel100',name:'Placa 100 × 100 mm · modelo propio',printCm:[10,10],kind:'glb',url:'./vendor/panel100.glb?v=fase3e-20261110',gltfURL:'./vendor/panel100.gltf?v=fase3e-20261110',worldScale:20,physicalM:[.1,.1,.003],printMesh:'Printable',license:'CC0-1.0',calibration:'digital; fabricación pendiente'}
+ {id:'panel100',name:'Placa 100 × 100 mm · modelo propio',printCm:[10,10],kind:'glb',url:'./vendor/panel100.glb?v=fase3f-20261110',gltfURL:'./vendor/panel100.gltf?v=fase3f-20261110',worldScale:20,physicalM:[.1,.1,.003],printMesh:'Printable',license:'CC0-1.0',calibration:'digital; fabricación pendiente'}
 ];
 export const PRODUCT_VARIANTS={original:{name:'Original',roughness:null,metalness:null},matte:{name:'Mate',roughness:.85,metalness:0},gloss:{name:'Brillante',roughness:.22,metalness:.06},metal:{name:'Metal',roughness:.3,metalness:.75}};
 export const profileById=id=>PRODUCT_PROFILES.find(p=>p.id===id);

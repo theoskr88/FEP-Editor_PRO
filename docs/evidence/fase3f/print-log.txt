@@ -1,0 +1,19 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.waitFor: Error: strict mode violation: locator('#sheetBleed') resolved to 2 elements:
+    1) <input min="0" max="10" value="0" step="0.5" type="number" id="sheetBleed"/> aka getByLabel('Diseño', { exact: true }).getByLabel('Sangrado (mm)')
+    2) <input min="0" max="10" value="0" step="0.5" type="number" id="sheetBleed"/> aka getByRole('spinbutton', { name: 'Sangrado (mm)' })
+
+Call log:
+[2m  - waiting for locator('#sheetBleed')[22m
+
+    at reveal (/workspace/FEP-Editor_PRO/tests/navigation.mjs:5:47)
+    at Proxy.<anonymous> (/workspace/FEP-Editor_PRO/tests/navigation.mjs:11:236)
+    at input (/workspace/FEP-Editor_PRO/tests/print-browser.mjs:3:290)
+    at /workspace/FEP-Editor_PRO/tests/print-browser.mjs:5:168
+    at async check (/workspace/FEP-Editor_PRO/tests/print-browser.mjs:3:103)
+    at async file:///workspace/FEP-Editor_PRO/tests/print-browser.mjs:5:2
+
+Node.js v24.22.1

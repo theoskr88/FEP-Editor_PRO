@@ -1,6 +1,6 @@
 // Inspect dimensions BEFORE asking the browser to allocate a decoded bitmap.
 export const ASSET_LIMITS={bytes:10*1024*1024,side:8192,pixels:16_000_000,totalPixels:32_000_000,projectBytes:30_000_000};
-export function imageInfo(bytes){
+export function imageInfo(bytes,limits=ASSET_LIMITS){
  const b=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes),d=new DataView(b.buffer,b.byteOffset,b.byteLength);
  const str=(p,n)=>String.fromCharCode(...b.subarray(p,p+n));let width,height,type;
  if(b.length>=24&&str(0,8)==='\x89PNG\r\n\x1a\n'&&str(12,4)==='IHDR'){type='image/png';width=d.getUint32(16);height=d.getUint32(20)}
@@ -14,7 +14,7 @@ export function imageInfo(bytes){
   }
  }
  if(!width||!height)throw Error('Imagen dañada o formato no admitido (PNG, JPEG o WebP)');
- if(width>ASSET_LIMITS.side||height>ASSET_LIMITS.side||width*height>ASSET_LIMITS.pixels)throw Error('Imagen demasiado grande: máximo 8192 px por lado y 16 megapíxeles');
+ if(width>limits.side||height>limits.side||width*height>limits.pixels)throw Error(`Imagen demasiado grande: máximo ${limits.side} px por lado y ${limits.pixels/1e6} megapíxeles`);
  return {width,height,type,pixels:width*height};
 }
 export async function decodeImageData(data){

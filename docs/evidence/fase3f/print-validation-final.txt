@@ -1,0 +1,1 @@
+PASS Poppler PDF import, A3 size and rasterization

@@ -1,0 +1,20 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert(items.every(v=>v.w===20&&v.h===9&&v.x>=1&&v.y>=1))
+
+    at file:///workspace/FEP-Editor_PRO/tests/print-browser.mjs:5:446
+    at async check (file:///workspace/FEP-Editor_PRO/tests/print-browser.mjs:3:103)
+    at async file:///workspace/FEP-Editor_PRO/tests/print-browser.mjs:5:2 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

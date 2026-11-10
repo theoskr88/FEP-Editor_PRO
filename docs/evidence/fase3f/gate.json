@@ -1,0 +1,19 @@
+{
+  "phase": "fase3f",
+  "base": "f525eb4",
+  "gate": "passed locally",
+  "reports": {
+    "acceptance.json": 20,
+    "print-browser.json": 12,
+    "print-validation.json": 3,
+    "boot.json": 8,
+    "interface/interface-browser.json": 24
+  },
+  "unitTests": 81,
+  "staticPackageChecks": 25,
+  "testedRuntimeSha256": "3c4bd54f85bce6acf24b86dd36969de20ee525a6cb7e54cf6a9af2444feb0fdf",
+  "deployed": false,
+  "physicalDevicesTested": false,
+  "physicalPrintingTested": false,
+  "hardwarePlotterTested": false
+}

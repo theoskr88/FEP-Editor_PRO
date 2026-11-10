@@ -1,0 +1,17 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: [{"url":"blob:http://127.0.0.1:40591/e65e6f78-9f0f-4c92-97a0-2ae4e712046c","name":"Diseño actual 20 × 8.5 cm","x":1,"y":1,"w":20,"h":8.5,"page":0,"id":1,"turns":0},{"url":"blob:http://127.0.0.1:40591/e65e6f78-9f0f-4c92-97a0-2ae4e712046c","name":"Diseño actual 20 × 8.5 cm (copia)","x":1,"y":10.8,"w":20,"h":8.5,"page":0,"id":2,"turns":0},{"url":"blob:http://127.0.0.1:40591/e65e6f78-9f0f-4c92-97a0-2ae4e712046c","name":"Diseño actual 20 × 8.5 cm (copia)","x":1,"y":20.6,"w":20,"h":8.5,"page":0,"id":3,"turns":0},{"url":"blob:http://127.0.0.1:40591/e65e6f78-9f0f-4c92-97a0-2ae4e712046c","name":"Diseño actual 20 × 8.5 cm (copia)","x":1,"y":30.400000000000002,"w":20,"h":8.5,"page":0,"id":4,"turns":0},{"url":"blob:http://127.0.0.1:40591/e65e6f78-9f0f-4c92-97a0-2ae4e712046c","name":"Diseño actual 20 × 8.5 cm (copia)","x":1,"y":1,"w":20,"h":8.5,"page":1,"id":5,"turns":0},{"url":"blob:http://127.0.0.1:40591/e65e6f78-9f0f-4c92-97a0-2ae4e712046c","name":"Diseño actual 20 × 8.5 cm (copia)","x":1,"y":10.8,"w":20,"h":8.5,"page":1,"id":6,"turns":0},{"url":"blob:http://127.0.0.1:40591/e65e6f78-9f0f-4c92-97a0-2ae4e712046c","name":"Diseño actual 20 × 8.5 cm (copia)","x":1,"y":20.6,"w":20,"h":8.5,"page":1,"id":7,"turns":0},{"url":"blob:http://127.0.0.1:40591/e65e6f78-9f0f-4c92-97a0-2ae4e712046c","name":"Diseño actual 20 × 8.5 cm (copia)","x":1,"y":30.400000000000002,"w":20,"h":8.5,"page":1,"id":8,"turns":0},{"url":"blob:http://127.0.0.1:40591/e65e6f78-9f0f-4c92-97a0-2ae4e712046c","name":"Diseño actual 20 × 8.5 cm (copia)","x":1,"y":1,"w":20,"h":8.5,"page":2,"id":9,"turns":0}]
+    at file:///workspace/FEP-Editor_PRO/tests/print-browser.mjs:5:446
+    at async check (file:///workspace/FEP-Editor_PRO/tests/print-browser.mjs:3:103)
+    at async file:///workspace/FEP-Editor_PRO/tests/print-browser.mjs:5:2 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

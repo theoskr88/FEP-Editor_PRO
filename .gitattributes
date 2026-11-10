@@ -1,2 +1,3 @@
 vendor/clipper-LICENSE.txt whitespace=-blank-at-eol
 docs/evidence/**/*.txt whitespace=-blank-at-eol
+vendor/RoomEnvironment.js whitespace=-space-before-tab
