@@ -1,0 +1,294 @@
+
+> fep-editor-pro@0.9.5 test
+> node --test tests/*.test.mjs
+
+✔ legacy project remains readable (2.246548ms)
+✔ reject nullLayer (1.431937ms)
+✔ reject badSize (0.291557ms)
+✔ reject hugeSize (1.013589ms)
+✔ reject unknownLayer (0.268453ms)
+✔ reject remoteImage (0.284627ms)
+✔ reject badOpacity (0.270415ms)
+✔ reject badPosition (0.248613ms)
+✔ reject futureVersion (0.377566ms)
+✔ reject tooMany (0.508973ms)
+✔ palette pink (0.409073ms)
+✔ palette gold (2.275491ms)
+✔ palette silver (0.101613ms)
+✔ palette blue (0.238057ms)
+✔ palette multi (0.124237ms)
+✔ palette custom (0.212198ms)
+✔ glitter controls have finite limits (0.163845ms)
+✔ deterministic printable and material textures differ (255.143045ms)
+✔ gold then a free blue color is authoritative and becomes custom (0.36696ms)
+✔ quick palettes supply their own synchronized color (0.292098ms)
+✔ legacy named palettes preserve their formerly effective color (0.361913ms)
+✔ legacy V1/V2 migrate printable and physical settings without losing artwork (0.891656ms)
+✔ new schema roundtrips independent material, draft and printable layer colors (0.456655ms)
+✔ reject future glitter schema without guessing color semantics (0.505859ms)
+✔ adaptive maps have fixed desktop and touch memory bounds (0.198277ms)
+✔ finish properties are finite and matte is rougher than gloss (0.285508ms)
+✔ irregular printable flakes use paths instead of square particle fills (68.712865ms)
+✔ normal and roughness maps align identical deterministic flake geometry (55.488426ms)
+✔ LRU tile reuse is stable and evicts allocated canvases at its cap (6.291612ms)
+✔ legacy finish migration preserves art without mutating input (3.059797ms)
+✔ normalizes printable glitter under artwork and retains V2 settings (0.479759ms)
+✔ image dimensions preflight rejects huge allocation and corrupt headers (1.078897ms)
+✔ corrupt embedded image rejects preparation without mutating input (0.886439ms)
+✔ invalid material payload rejects before state application (0.394311ms)
+✔ autosave debounces to latest snapshot and reports failure (20.478659ms)
+✔ autosave serializes in-flight writes to preserve backup ordering (0.503234ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 537.610455
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:regressions
+> node tests/regressions.mjs
+
+[
+  'drag preserves grab offset',
+  'export raster excludes physical glitter',
+  'export raster includes printable glitter'
+]
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:browser
+> node tests/browser.mjs
+
+{
+  "passed": 29,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "startup + print API",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "preserve original tool controls",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "text history + selection preserves redo",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "duplicate, opacity, visibility, lock",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "invalid project cannot mutate document",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "physical glitter never changes printable art",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "printable glitter is below design and changes art",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "save/reopen layers and glitter settings",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "sheet actually rotates pixels",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "no remote service requests / unhandled errors",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "startup + print API",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "preserve original tool controls",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "text history + selection preserves redo",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "duplicate, opacity, visibility, lock",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "invalid project cannot mutate document",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "physical glitter never changes printable art",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "printable glitter is below design and changes art",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "save/reopen layers and glitter settings",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "sheet actually rotates pixels",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "no remote service requests / unhandled errors",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "startup + print API",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "preserve original tool controls",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "text history + selection preserves redo",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "duplicate, opacity, visibility, lock",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "invalid project cannot mutate document",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "printable glitter is below design and changes art",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "save/reopen layers and glitter settings",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "sheet actually rotates pixels",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "no remote service requests / unhandled errors",
+      "passed": true
+    }
+  ]
+}
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:reliability
+> node tests/reliability-browser.mjs
+
+PASS legacy migration removes finish UI, retains eight products and art
+PASS PNG/JPEG/WebP images decode before insertion
+PASS corrupt image, huge dimensions and corrupt project assets are atomic
+PASS debounced autosave recovers images, sizes, text, product, glitter and placement after reload
+PASS previous IndexedDB version restores transactionally
+PASS HOLA mirror matches every reflected pixel and leaves texture normal
+PASS PNG and JPEG declare 300 dpi; PDF MediaBox matches physical cm
+PASS two 20×9 cm pieces fit A4 without scaling; overlaps and overflow rejected
+PASS plancha mirror is applied once to final raster
+PASS selected design renders on mug and updates actual WebGL pixels
+PASS 3D texture keeps updating after export and reopen; mockup PNG and video regenerate
+PASS damaged current autosave keeps backup recoverable without overwriting it
+PASS quota failure is visible and JSON export remains available
+PASS no unhandled errors or external service requests
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:glitter
+> node tests/glitter-browser.mjs && node tests/print-files.mjs
+
+PASS desktop all glitter controls stay in the left tool column
+PASS desktop gold → #1249FF turns preview blue; applying changes only selected layer
+PASS desktop layer visibility, opacity, lock, duplicate and undo remain independent
+PASS desktop physical blue changes mockup only, excluding material from PNG/JPEG/PDF
+PASS desktop palettes synchronize color; resets and mode switches never apply a draft to another layer
+PASS desktop HOLA and a photo stay above printable glitter in canvas and export
+PASS desktop stable rendering and bounded texture cache; lighting changes without regenerating maps
+PASS desktop JSON and autosave roundtrip material, draft and layer colors independently
+PASS desktop image added after export updates artwork and physical texture
+PASS desktop 20×9 cm pieces keep scale and browser print receives a decoded sheet
+PASS desktop no errors or external dependencies; editor still usable without WebGL
+PASS touch all glitter controls stay in the left tool column
+PASS touch gold → #1249FF turns preview blue; applying changes only selected layer
+PASS touch layer visibility, opacity, lock, duplicate and undo remain independent
+PASS touch physical blue changes mockup only, excluding material from PNG/JPEG/PDF
+PASS touch palettes synchronize color; resets and mode switches never apply a draft to another layer
+PASS touch HOLA and a photo stay above printable glitter in canvas and export
+PASS touch stable rendering and bounded texture cache; lighting changes without regenerating maps
+PASS touch JSON and autosave roundtrip material, draft and layer colors independently
+PASS touch image added after export updates artwork and physical texture
+PASS touch 20×9 cm pieces keep scale and browser print receives a decoded sheet
+PASS touch no errors or external dependencies; editor still usable without WebGL
+PASS noWebGL all glitter controls stay in the left tool column
+PASS noWebGL gold → #1249FF turns preview blue; applying changes only selected layer
+PASS noWebGL layer visibility, opacity, lock, duplicate and undo remain independent
+PASS noWebGL physical blue changes mockup only, excluding material from PNG/JPEG/PDF
+PASS noWebGL palettes synchronize color; resets and mode switches never apply a draft to another layer
+PASS noWebGL HOLA and a photo stay above printable glitter in canvas and export
+PASS noWebGL stable rendering and bounded texture cache; lighting changes without regenerating maps
+PASS noWebGL JSON and autosave roundtrip material, draft and layer colors independently
+PASS noWebGL image added after export updates artwork and physical texture
+PASS noWebGL 20×9 cm pieces keep scale and browser print receives a decoded sheet
+PASS noWebGL no errors or external dependencies; editor still usable without WebGL
+PASS actual file mirror image/png { w: 2362, h: 1063, ink: 80659, mismatch: 0, exact: 0 }
+PASS actual file mirror image/jpeg { w: 2362, h: 1063, ink: 80664, mismatch: 16, exact: 101321 }
+PASS actual file mirror application/pdf { w: 2362, h: 1063, ink: 80660, mismatch: 12, exact: 82728 }
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

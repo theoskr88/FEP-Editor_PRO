@@ -11,12 +11,12 @@ Base oficial: `60c27819008984db124046cec669a8c87f24c9c3`, rama `consolidacion/fa
 | `npm run test:browser` | 29 aprobadas | Capas, JSON, ocho productos, rotación real de plancha, escritorio/táctil/sin WebGL |
 | `npm run test:reliability` | 16 escenarios aprobados | Importación atómica, persistencia/respaldo, medidas/espejo, WebGL, PNG mockup y WebM con material físico glitter activo |
 | `npm run test:glitter` | 33 escenarios UI + 3 comprobaciones de archivos | Color y capa en tres modos; PNG/JPEG/PDF descargados realmente y decodificados |
-| `npm run package` | Pendiente de empaquetado final | ZIP de Pages y ZIP fuente separados, sin despliegue |
-| `npm run test:package` | Pendiente de ejecución | Se servirá el ZIP extraído sin instrumentación de pruebas |
+| `npm run package` | Ejecutado; dos ZIP íntegros | ZIP de Pages y ZIP fuente separados, sin despliegue |
+| `npm run test:package` | 1 escenario, 10 verificaciones aprobadas | ZIP extraído servido sin instrumentación: módulos locales, WebGL, color libre azul, raster imprimible, autoguardado y cero errores/solicitudes externas |
 
 Los escenarios de UI se ejecutan en escritorio 1500×980, viewport táctil 390×844 y escritorio con WebGL deshabilitado. Las 3 comprobaciones de archivos son en escritorio. Los resultados combinan pruebas y escenarios de integración; no equivalen a funciones terminadas o certificación comercial. No se deshabilitaron aserciones de las suites anteriores.
 
-Log de tareas: `evidence/fase2/tasks.log`. Informes estructurados: `evidence/fase2/glitter-browser.json`, `evidence/fase2/print-files.json`, `evidence/browser.json`, `evidence/regressions.json`, `evidence/fase1-reliability.json`. La prueba del ZIP genera `evidence/fase2/package.json` con el SHA-256 exacto probado. Las suites conservan algunos nombres históricos de salida de Fase 1; corresponden a la ejecución actual. Para evidencia histórica exacta usar el ZIP de Fase 1 conservado.
+Log de tareas: `evidence/fase2/tasks.txt`. Informes estructurados: `evidence/fase2/glitter-browser.json`, `evidence/fase2/print-files.json`, `evidence/browser.json`, `evidence/regressions.json`, `evidence/fase1-reliability.json`. La prueba del ZIP generó `evidence/fase2/package.json` con el SHA-256 exacto probado. Las suites conservan algunos nombres históricos de salida de Fase 1; corresponden a la ejecución actual. Para evidencia histórica exacta usar el ZIP de Fase 1 conservado.
 
 ## Prueba decisiva y aislamiento
 
