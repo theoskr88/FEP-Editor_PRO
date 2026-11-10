@@ -1,3 +1,7 @@
+# Fase 2C
+
+Arranque independiente con diagnóstico y referencias coherentes de revisión para corregir mezcla de módulos glitter; recuperación limitada por tiempo; 60 stickers vectoriales locales con texto asociado, controles y persistencia. Se conserva el motor y las funciones previas. [Informe y reversión](FASE2C.md). Sin despliegues.
+
 # Fase 2B — interfaz
 
 Base aprobada `1138d98`, rama `desarrollo/interfaz-fase2b`. Seis pestañas, vistas persistentes, paneles móviles y capas con miniaturas. Decisiones, preajustes, límites y reversión: [INTERFAZ_FASE2B.md](INTERFAZ_FASE2B.md). Pruebas actuales: [RESULTADOS.md](RESULTADOS.md). Sin despliegues.

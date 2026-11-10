@@ -1,0 +1,140 @@
+{
+  "passed": 27,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "all 60 local vector definitions actually render nonempty pixels",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "search, filtered categories and insertion produce independent layers",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "resize, rotate, flip, fill, outline, shadow and associated text persist",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "layers duplicate, order, block, hide, opacity, delete and undo do not mutate originals",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "stickers move on canvas, update actual 3D pixels, and export PNG/JPEG/PDF",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "final mirror reflects all pixels of transformed sticker plus contained HOLA",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "JSON, automatic recovery and rejected unknown sticker remain atomic",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "stickers join print sheet at original cm and 360 video remains usable",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "physical glitter never enters sticker artwork; printable glitter stays below every sticker",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "all 60 local vector definitions actually render nonempty pixels",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "search, filtered categories and insertion produce independent layers",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "resize, rotate, flip, fill, outline, shadow and associated text persist",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "layers duplicate, order, block, hide, opacity, delete and undo do not mutate originals",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "stickers move on canvas, update actual 3D pixels, and export PNG/JPEG/PDF",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "final mirror reflects all pixels of transformed sticker plus contained HOLA",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "JSON, automatic recovery and rejected unknown sticker remain atomic",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "stickers join print sheet at original cm and 360 video remains usable",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "physical glitter never enters sticker artwork; printable glitter stays below every sticker",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "all 60 local vector definitions actually render nonempty pixels",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "search, filtered categories and insertion produce independent layers",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "resize, rotate, flip, fill, outline, shadow and associated text persist",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "layers duplicate, order, block, hide, opacity, delete and undo do not mutate originals",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "stickers move on canvas, update actual 3D pixels, and export PNG/JPEG/PDF",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "final mirror reflects all pixels of transformed sticker plus contained HOLA",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "JSON, automatic recovery and rejected unknown sticker remain atomic",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "stickers join print sheet at original cm and 360 video remains usable",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "physical glitter never enters sticker artwork; printable glitter stays below every sticker",
+      "passed": true
+    }
+  ]
+}

@@ -1,12 +1,13 @@
-import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js';
+import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase2c-20261110';
 // Validate before changing any live editor state. Legacy V1 remains readable.
 export function validateProject(data){
  if(!data||typeof data!=='object'||![undefined,1,2].includes(data.version)||!Array.isArray(data.elements)||data.elements.length>500)throw Error('Formato o número de capas inválido');
  for(const key of ['width','height'])if(data[key]!==undefined&&(!Number.isFinite(data[key])||data[key]<1||data[key]>100))throw Error('Dimensiones fuera de 1–100 cm');
  for(const e of data.elements){
-  if(!e||!['text','image','glitter'].includes(e.type)||!Number.isFinite(e.x)||!Number.isFinite(e.y)||Math.abs(e.x)>10||Math.abs(e.y)>10)throw Error('Capa inválida');
+  if(!e||!['text','image','glitter','sticker'].includes(e.type)||!Number.isFinite(e.x)||!Number.isFinite(e.y)||Math.abs(e.x)>10||Math.abs(e.y)>10)throw Error('Capa inválida');
   if(e.type==='text'&&(typeof e.text!=='string'||e.text.length>1000||!Number.isFinite(e.size)||e.size<=0||e.size>500))throw Error('Texto inválido');
   if(e.type==='image'&&(typeof e.data!=='string'||e.data.length>15_000_000||!/^data:image\/(png|jpeg|webp);base64,/.test(e.data)))throw Error('Imagen no compatible');
+  if(e.type==='sticker')validateStickerLayer(e);
   for(const key of ['widthFrac','heightFrac','scale'])if(e[key]!==undefined&&(!Number.isFinite(e[key])||e[key]<=0||e[key]>3))throw Error('Tamaño de imagen inválido');
   if(e.glitter!==undefined&&(!e.glitter||typeof e.glitter!=='object'||Array.isArray(e.glitter)))throw Error('Parámetros glitter inválidos');
   for(const key of ['visible','locked'])if(e[key]!==undefined&&typeof e[key]!=='boolean')throw Error('Estado de capa inválido');
@@ -20,7 +21,7 @@ export function normalizeProject(input){
  if(input.glitter!==undefined&&(!input.glitter||typeof input.glitter!=='object'||Array.isArray(input.glitter)))throw Error('Parámetros del material inválidos');
  if(input.glitterSchema!==undefined&&![1,GLITTER_SCHEMA].includes(input.glitterSchema))throw Error('Versión de parámetros glitter no compatible');
  if(input.glitterDraft!==undefined&&(!input.glitterDraft||typeof input.glitterDraft!=='object'||Array.isArray(input.glitterDraft)))throw Error('Borrador glitter inválido');
- const data=structuredClone(input),warnings=[];
+ const data=typeof structuredClone==='function'?structuredClone(input):JSON.parse(JSON.stringify(input)),warnings=[];
  const normalizeGlitter=input.glitterSchema===GLITTER_SCHEMA?glitterSettings:migrateLegacyGlitter;
  data.glitter=normalizeGlitter(data.glitter);data.glitterDraft=input.glitterSchema===GLITTER_SCHEMA?glitterSettings(data.glitterDraft??data.glitter):{...data.glitter};data.glitterMode=data.glitterMode==='material'?'material':'print';data.glitterSchema=GLITTER_SCHEMA;
  for(const e of data.elements)if(e.type==='glitter')e.glitter=normalizeGlitter(e.glitter);
@@ -37,4 +38,15 @@ export function normalizeProject(input){
  // A glitter background is always below artwork, preserving relative order.
  data.elements=[...data.elements.filter(e=>e.type==='glitter'),...data.elements.filter(e=>e.type!=='glitter')];
  return {data,warnings};
+}
+
+export function validateStickerLayer(e){
+ if(e.stickerName!==undefined&&(typeof e.stickerName!=='string'||e.stickerName.length>80))throw Error('Nombre de sticker inválido');
+ if(typeof e.stickerId!=='string'||!/^(cloud|bubble|decor|nature|label)-[a-z0-9-]{1,60}$/.test(e.stickerId))throw Error('Identificador de sticker inválido');
+ for(const key of ['color','outlineColor'])if(typeof e[key]!=='string'||!/^#[0-9a-f]{6}$/i.test(e[key]))throw Error('Color de sticker inválido');
+ for(const key of ['widthFrac','heightFrac'])if(!Number.isFinite(e[key])||e[key]<=0||e[key]>3)throw Error('Tamaño de sticker fuera de rango');
+ if(!Number.isFinite(e.rotation)||Math.abs(e.rotation)>3600||!Number.isFinite(e.outlineWidth)||e.outlineWidth<0||e.outlineWidth>8)throw Error('Transformación o contorno de sticker inválido');
+ for(const key of ['flipX','flipY','shadow'])if(typeof e[key]!=='boolean')throw Error('Estilo de sticker inválido');
+ if(e.label!==undefined&&(!e.label||typeof e.label.text!=='string'||e.label.text.length>300||!Number.isFinite(e.label.size)||e.label.size<4||e.label.size>40||!/^#[0-9a-f]{6}$/i.test(e.label.color)))throw Error('Texto de sticker inválido');
+ return e;
 }

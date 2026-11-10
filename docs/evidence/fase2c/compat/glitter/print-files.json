@@ -1,0 +1,32 @@
+{
+  "passed": 3,
+  "results": [
+    {
+      "type": "image/png",
+      "passed": true,
+      "w": 2362,
+      "h": 1063,
+      "ink": 80659,
+      "mismatch": 0,
+      "exact": 0
+    },
+    {
+      "type": "image/jpeg",
+      "passed": true,
+      "w": 2362,
+      "h": 1063,
+      "ink": 80663,
+      "mismatch": 15,
+      "exact": 101326
+    },
+    {
+      "type": "application/pdf",
+      "passed": true,
+      "w": 2362,
+      "h": 1063,
+      "ink": 80660,
+      "mismatch": 12,
+      "exact": 82710
+    }
+  ]
+}

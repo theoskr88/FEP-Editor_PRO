@@ -1,0 +1,14 @@
+{
+  "urls": [
+    "https://sublima.fepmarket.com/",
+    "https://sublifep.pages.dev/"
+  ],
+  "liveVerified": false,
+  "reason": "Environment proxy denied CONNECT tunnel with 403 before origin; domains absent from enforced allowlist",
+  "observationsCurrent": true,
+  "networkPolicy": "restricted/enforced",
+  "reportedException": "The requested module './glitter.js' does not provide an export named 'applyGlitterPreset' (at glitter-controls.js:1:49)",
+  "reproducedLocally": true,
+  "originResponseInspected": false,
+  "deployed": false
+}

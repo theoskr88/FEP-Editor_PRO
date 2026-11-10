@@ -1,14 +1,15 @@
-import {initInterface} from './src/interface.js';
-import {createLayerList,layerName} from './src/layer-ui.js';
-import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js';
-import {createGlitterCache} from './src/glitter-cache.js';
-import {createGlitterControls} from './src/glitter-controls.js';
-import {prepareProject} from './src/imports.js';
-import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js';
-import {openDocumentStore,createAutosave} from './src/persistence.js';
-import * as THREE from 'three';
-import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-const ui=initInterface();
+import {validateStickerLayer} from './src/project.js?v=fase2c-20261110';
+import {createLayerList,layerName} from './src/layer-ui.js?v=fase2c-20261110';
+import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fase2c-20261110';
+import {createGlitterCache} from './src/glitter-cache.js?v=fase2c-20261110';
+import {createGlitterControls} from './src/glitter-controls.js?v=fase2c-20261110';
+import {prepareProject} from './src/imports.js?v=fase2c-20261110';
+import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js?v=fase2c-20261110';
+import {openDocumentStore,createAutosave} from './src/persistence.js?v=fase2c-20261110';
+let THREE,OrbitControls;
+let recovering=true,stickerController,stickerPainter,stickerGeometry,stickerReady;
+if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fase2c-20261110')).initInterface()}catch{}}
+const ui=window.__fepUI||{refresh(){}};
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 let dragStart=null,gestureHistory=false,importGeneration=0;
 let documentWidth=20,documentHeight=8.5;
@@ -27,7 +28,7 @@ function updateDimensions(){let w=+($('widthCm').value)||20,h=+($('heightCm').va
 textureCanvas.width=canvas.width;textureCanvas.height=canvas.height;
 $('canvasWrap').style.aspectRatio=`${w} / ${h}`;
 $('resolution').textContent=`${w} × ${h} cm`;draw();updateImageControls()}
-function copyElements(source=elements){return source.map(e=>({...e,...(e.glitter?{glitter:{...e.glitter}}:{})}))}
+function copyElements(source=elements){return source.map(e=>({...e,...(e.glitter?{glitter:{...e.glitter}}:{}),...(e.label?{label:{...e.label}}:{})}))}
 function trimHistory(){
  const pixels=()=>{const seen=new Set();let n=0;for(const list of [elements,...history,...redoStack])for(const e of list)if(e.type==='image'&&e.img&&!seen.has(e.data)){seen.add(e.data);n+=e.img.naturalWidth*e.img.naturalHeight}return n};
  while(history.length+redoStack.length>40||pixels()>ASSET_LIMITS.totalPixels){if(history.length)history.shift();else if(redoStack.length)redoStack.shift();else break}
@@ -81,6 +82,7 @@ function paintDesign(target,width,height,{transparent=false}={}){
   for(let i=0;i<elements.length;i++){
     const e=elements[i];if(e.visible===false)continue;target.save();target.globalAlpha=e.opacity??1;
     if(e.type==='glitter'){const tile=glitterTiles.get(e.glitter);target.drawImage(tile,0,0,width,height);target.restore();continue;}
+    if(e.type==='sticker'){if(stickerPainter)stickerPainter(target,e,width,height);target.restore();continue;}
     target.translate(e.x*width,e.y*height);
     if(e.type==='text'){
       target.font=`bold ${e.size*width/canvas.width}px Arial`;
@@ -101,25 +103,26 @@ function draw(){
   refreshLayers();
   paintDesign(ctx,canvas.width,canvas.height);
   // El borde punteado es interfaz de edición y no forma parte del diseño.
+  stickerController?.sync();
   if(selected>=0){
     const b=bounds(elements[selected]);ctx.save();ctx.strokeStyle='#0c91a3';
     ctx.lineWidth=3;ctx.setLineDash([9,7]);ctx.strokeRect(b.x,b.y,b.w,b.h);
-    if(elements[selected]?.type==='image'){ctx.setLineDash([]);ctx.fillStyle='#0c91a3';ctx.fillRect(b.x+b.w-9,b.y+b.h-9,18,18);ctx.strokeStyle='#fff';ctx.strokeRect(b.x+b.w-9,b.y+b.h-9,18,18)}
+    if(['image','sticker'].includes(elements[selected]?.type)){ctx.setLineDash([]);ctx.fillStyle='#0c91a3';ctx.fillRect(b.x+b.w-9,b.y+b.h-9,18,18);ctx.strokeStyle='#fff';ctx.strokeRect(b.x+b.w-9,b.y+b.h-9,18,18)}
     ctx.restore();
   }
   paintDesign(textureCtx,textureCanvas.width,textureCanvas.height);
   if(finishMode==='glitter')updateGlitterArtwork();updateTexture();
   if($('mirrorPreview'))refreshIndividualPreview();
 }
-function bounds(e){if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
+function bounds(e){if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
 function pos(ev){const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/canvas.width,r.height/canvas.height),w=canvas.width*scale,h=canvas.height*scale;return{x:(ev.clientX-r.left-(r.width-w)/2)/scale,y:(ev.clientY-r.top-(r.height-h)/2)/scale}}
 canvas.addEventListener('pointerdown',ev=>{
   if(dragging||resizing)return;const p=pos(ev);resizing=false;resizeStart=null;gestureHistory=false;
   // El cuadro inferior derecho cambia el tamaño de una imagen seleccionada.
-  if(selected>=0&&elements[selected]?.type==='image'&&!elements[selected].locked){
+  if(selected>=0&&['image','sticker'].includes(elements[selected]?.type)&&!elements[selected].locked){
     const b=bounds(elements[selected]);const hit=15*canvas.width/Math.max(1,canvas.getBoundingClientRect().width);
     if(Math.abs(p.x-(b.x+b.w))<=hit&&Math.abs(p.y-(b.y+b.h))<=hit){
-      resizing=true;resizeStart={x:p.x,y:p.y,w:b.w,h:b.h};
+      resizing=true;resizeStart={x:p.x,y:p.y,w:elements[selected].type==='sticker'?elements[selected].widthFrac*canvas.width:b.w,h:elements[selected].type==='sticker'?elements[selected].heightFrac*canvas.height:b.h};
       canvas.setPointerCapture(ev.pointerId);return;
     }
   }
@@ -154,7 +157,7 @@ canvas.addEventListener('wheel',ev=>{
   const e=elements[selected],k=ev.deltaY<0?1.08:.92;
   if(e.type==='text')e.size=Math.max(12,Math.min(500,e.size*k));
   else {
-    const f=imageFractions(e);e.widthFrac=Math.max(.005,Math.min(3,f.fw*k));
+    const f=e.type==='sticker'?stickerGeometry.stickerFractions(e,canvas.width,canvas.height):imageFractions(e);e.widthFrac=Math.max(.005,Math.min(3,f.fw*k));
     e.heightFrac=Math.max(.005,Math.min(3,f.fh*k));delete e.scale;
     updateImageControls();
   }
@@ -201,6 +204,7 @@ $('rotationNumber').addEventListener('change',e=>setPrintRotation(e.target.value
 $('widthCm').onchange=()=>{updateDimensions();buildModel()};$('heightCm').onchange=updateDimensions;$('product').onchange=()=>{setDimForProduct();updateRotationToolbar()};
 function projectSnapshot(){return {version:2,glitterSchema:GLITTER_SCHEMA,glitter:glitterControls.material(),glitterDraft:glitterControls.draft(),glitterMode:glitterControls.mode(),product:$('product').value,color:$('productColor').value,width:documentWidth,height:documentHeight,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,viewerBackground:$('viewerBackground').value,showGuides:preferredGuides,keepImageRatio:$('keepImageRatio').checked,elements:elements.map(({img,...e})=>e)}}
 function applyPreparedProject({data,warnings}){
+ if(data.elements.some(e=>e.type==='sticker')&&!stickerPainter)throw Error('El motor de stickers no está disponible; el documento abierto se conserva');
  glitterControls.restore({material:data.glitter,draft:data.glitterDraft,mode:data.glitterMode});$('product').value=data.product;$('productColor').value=data.color;finishMode=data.finishMode;$('finishMode').value=finishMode;
  $('mirrorModeIndividual').checked=data.mirrorMode==='espejo';$('widthCm').value=data.width;$('heightCm').value=data.height;
  elements=data.elements;selected=-1;history=[];redoStack=[];printRotationDeg=data.printRotationDeg;
@@ -214,7 +218,7 @@ $('load').onclick=()=>$('projectFile').click();
 $('projectFile').onchange=async ev=>{
  const f=ev.target.files?.[0];ev.target.value='';if(!f)return;const generation=++importGeneration,before=JSON.stringify(projectSnapshot());
  try{if(f.size>ASSET_LIMITS.projectBytes)throw Error('Proyecto demasiado grande (máximo 30 MB)');let raw;try{raw=JSON.parse(await f.text())}catch{throw Error('El archivo no contiene JSON válido')}
- const prepared=await prepareProject(raw);if(generation!==importGeneration)return;if(JSON.stringify(projectSnapshot())!==before)throw Error('El documento cambió durante la importación; vuelve a abrir el archivo');applyPreparedProject(prepared)
+ const prepared=await prepareProject(raw);if(prepared.data.elements.some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(generation!==importGeneration)return;if(JSON.stringify(projectSnapshot())!==before)throw Error('El documento cambió durante la importación; vuelve a abrir el archivo');applyPreparedProject(prepared)
  }catch(error){notify('No se pudo abrir el proyecto: '+error.message)}
 };
 function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
@@ -314,13 +318,13 @@ let baseMat,modelRoot,modelUVs=[];
 // Efectos no destructivos: se visualizan exclusivamente en el modelo 3D.
 let finishMode='standard';
 function glitterSurface(){const c=document.createElement('canvas');c.width=glitterResolution.width;c.height=glitterResolution.height;return c}
-function glitterCanvasTexture(c){const t=new THREE.CanvasTexture(c);t.flipY=true;return t}
+function glitterCanvasTexture(c){if(!THREE)return {image:c};const t=new THREE.CanvasTexture(c);t.flipY=true;return t}
 const glitterCanvas=glitterSurface(),glitterCtx=glitterCanvas.getContext('2d');
 const glitterNormalCanvas=glitterSurface(),glitterRoughCanvas=glitterSurface();
 const glitterMaskCanvas=glitterSurface(),physicalArtCanvas=glitterSurface();
-const glitterTexture=glitterCanvasTexture(glitterCanvas);glitterTexture.colorSpace=THREE.SRGBColorSpace;
-const glitterNormalTexture=glitterCanvasTexture(glitterNormalCanvas),glitterRoughTexture=glitterCanvasTexture(glitterRoughCanvas);
-const glitterMaskTexture=glitterCanvasTexture(glitterMaskCanvas),physicalArtTexture=glitterCanvasTexture(physicalArtCanvas);physicalArtTexture.colorSpace=THREE.SRGBColorSpace;
+let glitterTexture=glitterCanvasTexture(glitterCanvas);glitterTexture.colorSpace=THREE?.SRGBColorSpace;
+let glitterNormalTexture=glitterCanvasTexture(glitterNormalCanvas),glitterRoughTexture=glitterCanvasTexture(glitterRoughCanvas);
+let glitterMaskTexture=glitterCanvasTexture(glitterMaskCanvas),physicalArtTexture=glitterCanvasTexture(physicalArtCanvas);physicalArtTexture.colorSpace=THREE?.SRGBColorSpace;
 let materialFrame=0,materialKey='',materialGenerations=0;
 function updateGlitterArtwork(){
  const art=physicalArtCanvas.getContext('2d'),mask=glitterMaskCanvas.getContext('2d'),w=physicalArtCanvas.width,h=physicalArtCanvas.height;
@@ -393,7 +397,7 @@ function focusPrintEdge(edge){
   controls.update();
 }
 
-function init3D(){const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,node.clientWidth/Math.max(1,node.clientHeight),.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(node.clientWidth,Math.max(1,node.clientHeight));node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();const resize=()=>{const w=node.clientWidth,h=node.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)};new ResizeObserver(resize).observe(node)}
+function init3D(){const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,node.clientWidth/Math.max(1,node.clientHeight),.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(node.clientWidth,Math.max(1,node.clientHeight));node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE?.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();const resize=()=>{const w=node.clientWidth,h=node.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)};typeof ResizeObserver==='function'?new ResizeObserver(resize).observe(node):window.addEventListener('resize',resize)}
 function addGeo(geo,mat,x=0,y=0,z=0,rotateX=0){let o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);o.rotation.x=rotateX;modelRoot.add(o);return o}
 function buildModel(){if(!scene)return;if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material]))material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&['mug','tumbler'].includes(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';let printMat=new THREE.MeshStandardMaterial({map:physical?physicalArtTexture:texture,transparent:physical,depthWrite:!physical,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;
 if(p==='mug'||p==='tumbler'){let r=p==='mug'?.93:.66,h=p==='mug'?2.05:3;// Cuerpo completo sin arte: evita repetir el archivo en toda la taza.
@@ -525,7 +529,7 @@ function refreshTextureNow(){
   if(!scene || !renderer || !textureCanvas.width || !textureCanvas.height)return;
   const previous=texture;
   const current=new THREE.CanvasTexture(textureCanvas);
-  current.colorSpace=THREE.SRGBColorSpace;
+  current.colorSpace=THREE?.SRGBColorSpace;
   current.wrapS=THREE.ClampToEdgeWrapping;
   current.wrapT=THREE.ClampToEdgeWrapping;
   current.flipY=true;
@@ -636,9 +640,21 @@ $('exportVideo').addEventListener('click',async()=>{
   finally{if(stream)stream.getTracks().forEach(t=>t.stop());camera.position.copy(start);controls.target.copy(target);controls.enabled=true;controls.enableDamping=true;controls.update();if(show){$('showGuides').checked=true;buildModel()}recording=false;button.disabled=false;button.textContent='Grabar giro 360° (WebM)';requestAnimationFrame(()=>resync3D());}
 });
 
-const renderLayerList=createLayerList({list:$('layerList'),getImage,getGlitterTile:value=>glitterTiles.get(value),onSelect:index=>{selected=index;if(elements[index].type==='glitter')glitterControls.selectLayer(elements[index].glitter);loadSelectedTextIntoInputs();updateImageControls();draw()},onToggle:(index,key,value)=>{addHistory();elements[index][key]=value;draw()}});
+const renderLayerList=createLayerList({list:$('layerList'),getImage,getGlitterTile:value=>glitterTiles.get(value),getStickerRenderer:()=>stickerPainter,onSelect:index=>{selected=index;if(elements[index].type==='glitter')glitterControls.selectLayer(elements[index].glitter);loadSelectedTextIntoInputs();updateImageControls();draw()},onToggle:(index,key,value)=>{addHistory();elements[index][key]=value;draw()}});
 
-updateDimensions();try{init3D()}catch(error){scene=null;renderer=null;$('viewerFallback').hidden=false;$('liveStatus').textContent='Solo 2D';$('liveStatus').parentElement.dataset.state='offline';for(const id of ['exportMockup','exportVideo']){$(id).disabled=true;$(id).title='Requiere visor 3D disponible'}notify('Visor 3D no disponible. El editor y la impresión 2D siguen disponibles.')}updateRotationToolbar();focusDesignFront();
+updateDimensions();updateRotationToolbar();
+async function startThree(){
+ try{
+  THREE=await deadline(import('three'),30000,'No terminó la carga de Three.js');({OrbitControls}=await deadline(import('three/addons/controls/OrbitControls.js'),15000,'No terminó la carga de OrbitControls'));
+  glitterTexture=glitterCanvasTexture(glitterCanvas);glitterTexture.colorSpace=THREE.SRGBColorSpace;
+  glitterNormalTexture=glitterCanvasTexture(glitterNormalCanvas);glitterRoughTexture=glitterCanvasTexture(glitterRoughCanvas);
+  glitterMaskTexture=glitterCanvasTexture(glitterMaskCanvas);physicalArtTexture=glitterCanvasTexture(physicalArtCanvas);physicalArtTexture.colorSpace=THREE.SRGBColorSpace;
+  updateGlitterArtwork();init3D();focusDesignFront();$('liveStatus').textContent='En vivo';$('liveStatus').parentElement.dataset.state='ready';window.__fepBoot?.stage('three','ready');
+ }catch(error){window.__fepBoot?.stage('three','failed',error);scene=null;renderer=null;$('viewerFallback').hidden=false;$('liveStatus').textContent='Solo 2D';$('liveStatus').parentElement.dataset.state='offline';notify('Visor 3D no disponible. El editor y la impresión 2D siguen disponibles.')}
+ finally{update3DControls();stickerController?.sync();if(!stickerController&&$('stickerInsert'))$('stickerInsert').disabled=true}
+}
+function update3DControls(){for(const id of ['exportMockup','exportVideo']){$(id).disabled=!renderer;$(id).title=renderer?'':'Requiere visor 3D disponible'}}
+
 
 // API interna de impresión: la plancha recibe el arte limpio y los codificadores de 300 ppp.
 let savedMirrorMode;try{savedMirrorMode=localStorage.getItem('estudio-mirror-mode')}catch{}
@@ -665,20 +681,36 @@ $('layerOpacity').onchange=ev=>{const e=elements[selected];if(!e||e.locked)retur
 $('layerDuplicate').onclick=()=>{const e=elements[selected];if(!e)return;try{if(elements.length>=500)throw Error('Máximo 500 capas');enforceDocumentBudget([...elements,e])}catch(error){notify(error.message);return}addHistory();elements.splice(selected+1,0,JSON.parse(JSON.stringify({...e,img:undefined})));selected++;draw()};
 for(const [id,delta] of [['layerUp',1],['layerDown',-1]])$(id).onclick=()=>{const i=selected,j=i+delta;if(i<0||j<0||j>=elements.length||elements[i].locked||((elements[i].type==='glitter')!==(elements[j].type==='glitter')))return;addHistory();[elements[i],elements[j]]=[elements[j],elements[i]];selected=j;draw()};
 
+window.__fepBoot?.enableDesign();stickerReady=loadStickers();startThree();update3DControls();
+
 // Recovery completes before the editor accepts changes. No empty startup save.
 const autosaveStatus=$('autosaveStatus');
 function showSaveStatus(state,error){autosaveStatus.dataset.state=state;autosaveStatus.textContent=({saving:'Guardando…',saved:'Guardado en este navegador',error:'Error de autoguardado. Descarga el proyecto JSON.'})[state]||state;if(error)autosaveStatus.title=error.message}
 let documentStore,autosave;
-const startupControls=[...document.querySelectorAll('button,input,select')].map(node=>[node,node.disabled]);startupControls.forEach(([node])=>node.disabled=true);
+const startupControls=[...document.querySelectorAll('button,input,select')].filter(n=>!n.matches('[role=tab],[data-open-tool],#closeTools,#copyStartupReport')).map(node=>[node,node.disabled]);startupControls.forEach(([node])=>node.disabled=true);
 try{
  documentStore=await openDocumentStore();
- const current=await documentStore.read();
- if(current){try{applyPreparedProject(await prepareProject(current.document));showSaveStatus('saved')}catch(error){showSaveStatus('error',error);notify('La copia actual no se pudo recuperar. Usa Restaurar versión anterior o abre un JSON; no se sobrescribió la copia.')}}
+ const current=await deadline(documentStore.read(),6000,'La lectura del guardado local no respondió');
+ if(current){try{const prepared=await deadline(prepareProject(current.document),10000,'No terminó la recuperación de imágenes');if(prepared.data.elements.some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');applyPreparedProject(prepared);showSaveStatus('saved')}catch(error){window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);notify('La copia actual no se pudo recuperar. Usa Restaurar versión anterior o abre un JSON; no se sobrescribió la copia.')}}
  else autosaveStatus.textContent='Autoguardado local activo';
  autosave=createAutosave({store:documentStore,snapshot:projectSnapshot,status:showSaveStatus});
+ if(window.__fepBoot?.stages.storage.state!=='failed')window.__fepBoot?.stage('storage','ready');
  const assetIDs=new WeakMap();let nextID=0;const fingerprint=()=>{const state=projectSnapshot();state.elements=elements.map(({img,data,...e})=>{if(img&&!assetIDs.has(img))assetIDs.set(img,++nextID);return {...e,asset:img?assetIDs.get(img):null}});return JSON.stringify(state)};let observed=fingerprint();queueAutosave=()=>{const next=fingerprint();if(next!==observed){observed=next;autosave.schedule()}};
  for(const event of ['input','change','click'])document.addEventListener(event,()=>queueMicrotask(queueAutosave));
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autosave.flush()});window.addEventListener('pagehide',()=>autosave.flush());
  $('restorePrevious').onclick=async()=>{try{const old=await documentStore.read('previous');if(!old){notify('Todavía no hay una versión anterior.');return}const before=JSON.stringify(projectSnapshot()),prepared=await prepareProject(old.document);if(before!==JSON.stringify(projectSnapshot()))throw Error('El documento cambió; vuelve a intentarlo');applyPreparedProject(prepared);await autosave.flush();notify('Versión anterior restaurada; la versión reemplazada queda como respaldo.')}catch(error){notify('No se pudo restaurar: '+error.message)}};
-}catch(error){showSaveStatus('error',error);$('restorePrevious').title='Almacenamiento local no disponible'}
-finally{startupControls.forEach(([node,disabled])=>node.disabled=disabled);if(!autosave)$('restorePrevious').disabled=true;updateImageControls();glitterControls.switchMode(glitterControls.mode())}
+}catch(error){window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);$('restorePrevious').title='Almacenamiento local no disponible'}
+finally{recovering=false;startupControls.forEach(([node,disabled])=>node.disabled=disabled);if(!autosave)$('restorePrevious').disabled=true;updateImageControls();glitterControls.switchMode(glitterControls.mode());update3DControls();stickerController?.sync();if(!stickerController&&$('stickerInsert'))$('stickerInsert').disabled=true}
+
+function deadline(promise,ms,message){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error(message)),ms)})]).finally(()=>clearTimeout(timer))}
+
+async function loadStickers(){
+ try{
+  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fase2c-20261110'),import('./src/sticker-renderer.js?v=fase2c-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fase2c-20261110');
+  stickerController=uiModule.createStickerControls({selected:()=>elements[selected],dimensions:cmPrint,busy:()=>recovering,notify,insert:definition=>{
+   if(recovering)return;if(elements.length>=500){notify('Máximo 500 capas');return}
+   const layer={type:'sticker',stickerId:definition.id,stickerName:definition.name,x:.5,y:.5,widthFrac:.28,heightFrac:.28*canvas.width/canvas.height*.75,color:'#e6eef9',outlineColor:'#52697e',outlineWidth:definition.shapes[0].stroke?1.5:0,rotation:0,flipX:false,flipY:false,shadow:false,...(definition.textBox?{label:{text:'',size:14,color:'#172b4d'}}:{})};validateStickerLayer(layer);addHistory();elements.push(layer);selected=elements.length-1;loadSelectedTextIntoInputs();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Sticker añadido: '+definition.name)
+  },commit:next=>{if(recovering)throw Error('Espera a que termine la recuperación');validateStickerLayer(next);addHistory();Object.assign(elements[selected],next);draw()}});
+  $('stickerLibraryStatus').textContent='Biblioteca local · '+catalog.stickers.length+' elementos vectoriales';window.__fepBoot?.stage('stickers','ready');draw();return true;
+ }catch(error){window.__fepBoot?.stage('stickers','failed',error);if($('stickerLibraryStatus'))$('stickerLibraryStatus').textContent='No se pudo cargar la biblioteca: '+error.message;if($('stickerInsert'))$('stickerInsert').disabled=true;return false}
+}

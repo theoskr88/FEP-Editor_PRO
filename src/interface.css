@@ -10,3 +10,9 @@
 
 #panel-effects,#panel-print{gap:12px}.preset-card{min-height:56px}.control-card.compact.field-pair{align-items:end}
 @media(min-width:901px) and (max-height:660px){.app-header{height:60px}.tool-tabs{height:48px}.workspace-heading{padding:12px}.workspace-heading .eyebrow{font-size:8px;margin-bottom:4px}.workspace-heading h2{font-size:14px}#viewer{min-height:110px}.canvas-actions{padding:8px}.rotation-toolbar{padding:10px;gap:6px}.workspace-caption{padding:6px;font-size:8px}.tool-panel{padding:15px}}
+
+.startup-diagnostics{flex:none;margin:0;padding:9px 20px;background:#372b24;border-bottom:1px solid #87694d;color:#f1d8bc;font-size:11px;max-height:200px;overflow:auto}.startup-diagnostics summary{cursor:pointer;min-height:20px}.startup-diagnostics pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:10px;line-height:1.6}.startup-diagnostics button{font-size:10px;min-height:30px}
+
+textarea{font:inherit;color:inherit;background:#101b28;border:1px solid #394a60;border-radius:8px;padding:9px;resize:vertical;min-width:0}.sticker-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;max-height:200px;overflow:auto;overscroll-behavior:contain}.sticker-tile{padding:4px;min-height:58px;background:#23364a}.sticker-tile svg{display:block;width:100%;height:48px}.sticker-tile[aria-pressed=true]{border-color:#76e4c4;background:#36595b}.sticker-quick{display:flex;align-items:center;gap:12px;font-size:11px}.sticker-quick>div{width:70px;flex:none}.sticker-quick svg{width:70px;height:53px}#stickerTextFields{gap:9px}#stickerTextFields textarea{width:100%}#stickerFlipX[aria-pressed=true],#stickerFlipY[aria-pressed=true]{border-color:#76e4c4}
+
+.live-badge[data-state=loading]>i{background:#d6c579}

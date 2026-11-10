@@ -1,0 +1,23 @@
+{
+  "archive": "FEP_EDITOR_PRO_FASE2C_PAGES.zip",
+  "sha256": "09f983cad67f0b80e6da5c0c73c621e175894df1e63f7fa316b7e5c81bd716a6",
+  "passed": true,
+  "checks": [
+    "static imports from extracted ZIP",
+    "WebGL canvas",
+    "text editing",
+    "autosave across reload",
+    "no external requests",
+    "no missing dependencies",
+    "no JS errors",
+    "gold to free blue control",
+    "printable glitter raster",
+    "glitter state recovered from IndexedDB",
+    "six tabs and packaged local stylesheet",
+    "desktop previews visible across all tabs",
+    "all startup stages ready",
+    "60 packaged local stickers and associated text",
+    "mug pixels rendered",
+    "cold mobile startup and text insertion"
+  ]
+}

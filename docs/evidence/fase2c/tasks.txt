@@ -1,0 +1,395 @@
+
+> fep-editor-pro@0.9.5 test
+> node --test tests/*.test.mjs
+
+✔ legacy project remains readable (1.481009ms)
+✔ reject nullLayer (1.043648ms)
+✔ reject badSize (0.199291ms)
+✔ reject hugeSize (0.804967ms)
+✔ reject unknownLayer (0.17202ms)
+✔ reject remoteImage (0.208064ms)
+✔ reject badOpacity (0.186332ms)
+✔ reject badPosition (0.140212ms)
+✔ reject futureVersion (0.206993ms)
+✔ reject tooMany (0.339093ms)
+✔ palette pink (2.508923ms)
+✔ palette gold (0.130868ms)
+✔ palette silver (0.347635ms)
+✔ palette blue (0.209366ms)
+✔ palette multi (0.161204ms)
+✔ palette custom (0.055214ms)
+✔ glitter controls have finite limits (0.121263ms)
+✔ deterministic printable and material textures differ (235.837541ms)
+✔ gold then a free blue color is authoritative and becomes custom (0.255927ms)
+✔ quick palettes supply their own synchronized color (0.17839ms)
+✔ legacy named palettes preserve their formerly effective color (0.247714ms)
+✔ legacy V1/V2 migrate printable and physical settings without losing artwork (0.67483ms)
+✔ new schema roundtrips independent material, draft and printable layer colors (0.38399ms)
+✔ reject future glitter schema without guessing color semantics (0.41669ms)
+✔ adaptive maps have fixed desktop and touch memory bounds (0.189096ms)
+✔ finish properties are finite and matte is rougher than gloss (0.226893ms)
+✔ irregular printable flakes use paths instead of square particle fills (55.022196ms)
+✔ normal and roughness maps align identical deterministic flake geometry (30.653614ms)
+✔ LRU tile reuse is stable and evicts allocated canvases at its cap (36.830554ms)
+✔ layout fits wide and tall art without changing its physical aspect (7.766512ms)
+✔ four recipes preserve free colors except explicit holographic multicolor (1.173984ms)
+✔ physical metallic and holographic properties stay out of ordinary glitter (0.49614ms)
+✔ JSON V2 roundtrips printable and physical recipes independently (1.046182ms)
+✔ thumbnail fits an image in 48px and never mutates layer data (0.544583ms)
+✔ metallic and holographic recipes honor matte instead of silently forcing gloss (0.279002ms)
+✔ legacy finish migration preserves art without mutating input (3.151154ms)
+✔ normalizes printable glitter under artwork and retains V2 settings (0.498473ms)
+✔ image dimensions preflight rejects huge allocation and corrupt headers (1.138772ms)
+✔ corrupt embedded image rejects preparation without mutating input (0.944448ms)
+✔ invalid material payload rejects before state application (0.382538ms)
+✔ autosave debounces to latest snapshot and reports failure (20.353151ms)
+✔ autosave serializes in-flight writes to preserve backup ordering (3.414843ms)
+✔ 60 stable local vectors, 12 in each of five categories, including required shapes (1.632929ms)
+✔ search handles accents, categories, unknown and empty results (1.123418ms)
+✔ internal SVG previews contain no remote sources or executable markup (1.428901ms)
+✔ sticker schema rejects malformed styles and text atomically (2.124752ms)
+✔ rotated sticker bounds track transformed dimensions and preserve center (0.383369ms)
+✔ V1/V2 and magic migration preserve older artwork alongside sticker data (0.881813ms)
+✔ catalog lookup rejects unknown IDs before any project state changes (1.319335ms)
+✔ valid project roundtrip normalizes sticker display names without raster assets (0.464031ms)
+ℹ tests 50
+ℹ suites 0
+ℹ pass 50
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 494.964693
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:boot
+> node tests/boot.mjs
+
+REPRODUCED resize [ 'ResizeObserver is not a constructor' ]
+REPRODUCED media [ 'media.addEventListener is not a function' ]
+REPRODUCED hasOwn [ 'Object.hasOwn is not a function' ]
+PASS boot normal
+PASS boot mobile
+PASS boot legacy APIs
+PASS boot missing Three MIME fallback
+PASS boot missing sticker module
+PASS boot stalled IndexedDB
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:regressions
+> node tests/regressions.mjs
+
+[
+  'drag preserves grab offset',
+  'export raster excludes physical glitter',
+  'export raster includes printable glitter'
+]
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:browser
+> node tests/browser.mjs
+
+{
+  "passed": 29,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "startup + print API",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "preserve original tool controls",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "text history + selection preserves redo",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "duplicate, opacity, visibility, lock",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "invalid project cannot mutate document",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "physical glitter never changes printable art",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "printable glitter is below design and changes art",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "save/reopen layers and glitter settings",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "sheet actually rotates pixels",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "no remote service requests / unhandled errors",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "startup + print API",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "preserve original tool controls",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "text history + selection preserves redo",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "duplicate, opacity, visibility, lock",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "invalid project cannot mutate document",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "physical glitter never changes printable art",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "printable glitter is below design and changes art",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "save/reopen layers and glitter settings",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "sheet actually rotates pixels",
+      "passed": true
+    },
+    {
+      "mode": "touch",
+      "name": "no remote service requests / unhandled errors",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "startup + print API",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "preserve original tool controls",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "text history + selection preserves redo",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "duplicate, opacity, visibility, lock",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "invalid project cannot mutate document",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "printable glitter is below design and changes art",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "save/reopen layers and glitter settings",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "sheet actually rotates pixels",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "no remote service requests / unhandled errors",
+      "passed": true
+    }
+  ]
+}
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:reliability
+> node tests/reliability-browser.mjs
+
+PASS legacy migration removes finish UI, retains eight products and art
+PASS PNG/JPEG/WebP images decode before insertion
+PASS corrupt image, huge dimensions and corrupt project assets are atomic
+PASS debounced autosave recovers images, sizes, text, product, glitter and placement after reload
+PASS previous IndexedDB version restores transactionally
+PASS HOLA mirror matches every reflected pixel and leaves texture normal
+PASS PNG and JPEG declare 300 dpi; PDF MediaBox matches physical cm
+PASS two 20×9 cm pieces fit A4 without scaling; overlaps and overflow rejected
+PASS plancha mirror is applied once to final raster
+PASS selected design renders on mug and updates actual WebGL pixels
+PASS 3D texture keeps updating after export and reopen; mockup PNG and video regenerate
+PASS damaged current autosave keeps backup recoverable without overwriting it
+PASS quota failure is visible and JSON export remains available
+PASS no unhandled errors or external service requests
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:glitter
+> node tests/glitter-browser.mjs && node tests/print-files.mjs
+
+PASS desktop all glitter controls stay in the left tool column
+PASS desktop gold → #1249FF turns preview blue; applying changes only selected layer
+PASS desktop layer visibility, opacity, lock, duplicate and undo remain independent
+PASS desktop physical blue changes mockup only, excluding material from PNG/JPEG/PDF
+PASS desktop palettes synchronize color; resets and mode switches never apply a draft to another layer
+PASS desktop HOLA and a photo stay above printable glitter in canvas and export
+PASS desktop stable rendering and bounded texture cache; lighting changes without regenerating maps
+PASS desktop JSON and autosave roundtrip material, draft and layer colors independently
+PASS desktop image added after export updates artwork and physical texture
+PASS desktop 20×9 cm pieces keep scale and browser print receives a decoded sheet
+PASS desktop no errors or external dependencies; editor still usable without WebGL
+PASS touch all glitter controls stay in the left tool column
+PASS touch gold → #1249FF turns preview blue; applying changes only selected layer
+PASS touch layer visibility, opacity, lock, duplicate and undo remain independent
+PASS touch physical blue changes mockup only, excluding material from PNG/JPEG/PDF
+PASS touch palettes synchronize color; resets and mode switches never apply a draft to another layer
+PASS touch HOLA and a photo stay above printable glitter in canvas and export
+PASS touch stable rendering and bounded texture cache; lighting changes without regenerating maps
+PASS touch JSON and autosave roundtrip material, draft and layer colors independently
+PASS touch image added after export updates artwork and physical texture
+PASS touch 20×9 cm pieces keep scale and browser print receives a decoded sheet
+PASS touch no errors or external dependencies; editor still usable without WebGL
+PASS noWebGL all glitter controls stay in the left tool column
+PASS noWebGL gold → #1249FF turns preview blue; applying changes only selected layer
+PASS noWebGL layer visibility, opacity, lock, duplicate and undo remain independent
+PASS noWebGL physical blue changes mockup only, excluding material from PNG/JPEG/PDF
+PASS noWebGL palettes synchronize color; resets and mode switches never apply a draft to another layer
+PASS noWebGL HOLA and a photo stay above printable glitter in canvas and export
+PASS noWebGL stable rendering and bounded texture cache; lighting changes without regenerating maps
+PASS noWebGL JSON and autosave roundtrip material, draft and layer colors independently
+PASS noWebGL image added after export updates artwork and physical texture
+PASS noWebGL 20×9 cm pieces keep scale and browser print receives a decoded sheet
+PASS noWebGL no errors or external dependencies; editor still usable without WebGL
+PASS actual file mirror image/png { w: 2362, h: 1063, ink: 80659, mismatch: 0, exact: 0 }
+PASS actual file mirror image/jpeg { w: 2362, h: 1063, ink: 80663, mismatch: 15, exact: 101299 }
+PASS actual file mirror application/pdf { w: 2362, h: 1063, ink: 80660, mismatch: 12, exact: 82735 }
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:interface
+> node tests/interface-browser.mjs
+
+PASS desktop six real tabs, one tool panel, keyboard navigation and responsive workspaces
+PASS desktop text and image tools use accordions and update document without duplicate controls
+PASS desktop layer thumbnails, selection, ordering, visibility, lock and history work through the new panel
+PASS desktop four presets separate printable drafts from physical material and iridescence
+PASS desktop JSON and local recovery retain layers and recipes across the reorganized controls
+PASS desktop print sheet is docked, keeps desktop previews visible and exports a real file
+PASS desktop mobile drawer closes with Escape and 360 controls or fallback remain reachable
+PASS desktop no JavaScript, shader errors or remote service dependencies
+PASS mobile six real tabs, one tool panel, keyboard navigation and responsive workspaces
+PASS mobile text and image tools use accordions and update document without duplicate controls
+PASS mobile layer thumbnails, selection, ordering, visibility, lock and history work through the new panel
+PASS mobile four presets separate printable drafts from physical material and iridescence
+PASS mobile JSON and local recovery retain layers and recipes across the reorganized controls
+PASS mobile print sheet is docked, keeps desktop previews visible and exports a real file
+PASS mobile mobile drawer closes with Escape and 360 controls or fallback remain reachable
+PASS mobile no JavaScript, shader errors or remote service dependencies
+PASS noWebGL six real tabs, one tool panel, keyboard navigation and responsive workspaces
+PASS noWebGL text and image tools use accordions and update document without duplicate controls
+PASS noWebGL layer thumbnails, selection, ordering, visibility, lock and history work through the new panel
+PASS noWebGL four presets separate printable drafts from physical material and iridescence
+PASS noWebGL JSON and local recovery retain layers and recipes across the reorganized controls
+PASS noWebGL print sheet is docked, keeps desktop previews visible and exports a real file
+PASS noWebGL mobile drawer closes with Escape and 360 controls or fallback remain reachable
+PASS noWebGL no JavaScript, shader errors or remote service dependencies
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> fep-editor-pro@0.9.5 test:stickers
+> node tests/stickers-browser.mjs
+
+PASS stickers desktop all 60 local vector definitions actually render nonempty pixels
+PASS stickers desktop search, filtered categories and insertion produce independent layers
+PASS stickers desktop resize, rotate, flip, fill, outline, shadow and associated text persist
+PASS stickers desktop layers duplicate, order, block, hide, opacity, delete and undo do not mutate originals
+PASS stickers desktop stickers move on canvas, update actual 3D pixels, and export PNG/JPEG/PDF
+PASS stickers desktop final mirror reflects all pixels of transformed sticker plus contained HOLA
+PASS stickers desktop JSON, automatic recovery and rejected unknown sticker remain atomic
+PASS stickers desktop stickers join print sheet at original cm and 360 video remains usable
+PASS stickers desktop physical glitter never enters sticker artwork; printable glitter stays below every sticker
+PASS stickers mobile all 60 local vector definitions actually render nonempty pixels
+PASS stickers mobile search, filtered categories and insertion produce independent layers
+PASS stickers mobile resize, rotate, flip, fill, outline, shadow and associated text persist
+PASS stickers mobile layers duplicate, order, block, hide, opacity, delete and undo do not mutate originals
+PASS stickers mobile stickers move on canvas, update actual 3D pixels, and export PNG/JPEG/PDF
+PASS stickers mobile final mirror reflects all pixels of transformed sticker plus contained HOLA
+PASS stickers mobile JSON, automatic recovery and rejected unknown sticker remain atomic
+PASS stickers mobile stickers join print sheet at original cm and 360 video remains usable
+PASS stickers mobile physical glitter never enters sticker artwork; printable glitter stays below every sticker
+PASS stickers noWebGL all 60 local vector definitions actually render nonempty pixels
+PASS stickers noWebGL search, filtered categories and insertion produce independent layers
+PASS stickers noWebGL resize, rotate, flip, fill, outline, shadow and associated text persist
+PASS stickers noWebGL layers duplicate, order, block, hide, opacity, delete and undo do not mutate originals
+PASS stickers noWebGL stickers move on canvas, update actual 3D pixels, and export PNG/JPEG/PDF
+PASS stickers noWebGL final mirror reflects all pixels of transformed sticker plus contained HOLA
+PASS stickers noWebGL JSON, automatic recovery and rejected unknown sticker remain atomic
+PASS stickers noWebGL stickers join print sheet at original cm and 360 video remains usable
+PASS stickers noWebGL physical glitter never enters sticker artwork; printable glitter stays below every sticker
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
