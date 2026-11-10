@@ -1,3 +1,4 @@
+import {evidencePath} from './evidence.mjs';
 import {start,tick,fixtureImage} from './harness.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -18,7 +19,7 @@ for(const mode of ['desktop','touch','noWebGL']){
  await check('save/reopen layers and glitter settings',async()=>{const before=await p.evaluate(()=>window.__audit.state().elements);const download=p.waitForEvent('download');await p.locator('#save').click();const d=await download;const data=JSON.parse(await fs.readFile(await d.path(),'utf8'));assert.equal(data.version,2);await p.locator('#clear').click();await p.locator('#projectFile').setInputFiles({name:'saved.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});await p.waitForFunction(()=>document.getElementById('notice').textContent==='Proyecto cargado');assert.deepEqual(await p.evaluate(()=>window.__audit.state().elements),before)});
  await check('sheet actually rotates pixels',async()=>{await p.locator('#openPrintSheet').click();await p.locator('#sheetImportInput').setInputFiles({name:'synthetic.png',mimeType:'image/png',buffer:await fixtureImage(p)});await p.waitForFunction(()=>window.__sheetAudit.state().length===1);for(const [id,v]of [['sheetW','4'],['sheetH','2']]){await p.locator('#'+id).fill(v);await p.locator('#'+id).dispatchEvent('change')}await p.locator('#sheetRotate').click();await p.locator('#sheetMirrorMode').uncheck();const colors=await p.evaluate(()=>{const c=window.__sheetAudit.canvas(),s=window.__sheetAudit.state()[0],scale=c.width/Number(document.getElementById('sheetPageW').value),x=c.getContext('2d');return [.25,.75].map(b=>[...x.getImageData(Math.round((s.x+s.w*.5)*scale),Math.round((s.y+s.h*b)*scale),1,1).data])});assert.ok(colors[0][0]>200&&colors[0][2]<50);assert.ok(colors[1][2]>200&&colors[1][0]<50)});
  await check('no remote service requests / unhandled errors',async()=>{assert.deepEqual(h.external,[]);assert.deepEqual(h.errors,[])});
- await p.screenshot({path:`docs/evidence/${mode}.png`,fullPage:true});
- }finally{await h.close();await fs.writeFile('docs/evidence/browser.json',JSON.stringify(results,null,2)+'\n')}
+ await p.screenshot({path:evidencePath(`${mode}.png`),fullPage:true});
+ }finally{await h.close();await fs.writeFile(evidencePath('browser.json'),JSON.stringify(results,null,2)+'\n')}
 }
 console.log(JSON.stringify({passed:results.length,results},null,2));

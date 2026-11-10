@@ -1,3 +1,9 @@
+# Fase 2B — interfaz
+
+Base aprobada `1138d98`, rama `desarrollo/interfaz-fase2b`. Seis pestañas, vistas persistentes, paneles móviles y capas con miniaturas. Decisiones, preajustes, límites y reversión: [INTERFAZ_FASE2B.md](INTERFAZ_FASE2B.md). Pruebas actuales: [RESULTADOS.md](RESULTADOS.md). Sin despliegues.
+
+---
+
 # Fase 2A — glitter
 
 La entrega actual parte de Fase 1 en `60c2781`, en rama `mejora/glitter-fase2a`. Cambios de color, material, compatibilidad, pruebas y procedimiento de reversión: [GLITTER_FASE2A.md](GLITTER_FASE2A.md). Resultados actuales: [RESULTADOS.md](RESULTADOS.md). Sin despliegues.

@@ -1,50 +1,59 @@
-# Resultados — Fase 2A: glitter
+# Resultados — Fase 2B
 
-Base oficial: `60c27819008984db124046cec669a8c87f24c9c3`, rama `consolidacion/fase-1`; ZIP fuente verificado contra los archivos versionados. Rama actual: `mejora/glitter-fase2a`. Se conserva el mismo editor. Linux, Node 24, Python 3 y Chromium `/usr/bin/chromium` con SwiftShader. No hubo despliegues ni cambios en FEP Market.
+Base aprobada: `1138d9864ed9a0f719ec5430dc6286005a503e43` de `mejora/glitter-fase2a`, verificada en local/remoto. Desarrollo: `desarrollo/interfaz-fase2b`. Node 24, Python 3, Chromium `/usr/bin/chromium` y WebGL mediante SwiftShader en este entorno Linux. Sin despliegues ni cambios en main/FEP Market.
 
-## Tareas y evidencia
+## Verificación
 
-| Tarea | Resultado | Qué verifica |
+| Comando | Resultado | Alcance |
 |---|---:|---|
-| `npm test` | 36 aprobadas | 25 previas más 11 de color, migración V1/V2, esquema nuevo, determinismo, geometría irregular, mapas y caché acotada |
-| `npm run test:regressions` | 3 aprobadas | Arrastre, material excluido del raster, glitter imprimible incluido |
-| `npm run test:browser` | 29 aprobadas | Capas, JSON, ocho productos, rotación real de plancha, escritorio/táctil/sin WebGL |
-| `npm run test:reliability` | 16 escenarios aprobados | Importación atómica, persistencia/respaldo, medidas/espejo, WebGL, PNG mockup y WebM con material físico glitter activo |
-| `npm run test:glitter` | 33 escenarios UI + 3 comprobaciones de archivos | Color y capa en tres modos; PNG/JPEG/PDF descargados realmente y decodificados |
-| `npm run package` | Ejecutado; dos ZIP íntegros | ZIP de Pages y ZIP fuente separados, sin despliegue |
-| `npm run test:package` | 1 escenario, 10 verificaciones aprobadas | ZIP extraído servido sin instrumentación: módulos locales, WebGL, color libre azul, raster imprimible, autoguardado y cero errores/solicitudes externas |
+| `npm test` | 42 aprobadas | 36 previas más layout, miniaturas, recetas, compatibilidad JSON y mate/PBR |
+| `npm run test:regressions` | 3 aprobadas | Arrastre y separación glitter imprimible/material |
+| `npm run test:browser` | 29 aprobadas | Controles aprobados, capas, JSON, rotación de plancha y degradación sin WebGL |
+| `npm run test:reliability` | 16 escenarios aprobados | Recuperación, importación atómica, espejo, medidas, mockup y video con holográfico activo |
+| `npm run test:glitter` | 33 recorridos UI + 3 archivos | Color libre, capas y material en escritorio/táctil/sin WebGL; PNG/JPEG/PDF reales descargados |
+| `npm run test:interface` | 24 escenarios | Seis pestañas, dos vistas, panel móvil, miniaturas, recetas, guardado y plancha lateral |
+| `npm run package` | Pendiente de empaquetado final | ZIP estático y ZIP de fuente separados |
+| `npm run test:package` | Pendiente de ejecución | Prueba sobre el ZIP extraído sin instrumentar la aplicación |
 
-Los escenarios de UI se ejecutan en escritorio 1500×980, viewport táctil 390×844 y escritorio con WebGL deshabilitado. Las 3 comprobaciones de archivos son en escritorio. Los resultados combinan pruebas y escenarios de integración; no equivalen a funciones terminadas o certificación comercial. No se deshabilitaron aserciones de las suites anteriores.
+No se omiten fallos: el primer test de teclado falló con `false !== true` al esperar Diseño después de ArrowRight desde el foco de Producto. El código usaba el índice de la pestaña activa anterior; se corrigió para usar la pestaña enfocada. Se repitió el recorrido completo. No se eliminaron aserciones. Las cantidades son una mezcla de pruebas unitarias y escenarios de integración, no una certificación de funciones comerciales.
 
-Log de tareas: `evidence/fase2/tasks.txt`. Informes estructurados: `evidence/fase2/glitter-browser.json`, `evidence/fase2/print-files.json`, `evidence/browser.json`, `evidence/regressions.json`, `evidence/fase1-reliability.json`. La prueba del ZIP generó `evidence/fase2/package.json` con el SHA-256 exacto probado. Las suites conservan algunos nombres históricos de salida de Fase 1; corresponden a la ejecución actual. Para evidencia histórica exacta usar el ZIP de Fase 1 conservado.
+## Comprobaciones de interfaz
 
-## Prueba decisiva y aislamiento
+- Seis pestañas exactas y un único panel de herramientas visible, sin controles con IDs duplicados. Navegación con flechas/Home/End; panel móvil recogible con Escape y botón; campos inertes cuando está cerrado.
+- Ambos previews completos y sin superposición para las seis pestañas en escritorio 1024×600, 1024×768 y 1500×980. También siguen visibles al abrir la plancha acoplada.
+- Móvil emulado 390×844 y 360×800: barra inferior dentro de pantalla, panel de hasta 55 % de alto, sin overflow horizontal; el lienzo y el control frontal 270° permanecen alcanzables cerrando/desplazando el panel.
+- Texto e imagen en acordeones; capas con miniaturas de 48×48 diferentes por contenido, selección, orden, bloqueo, visibilidad, duplicado y Undo/Redo. La miniatura no cambia las medidas ni el arte.
+- Fino/grueso son recetas de partícula. Metálico/holográfico son parámetros del material existente; mate y ajustes de intensidad siguen funcionando. Se verificó la propiedad de iridescencia y ausencia de errores de shader en WebGL.
+- El material no cambia el raster del diseño. El borrador imprimible solo se aplica a la capa seleccionada; las recetas sobreviven a JSON, cierre/recarga y autoguardado. No se reincorporó Taza mágica.
 
-- Seleccionar Dorado sincroniza el selector a `#d5ab42`. Cambiarlo a `#1249FF` activa Personalizado y el promedio de píxeles de la miniatura pasa a azul. Antes de Aplicar, el documento conserva ambas capas; después cambia solo la seleccionada. Undo/Redo conserva las demás. Comprobado en los tres modos de navegador.
-- El material físico tiene su propio estado. Su cambio a azul produce píxeles azules en WebGL, sin cambiar los hashes de PNG/JPEG/PDF del arte. Sin WebGL se mantienen edición, miniatura y exportación 2D; no se afirma que el material se renderice allí.
-- Los parámetros de material, borrador imprimible y capa aplicada pueden ser diferentes. Se conservan al guardar/abrir JSON y al recuperar IndexedDB, tanto en modo imprimible como en modo material. Aplicar queda deshabilitado al recuperar modo material.
-- Ocultar, bloquear, duplicar, opacidad y Undo/Redo de glitter no cambian otra capa. Restablecer en cada destino no modifica el otro. Texto HOLA y fotografía sintética rojo/azul quedan por encima de la base y se comprueban sus píxeles en exportación. Una segunda imagen verde añadida tras exportar actualiza el arte y sigue asignada al material de impresión del modelo.
-- La escena se puede girar sin regenerar mapas ni mosaicos de la caché. Se comprueban límites de resolución y entradas. El patrón imprimible se conserva al repintar y no incorpora aleatoriedad por fotograma.
+## Regresiones de producción
 
-## Impresión, medidas y video
+Se conservaron los ocho productos, texto/imagen, tamaños en cm, sincronización 2D→3D, imagen tras exportar/reabrir, cámara aprobada y 270°. El resize corrige la relación de aspecto del visor sin alterar geometría o FOV.
 
-- Los botones reales descargan PNG, JPEG y PDF normales y en espejo. Se decodifican los dos rasters de cada formato, incluido el JPEG incrustado en PDF. Para HOLA a 20×9 cm, cada posición se compara con su reflejo horizontal: PNG coincide en todos los canales; en JPEG/PDF se compara geometría de tinta con tolerancia del 3 % por compresión con pérdida. La ejecución final observó 0 píxeles de máscara discordantes en PNG, 16 sobre 80664 en JPEG y 12 sobre 80660 en PDF; las pequeñas diferencias de JPEG/PDF son compatibles con su compresión con pérdida.
-- Se conservan 2362×1063 píxeles a 300 ppp para 20×9 cm; pHYs de PNG, JFIF de JPEG y MediaBox físico del PDF se comprueban en la suite de fiabilidad. La comparación geométrica no invierte solo el orden de los caracteres. La textura del editor y el visor no cambian al alternar espejo.
-- Dos piezas de 20×9 cm caben en A4 con margen de 0,5 cm y separación 0,3 cm, sin escalado automático. Rotación real de píxeles, colisión, márgenes y espejo una sola vez siguen cubiertos. La nueva prueba abre la ventana de impresión, espera que se decodifique el PNG y comprueba la llamada a `window.print` con un espía. El diálogo nativo y la salida de impresora no están comprobados.
-- PNG mockup y WebM se generan después de editar/reabrir; el video se prueba con material glitter activado y se decodifica con dimensiones positivas. Después se vuelve a editar para verificar la asignación de textura. No se certifican FPS ni calidad de cada fotograma, especialmente en dispositivos físicos.
+Espejo: se descargaron PNG/JPEG/PDF normales y reflejados, se decodificaron y compararon las formas de HOLA contra su reflejo geométrico. PNG coincide píxel a píxel; JPEG/PDF usan tolerancia de máscara de tinta del 3 % por compresión con pérdida. pHYs/JFIF a 300 ppp, dimensiones 2362×1063 para 20×9 cm y MediaBox del PDF físico siguen comprobados.
 
-## Capturas actuales
+Plancha: dos piezas de 20×9 cm en A4, sin cambio de escala, colisiones/márgenes, rotación real y espejo una sola vez. La prueba abre la ventana de impresión, decodifica su imagen y comprueba la llamada con un espía de `window.print`. El diálogo nativo y la impresora física no se consideran aprobados.
 
-- `evidence/fase2/desktop-editor.png`: selector personalizado azul, miniatura, arte, espejo y diseño sobre taza. La cámara se giró para mostrar simultáneamente texto/foto; la posición inicial aprobada no cambió.
-- `evidence/fase2/desktop-physical-blue.png`: producto azul sin capa glitter imprimible.
-- `evidence/fase2/touch-editor.png` y `touch-physical-blue.png`: viewport móvil táctil.
-- `evidence/fase2/noWebGL-editor.png`: composición utilizable sin WebGL.
-- `evidence/fase2/plancha.png`: A4 con dos artes a escala.
+PNG mockup y video 360°: generación, archivo con contenido y decodificación del video, seguida de nueva edición sin congelar textura. La ejecución de fiabilidad activa el holográfico del material antes del video. No se certifica suavidad/FPS en móviles físicos.
 
-Las imágenes cargadas son figuras sintéticas de prueba, no fotos de clientes. Los cambios y límites de implementación están en [GLITTER_FASE2A.md](GLITTER_FASE2A.md).
+## Evidencias
 
-## Pendientes y alcance comercial
+- `evidence/fase2b/tasks.txt` e `interface-final.txt`: comandos, salidas y estados de los recorridos finales.
+- `evidence/fase2b/interface-browser.json`: 24 escenarios de interfaz.
+- `evidence/fase2b/desktop-effects.png`, `desktop-layers.png`, `desktop-sheet.png`: herramientas y ambas vistas.
+- `evidence/fase2b/mobile-effects.png`, `mobile-layers.png`, `mobile-sheet.png`: capturas de viewport móvil (no una imagen larga que desplace artificialmente la barra fija).
+- `evidence/fase2b/noWebGL-*.png`: fallback con edición 2D disponible.
+- `evidence/fase2b/compat/`: informes y capturas de las suites aprobadas repetidas sobre esta interfaz. `glitter/print-files.json` registra las métricas de archivos reales.
+- La prueba de paquete escribe `evidence/fase2b/package.json` con SHA-256 exacto del ZIP servido.
 
-No se probaron impresoras reales, sublimación física, Safari/iOS/Android físicos ni rendimiento prolongado en teléfonos. La rugosidad, metalicidad y clearcoat son una aproximación PBR de la purpurina; no una calibración óptica. No hay HDR, microgeometría, refracción ni validación comercial de los modelos. El glitter imprimible sigue siendo color raster, no un material reflectante producido por una impresora corriente. El rendimiento comprobado es el de este entorno y viewport emulado.
+Las evidencias anteriores de Fase 1/2A se preservan. Los documentos históricos se conservan como referencia; las rutas anteriores siguen describiendo aquellas entregas.
 
-Se conservan los límites de activos, autoguardado local, importación atómica y ocho productos. La plancha no se persiste; usar una sola pestaña por documento. No se añadieron cuentas, pagos, suscripciones, servicios remotos, modelos nuevos ni otros efectos. Estado: prototipo validado para revisión, no versión comercial certificada. Reversión a `60c2781` documentada, sin publicar a producción.
+## Vista previa
+
+[Escritorio](evidence/fase2b/desktop-effects.png) · [Capas](evidence/fase2b/desktop-layers.png) · [Móvil](evidence/fase2b/mobile-effects.png) · [Plancha](evidence/fase2b/desktop-sheet.png)
+
+## Pendientes
+
+No se probaron dispositivos iPhone/Android físicos, Safari ni impresoras reales; tampoco usabilidad con usuarios, auditoría de accesibilidad exhaustiva o rendimiento prolongado. El holográfico imprimible es multicolor plano, sin efecto óptico físico. El material con iridescencia es aproximado; modelos/materiales requieren calibración comercial. La plancha no se autoguarda y grupos/selección múltiple siguen fuera de esta fase. Se recomienda una sola pestaña del navegador por documento, como en Fase 2A.
+
+El estado es prototipo validado para revisión. Decisiones, archivos modificados, alcance y reversión: [INTERFAZ_FASE2B.md](INTERFAZ_FASE2B.md). No se publica en producción sin autorización.

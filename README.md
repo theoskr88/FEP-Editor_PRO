@@ -1,4 +1,4 @@
-# FEP Editor PRO · Fase 2A · glitter
+# FEP Editor PRO · Fase 2B · interfaz profesional
 
 Se conserva el editor recibido, sus ocho modelos, lienzo y módulo de planchas. La interfaz original se amplía con controles de capas y glitter; no se sustituye por otro editor.
 
@@ -21,13 +21,22 @@ npm run test:regressions
 FEP_CHROMIUM=/usr/bin/chromium npm run test:browser
 FEP_CHROMIUM=/usr/bin/chromium npm run test:reliability
 FEP_CHROMIUM=/usr/bin/chromium npm run test:glitter
+FEP_CHROMIUM=/usr/bin/chromium npm run test:interface
 npm run package
 npm run test:package
 ```
 
-Las pruebas de navegador requieren Chromium instalado. Bloquean conexiones externas; las pruebas normales usan los archivos locales del paquete. `test:package` extrae el ZIP de Pages y lo sirve sin inyección de código de pruebas. `tests/baseline.mjs` es un diagnóstico histórico del commit `175591e`, no parte de las pruebas normales.
+Las pruebas de navegador requieren Chromium instalado. Las suites anteriores navegan las pestañas/acordeones reales mediante un ayudante; `test:interface` recorre la interfaz directamente. La evidencia actual se escribe en `docs/evidence/fase2b`, sin sobrescribir Fase 2A. Bloquean conexiones externas; las pruebas normales usan los archivos locales del paquete. `test:package` extrae el ZIP de Pages y lo sirve sin inyección de código de pruebas. `tests/baseline.mjs` es un diagnóstico histórico del commit `175591e`, no parte de las pruebas normales.
 
-`npm run package` escribe los ZIP `FEP_EDITOR_PRO_FASE2A_PAGES.zip` y `FEP_EDITOR_PRO_FASE2A_FUENTE.zip` en `/workspace/deliverables` (alternativa: `python3 scripts/package.py --out /ruta/de/salida`). Generar desde una copia de trabajo limpia para una entrega reproducible. No despliega. El ZIP de fuente incluye archivos versionados y excluye ZIP generados, cachés y `node_modules`; ejecutar `npm ci` para las pruebas. El ZIP de Pages se sirve directamente con `index.html` en la raíz.
+`npm run package` escribe los ZIP `FEP_EDITOR_PRO_FASE2B_PAGES.zip` y `FEP_EDITOR_PRO_FASE2B_FUENTE.zip` en `/workspace/deliverables` (alternativa: `python3 scripts/package.py --out /ruta/de/salida`). Generar desde una copia de trabajo limpia para una entrega reproducible. No despliega. El ZIP de fuente incluye archivos versionados y excluye ZIP generados, cachés y `node_modules`; ejecutar `npm ci` para las pruebas. El ZIP de Pages se sirve directamente con `index.html` en la raíz.
+
+## Seis pestañas, un mismo editor
+
+Producto, Diseño, Capas, Efectos, Escena e Imprimir. En escritorio, herramientas y plancha se acoplan a la izquierda; el lienzo 2D y el visor 3D siguen visibles. En móvil, una barra inferior abre paneles con scroll propio; se cierran con la misma pestaña, × o Escape. Guardar/Abrir JSON y Restaurar versión anterior están en Proyecto. Capas incluye miniaturas, orden, bloqueo y visibilidad.
+
+Fino, grueso, metálico y holográfico son preajustes del motor glitter existente. El holográfico imprimible simula colores; el material 3D aproxima iridescencia. El arte de sublimación no incorpora el revestimiento físico. No hay modelos nuevos ni Taza mágica.
+
+[Diseño, compatibilidad, límites y reversión](docs/INTERFAZ_FASE2B.md) · [Pruebas y capturas](docs/RESULTADOS.md).
 
 ## Glitter: un selector de color, dos destinos
 

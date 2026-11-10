@@ -1,3 +1,5 @@
+> Fase 2B reorganiza la presentación sin sustituir el editor. Ver [INTERFAZ_FASE2B.md](INTERFAZ_FASE2B.md) y [RESULTADOS.md](RESULTADOS.md). El contenido inferior conserva el contexto anterior.
+
 > Actualización Fase 2A: color, destinos independientes, caché y material glitter se describen en [GLITTER_FASE2A.md](GLITTER_FASE2A.md); resultados actuales en [RESULTADOS.md](RESULTADOS.md). La tabla inferior conserva contexto de Fase 1.
 
 # Auditoría del editor existente

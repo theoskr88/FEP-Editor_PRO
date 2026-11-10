@@ -1,3 +1,4 @@
+import {evidencePath} from './evidence.mjs';
 // Exercise actual download buttons, then decode their files (PDF's embedded JPEG).
 import {start} from './harness.mjs';
 import assert from 'node:assert/strict';
@@ -16,4 +17,4 @@ try{
   assert.equal(metrics.w,2362);assert.equal(metrics.h,1063);assert(metrics.ink>1000);assert(metrics.mismatch/metrics.ink<.03,`${type}: mirrored glyph geometry mismatch`);if(type==='image/png')assert.equal(metrics.exact,0);assert.equal(await p.evaluate(()=>window.__audit.texture()),texture);results.push({type,passed:true,...metrics});console.log('PASS actual file mirror',type,metrics);
  }
  assert.deepEqual(h.errors,[]);assert.deepEqual(h.external,[]);
-}finally{await h.close();await fs.writeFile('docs/evidence/fase2/print-files.json',JSON.stringify({passed:results.length,results},null,2)+'\n')}
+}finally{await h.close();await fs.writeFile(evidencePath('glitter/print-files.json'),JSON.stringify({passed:results.length,results},null,2)+'\n')}

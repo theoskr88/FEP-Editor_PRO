@@ -11,7 +11,8 @@
     "test:reliability": "node tests/reliability-browser.mjs",
     "package": "python3 scripts/package.py",
     "test:package": "node tests/package-browser.mjs",
-    "test:glitter": "node tests/glitter-browser.mjs && node tests/print-files.mjs"
+    "test:glitter": "node tests/glitter-browser.mjs && node tests/print-files.mjs",
+    "test:interface": "node tests/interface-browser.mjs"
   },
   "dependencies": {
     "three": "0.170.0"
