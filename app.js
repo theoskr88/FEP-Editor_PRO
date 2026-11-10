@@ -1,4 +1,6 @@
-import {paintGlitter,glitterSettings} from './src/glitter.js';
+import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js';
+import {createGlitterCache} from './src/glitter-cache.js';
+import {createGlitterControls} from './src/glitter-controls.js';
 import {prepareProject} from './src/imports.js';
 import {prepareImageFile,enforceDocumentBudget,ASSET_LIMITS} from './src/assets.js';
 import {openDocumentStore,createAutosave} from './src/persistence.js';
@@ -12,6 +14,8 @@ let elements=[],selected=-1,dragging=false,resizing=false,resizeStart=null,histo
 // Lienzo exclusivo para texturas: nunca contiene bordes de selección.
 const textureCanvas=document.createElement('canvas');
 const textureCtx=textureCanvas.getContext('2d');
+const glitterResolution=glitterTextureSize({touch:navigator.maxTouchPoints>0,deviceMemory:navigator.deviceMemory??8,viewportWidth:window.innerWidth});
+const glitterTiles=createGlitterCache({...glitterResolution,limit:glitterResolution.cacheEntries});
 const notify=s=>{$('notice').textContent=s};
 const dimensions={mug:[20,8.5],tumbler:[23,21],shirt:[30,35],tote:[28,30],notebook:[15,21],mousepad:[22,18],cushion:[28,28],keychain:[4,4]};
 function setDimForProduct(){let p=$('product').value, d=dimensions[p];if(!d)return;
@@ -68,12 +72,12 @@ $('imageHeightCm').addEventListener('change',()=>{
   setImageSize($('keepImageRatio').checked?h*old.w/old.h:Number($('imageWidthCm').value),h);
 });
 
-function paintDesign(target,width,height){
+function paintDesign(target,width,height,{transparent=false}={}){
   target.clearRect(0,0,width,height);
-  target.fillStyle='#ffffff';target.fillRect(0,0,width,height);
+  if(!transparent){target.fillStyle='#ffffff';target.fillRect(0,0,width,height)}
   for(let i=0;i<elements.length;i++){
     const e=elements[i];if(e.visible===false)continue;target.save();target.globalAlpha=e.opacity??1;
-    if(e.type==='glitter'){const tile=document.createElement('canvas');tile.width=1024;tile.height=512;paintGlitter(tile.getContext('2d'),tile.width,tile.height,e.glitter);target.drawImage(tile,0,0,width,height);target.restore();continue;}
+    if(e.type==='glitter'){const tile=glitterTiles.get(e.glitter);target.drawImage(tile,0,0,width,height);target.restore();continue;}
     target.translate(e.x*width,e.y*height);
     if(e.type==='text'){
       target.font=`bold ${e.size*width/canvas.width}px Arial`;
@@ -101,7 +105,7 @@ function draw(){
     ctx.restore();
   }
   paintDesign(textureCtx,textureCanvas.width,textureCanvas.height);
-  updateTexture();
+  if(finishMode==='glitter')updateGlitterArtwork();updateTexture();
   if($('mirrorPreview'))refreshIndividualPreview();
 }
 function bounds(e){if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
@@ -192,9 +196,9 @@ $('rotatePlus').onclick=()=>setPrintRotation(printRotationDeg+5);
 $('rotationViewFront').onclick=focusDesignFront;
 $('rotationNumber').addEventListener('change',e=>setPrintRotation(e.target.value));
 $('widthCm').onchange=()=>{updateDimensions();buildModel()};$('heightCm').onchange=updateDimensions;$('product').onchange=()=>{setDimForProduct();updateRotationToolbar()};
-function projectSnapshot(){return {version:2,glitter:readGlitterControls(),product:$('product').value,color:$('productColor').value,width:documentWidth,height:documentHeight,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,viewerBackground:$('viewerBackground').value,showGuides:preferredGuides,keepImageRatio:$('keepImageRatio').checked,elements:elements.map(({img,...e})=>e)}}
+function projectSnapshot(){return {version:2,glitterSchema:GLITTER_SCHEMA,glitter:glitterControls.material(),glitterDraft:glitterControls.draft(),glitterMode:glitterControls.mode(),product:$('product').value,color:$('productColor').value,width:documentWidth,height:documentHeight,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,viewerBackground:$('viewerBackground').value,showGuides:preferredGuides,keepImageRatio:$('keepImageRatio').checked,elements:elements.map(({img,...e})=>e)}}
 function applyPreparedProject({data,warnings}){
- applyGlitterControls(data.glitter);$('product').value=data.product;$('productColor').value=data.color;finishMode=data.finishMode;$('finishMode').value=finishMode;
+ glitterControls.restore({material:data.glitter,draft:data.glitterDraft,mode:data.glitterMode});$('product').value=data.product;$('productColor').value=data.color;finishMode=data.finishMode;$('finishMode').value=finishMode;
  $('mirrorModeIndividual').checked=data.mirrorMode==='espejo';$('widthCm').value=data.width;$('heightCm').value=data.height;
  elements=data.elements;selected=-1;history=[];redoStack=[];printRotationDeg=data.printRotationDeg;
  if(['#17253a','#e6eaf0','#ffffff'].includes(data.viewerBackground)){$('viewerBackground').value=data.viewerBackground;if(scene)scene.background=new THREE.Color(data.viewerBackground)}
@@ -306,12 +310,33 @@ $('exportPrint').onclick=async()=>{
 let baseMat,modelRoot,modelUVs=[];
 // Efectos no destructivos: se visualizan exclusivamente en el modelo 3D.
 let finishMode='standard';
-const glitterCanvas=document.createElement('canvas'); glitterCanvas.width=512;glitterCanvas.height=256;
-const glitterCtx=glitterCanvas.getContext('2d');
-// Brillos deterministas, sin aleatorizar cada fotograma ni alterar la impresión.
-paintGlitter(glitterCtx,512,256,glitterSettings(),{material:true});
-const glitterTexture=new THREE.CanvasTexture(glitterCanvas);glitterTexture.colorSpace=THREE.SRGBColorSpace;glitterTexture.flipY=true;
-$('finishMode').onchange=e=>{finishMode=e.target.value;buildModel()};
+function glitterSurface(){const c=document.createElement('canvas');c.width=glitterResolution.width;c.height=glitterResolution.height;return c}
+function glitterCanvasTexture(c){const t=new THREE.CanvasTexture(c);t.flipY=true;return t}
+const glitterCanvas=glitterSurface(),glitterCtx=glitterCanvas.getContext('2d');
+const glitterNormalCanvas=glitterSurface(),glitterRoughCanvas=glitterSurface();
+const glitterMaskCanvas=glitterSurface(),physicalArtCanvas=glitterSurface();
+const glitterTexture=glitterCanvasTexture(glitterCanvas);glitterTexture.colorSpace=THREE.SRGBColorSpace;
+const glitterNormalTexture=glitterCanvasTexture(glitterNormalCanvas),glitterRoughTexture=glitterCanvasTexture(glitterRoughCanvas);
+const glitterMaskTexture=glitterCanvasTexture(glitterMaskCanvas),physicalArtTexture=glitterCanvasTexture(physicalArtCanvas);physicalArtTexture.colorSpace=THREE.SRGBColorSpace;
+let materialFrame=0,materialKey='',materialGenerations=0;
+function updateGlitterArtwork(){
+ const art=physicalArtCanvas.getContext('2d'),mask=glitterMaskCanvas.getContext('2d'),w=physicalArtCanvas.width,h=physicalArtCanvas.height;
+ paintDesign(art,w,h,{transparent:true});physicalArtTexture.needsUpdate=true;
+ mask.globalCompositeOperation='source-over';mask.clearRect(0,0,w,h);mask.drawImage(physicalArtCanvas,0,0);mask.globalCompositeOperation='source-in';mask.fillStyle='#000';mask.fillRect(0,0,w,h);mask.globalCompositeOperation='destination-over';mask.fillStyle='#fff';mask.fillRect(0,0,w,h);mask.globalCompositeOperation='source-over';glitterMaskTexture.needsUpdate=true;
+}
+function refreshGlitterMaterial(){
+ materialFrame=0;const settings=glitterControls.material(),key=JSON.stringify(settings);if(key===materialKey)return;materialKey=key;materialGenerations++;
+ for(const [canvas,map]of [[glitterCanvas,'color'],[glitterNormalCanvas,'normal'],[glitterRoughCanvas,'roughness']])paintGlitter(canvas.getContext('2d'),canvas.width,canvas.height,settings,{material:true,map});
+ for(const texture of [glitterTexture,glitterNormalTexture,glitterRoughTexture])texture.needsUpdate=true;
+ const props=glitterMaterialProperties(settings);
+ modelRoot?.traverse(o=>{for(const m of(o.material?(Array.isArray(o.material)?o.material:[o.material]):[])){if(!m.userData.glitterSurface)continue;m.roughness=props.roughness;m.metalness=props.metalness;m.clearcoat=props.clearcoat;m.clearcoatRoughness=props.clearcoatRoughness;m.normalScale.setScalar(props.normalStrength);if(m.userData.glitterSurface==='body')m.color.set(settings.color)}});
+}
+function queueGlitterMaterial(){if(!materialFrame)materialFrame=requestAnimationFrame(refreshGlitterMaterial)}
+const glitterControls=createGlitterControls({preview:settings=>{const node=$('glitterPreview');node.getContext('2d').drawImage(glitterTiles.get(settings),0,0,node.width,node.height)},onMaterialChange:queueGlitterMaterial});
+// Initial maps must exist before building the first model.
+function initializeGlitterMaps(){const settings=glitterControls.material();for(const [canvas,map]of [[glitterCanvas,'color'],[glitterNormalCanvas,'normal'],[glitterRoughCanvas,'roughness']])paintGlitter(canvas.getContext('2d'),canvas.width,canvas.height,settings,{material:true,map});materialKey=JSON.stringify(settings);materialGenerations++}
+initializeGlitterMaps();
+$('finishMode').onchange=e=>{finishMode=e.target.value;if(finishMode==='glitter'){glitterControls.switchMode('material');updateGlitterArtwork()}buildModel()};
 function selectedImageForFit(){const e=elements[selected];if(!e||e.type!=='image'){notify('Selecciona una imagen en el lienzo para usar esta herramienta.');return null}const im=getImage(e);if(!im?.naturalWidth){notify('La imagen todavía está cargando.');return null}return {e,im}}
 function quickFit(mode){const item=selectedImageForFit();if(!item)return;const {e,im}=item;addHistory();const sourceRatio=im.naturalWidth/im.naturalHeight;const areaRatio=canvas.width/canvas.height;
  if(mode==='center'){e.x=.5;e.y=.5}
@@ -367,7 +392,7 @@ function focusPrintEdge(edge){
 
 function init3D(){const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,node.clientWidth/430,.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(node.clientWidth,430);node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();window.addEventListener('resize',()=>{let w=node.clientWidth;camera.aspect=w/430;camera.updateProjectionMatrix();renderer.setSize(w,430)})}
 function addGeo(geo,mat,x=0,y=0,z=0,rotateX=0){let o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);o.rotation.x=rotateX;modelRoot.add(o);return o}
-function buildModel(){if(!scene)return;if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material]))material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,plain=new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});let printMat=new THREE.MeshStandardMaterial({map:texture,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;let p=$('product').value;
+function buildModel(){if(!scene)return;if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material]))material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&['mug','tumbler'].includes(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';let printMat=new THREE.MeshStandardMaterial({map:physical?physicalArtTexture:texture,transparent:physical,depthWrite:!physical,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;
 if(p==='mug'||p==='tumbler'){let r=p==='mug'?.93:.66,h=p==='mug'?2.05:3;// Cuerpo completo sin arte: evita repetir el archivo en toda la taza.
 if(p==='mug'){
   // Taza 11 oz de paredes lisas, base discreta y labio delgado (foto de referencia).
@@ -395,10 +420,10 @@ const printSurface=addGeo(
 printSurface.rotation.y=THREE.MathUtils.degToRad(printRotationDeg);
 // Segunda superficie puramente decorativa: jamás se usa para exportar arte plano.
 if(finishMode==='glitter'){
- const glossMat=new THREE.MeshStandardMaterial({map:glitterTexture,bumpMap:glitterTexture,bumpScale:.025,transparent:true,opacity:1,roughness:({gloss:.16,satin:.45,matte:.8})[readGlitterControls().finish],metalness:.65,depthWrite:false,side:THREE.FrontSide});
+ const glossMat=new THREE.MeshPhysicalMaterial({map:glitterTexture,normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,alphaMap:glitterMaskTexture,transparent:true,opacity:1,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,depthWrite:false,side:THREE.FrontSide});glossMat.userData.glitterSurface='overlay';
  const sparkles=addGeo(new THREE.CylinderGeometry(r+.024,r+.024,h-.29,128,1,true,-printArc/2,printArc),glossMat);
  sparkles.rotation.y=THREE.MathUtils.degToRad(printRotationDeg);
- printMat.roughness=.28;printMat.metalness=.06;
+ // Artwork remains above the coating; the inverse alpha mask protects photos and text.
 }
 // Indicadores de ambos límites: quedan fuera del PNG para impresión.
 if($('showGuides').checked) for (const theta of [-printArc/2+THREE.MathUtils.degToRad(printRotationDeg),printArc/2+THREE.MathUtils.degToRad(printRotationDeg)]) {
@@ -622,15 +647,13 @@ for(const id of ['delete','applyText','quickCenter','quickContain','quickCover']
  const button=$(id),handler=button.onclick;if(handler)button.onclick=ev=>{if(elements[selected]?.locked){notify('La capa está bloqueada.');return}handler(ev)};
 }
 
-function readGlitterControls(){return glitterSettings({palette:$('glitterPalette').value,color:$('glitterColor').value,size:+$('glitterSize').value,intensity:+$('glitterIntensity').value,finish:$('glitterFinish').value})}
-function applyGlitterControls(value){const s=glitterSettings(value);for(const [id,key]of [['glitterPalette','palette'],['glitterColor','color'],['glitterSize','size'],['glitterIntensity','intensity'],['glitterFinish','finish']])$(id).value=s[key];paintGlitter(glitterCtx,512,256,s,{material:true});glitterTexture.needsUpdate=true;}
-for(const id of ['glitterPalette','glitterColor','glitterSize','glitterIntensity','glitterFinish'])$(id).onchange=()=>{applyGlitterControls(readGlitterControls());buildModel()};
-$('applyGlitterLayer').onclick=()=>{const e=elements[selected];if(e?.type!=='glitter'||e.locked){notify('Selecciona una capa glitter desbloqueada.');return}addHistory();e.glitter=readGlitterControls();draw()};
-$('addGlitterLayer').onclick=()=>{if(elements.length>=500){notify('Máximo 500 capas');return}addHistory();elements.unshift({type:'glitter',x:.5,y:.5,locked:false,glitter:readGlitterControls()});selected=0;draw();notify('Glitter simulado añadido al arte imprimible, debajo del diseño.');};
+function readGlitterControls(){return glitterControls.current()}
+$('applyGlitterLayer').onclick=()=>{const e=elements[selected];if(glitterControls.mode()!=='print'||e?.type!=='glitter'||e.locked){notify('Selecciona una capa glitter desbloqueada en modo imprimible.');return}addHistory();e.glitter=readGlitterControls();draw();notify('Glitter aplicado solo a la capa seleccionada.');};
+$('addGlitterLayer').onclick=()=>{if(elements.length>=500){notify('Máximo 500 capas');return}const settings=readGlitterControls();addHistory();elements.unshift({type:'glitter',x:.5,y:.5,locked:false,glitter:settings});selected=0;glitterControls.selectLayer(settings);draw();notify('Glitter simulado añadido al arte imprimible, debajo del diseño.');};
 function refreshLayers(){
  const list=$('layerList');if(!list)return;list.replaceChildren();
  for(let i=elements.length-1;i>=0;i--){const e=elements[i],row=document.createElement('div');row.className='btnrow';
- const choose=document.createElement('button');choose.textContent=(selected===i?'✓ ':'')+(e.type==='text'?e.text.slice(0,24):e.type==='glitter'?'Glitter imprimible':'Imagen');choose.onclick=()=>{selected=i;if(e.type==='glitter')applyGlitterControls(e.glitter);loadSelectedTextIntoInputs();updateImageControls();draw()};row.append(choose);
+ const choose=document.createElement('button');choose.textContent=(selected===i?'✓ ':'')+(e.type==='text'?e.text.slice(0,24):e.type==='glitter'?'Glitter imprimible':'Imagen');choose.onclick=()=>{selected=i;if(e.type==='glitter')glitterControls.selectLayer(e.glitter);loadSelectedTextIntoInputs();updateImageControls();draw()};row.append(choose);
  for(const [key,label] of [['visible','Visible'],['locked','Bloquear']]){const lab=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.checked=key==='visible'?e.visible!==false:!!e.locked;input.setAttribute('aria-label',label+' '+i);input.onchange=()=>{addHistory();e[key]=input.checked;draw()};lab.append(input,document.createTextNode(label));row.append(lab)}list.append(row);
  }
  $('layerOpacity').value=String(Math.round((elements[selected]?.opacity??1)*100));
@@ -655,4 +678,4 @@ try{
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autosave.flush()});window.addEventListener('pagehide',()=>autosave.flush());
  $('restorePrevious').onclick=async()=>{try{const old=await documentStore.read('previous');if(!old){notify('Todavía no hay una versión anterior.');return}const before=JSON.stringify(projectSnapshot()),prepared=await prepareProject(old.document);if(before!==JSON.stringify(projectSnapshot()))throw Error('El documento cambió; vuelve a intentarlo');applyPreparedProject(prepared);await autosave.flush();notify('Versión anterior restaurada; la versión reemplazada queda como respaldo.')}catch(error){notify('No se pudo restaurar: '+error.message)}};
 }catch(error){showSaveStatus('error',error);$('restorePrevious').title='Almacenamiento local no disponible'}
-finally{startupControls.forEach(([node,disabled])=>node.disabled=disabled);if(!autosave)$('restorePrevious').disabled=true;updateImageControls()}
+finally{startupControls.forEach(([node,disabled])=>node.disabled=disabled);if(!autosave)$('restorePrevious').disabled=true;updateImageControls();glitterControls.switchMode(glitterControls.mode())}
