@@ -5,7 +5,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright-core';
 export const root=fileURLToPath(new URL('../',import.meta.url));
-export async function start({baseline=false,mobile=false,noWebGL=false}={}){
+export async function start({baseline=false,mobile=false,noWebGL=false,storageUnavailable=false}={}){
  const source=baseline?'/workspace/editor-reference-v095':root;
  const appProbe=`\nwindow.__audit={mockup:()=>{renderer.render(scene,camera);return renderer.domElement.toDataURL()},snapshot:projectSnapshot,flush:()=>autosave.flush(),state:()=>({elements:elements.map(e=>e?JSON.parse(JSON.stringify({...e,img:undefined})):null),selected,history:history.length,redo:redoStack.length,width:canvas.width,height:canvas.height,product:$('product').value}),materials:()=>{let design=0,glitter=0;modelRoot?.traverse(o=>{for(const m of(o.material?(Array.isArray(o.material)?o.material:[o.material]):[])){if(m.map===texture)design++;if(m.map===glitterTexture)glitter++;}});return{design,glitter}},texture:()=>textureCanvas.toDataURL()};`;
  const sheetProbe=`\nwindow.__sheetAudit={valid:checkExport,state:()=>items.map(({img,...i})=>({...i})),canvas:()=>fullCanvas()};`;
@@ -17,6 +17,7 @@ export async function start({baseline=false,mobile=false,noWebGL=false}={}){
  await context.route('**/*',async route=>{let u=new URL(route.request().url());if(u.origin===origin)return route.continue();const prefix='/npm/three@0.170.0/';if(u.hostname==='cdn.jsdelivr.net'&&u.pathname.startsWith(prefix)){
   const p=u.pathname.slice(prefix.length);if(!p.includes('..')){try{return route.fulfill({contentType:'text/javascript',body:await fs.readFile(path.join(root,'node_modules/three',p))});}catch{}}
  }external.push(u.origin);return route.abort();});
+ if(storageUnavailable)await page.addInitScript(()=>{Object.defineProperty(window,'indexedDB',{get(){throw Error('Storage disabled')}});Object.defineProperty(window,'localStorage',{get(){throw Error('Storage disabled')}})});
  if(noWebGL)await page.addInitScript(()=>{const get=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(name,...args){return /webgl/.test(name)?null:get.call(this,name,...args);};});
  await page.goto(origin);await page.waitForFunction(()=>window.__sheetAudit);if(!noWebGL)await page.waitForFunction(()=>window.__estudioPrintAPI&&window.__audit);
  return {page,context,errors,external,origin,close:async()=>{await browser.close();await new Promise(r=>server.close(r));}};

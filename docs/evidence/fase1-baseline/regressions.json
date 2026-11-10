@@ -1,0 +1,8 @@
+{
+  "passed": 3,
+  "results": [
+    "drag preserves grab offset",
+    "export raster excludes physical glitter",
+    "export raster includes printable glitter"
+  ]
+}

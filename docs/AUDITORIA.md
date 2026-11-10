@@ -15,18 +15,18 @@ Esta intervención corrige defectos reproducidos y agrega un primer tramo de cap
 | Imágenes PNG/JPEG/WebP | Importación, proporción, medidas cm, arrastre, rueda, centrado, contener y cubrir existentes. Falta validación de decodificación, límites de píxeles y aviso de resolución fuente insuficiente. |
 | Selección y transformación | Selección individual; corregido salto por pérdida del punto de agarre. Sin rotación individual, multiselección ni alineación entre objetos. Mapeo de puntero corregido para object-fit. |
 | Capas | Añadida lista, visibilidad, bloqueo, duplicación, orden y opacidad. Texto, imagen y glitter; fondo blanco implícito. Sin grupos, capas de figuras o efectos independientes. |
-| Historial | 40 estados de elementos. Corregido borrado de Rehacer al seleccionar; imagen runtime excluida del JSON de historial. No incluye todavía tamaño/producto/acabados/cámara/plancha. |
-| Guardado local | JSON explícito V2; lectura V1. Validación estructural previa a mutar el documento. Conserva glitter/capas. Sin autoguardado, IndexedDB, recuperación tras cierre ni persistencia de planchas. |
+| Historial | Hasta 40 estados de capas, con activos compartidos y presupuesto total de 32 MP. Corregido borrado de Rehacer al seleccionar. No incluye todavía tamaño/producto/acabados/cámara/plancha. |
+| Guardado local | JSON V2/V1 más autoguardado IndexedDB recuperable, versión anterior y preparación atómica de activos. La plancha no se persiste. Ver CAMBIOS.md. |
 | Zoom / táctil | Controles Orbit 3D y puntero 2D existentes. No hay zoom/pan 2D, selección múltiple táctil ni prueba física en teléfono. |
 | Glitter imprimible | Nuevo fondo por capa determinista con cinco paletas, color personalizado, tamaño, intensidad y acabado. Parte del arte plano. |
 | Glitter físico | Material Standard con mapa y relieve aproximado; responde a luces y movimiento. Taza/vaso únicamente. No se exporta al arte de sublimación. |
-| Taza mágica | Conservada; efecto solo mockup. Corregida sustitución accidental de textura al editar. Verificación física pendiente. |
+| Acabado antiguo de calor | Retirado en consolidación Fase 1; proyectos antiguos migrados a normal con aviso y arte conservado. |
 | Modelos | Ocho geometrías originales: taza, vaso, polera, bolsa, libreta, mousepad, cojín y llavero. No equivalen a modelos calibrados ni GLB comerciales. |
 | Giro y zona imprimible | Ángulo de arte sobre taza/vaso y guías conservados. No es rotación de una capa ni calibración física de UV. |
 | Exportación | PNG/JPEG con metadatos 300 ppp y PDF raster con medidas físicas. Límite 40 millones de píxeles conservado. No convierte fotos pequeñas en alta resolución real. |
 | Espejo | Reflejo de raster completo existente; no altera el orden de caracteres. Verificación en impresora/sublimación pendiente. |
 | Planchas | Papeles, medidas, margen, separación, copias, orden automático, colisión, exportación e impresión existentes. Corregida rotación real de píxeles. Sin historial/guardado propio ni anidación óptima. |
-| Mockup PNG / WebM | Conservados. No se certificó vídeo ni soporte Safari; dependen de WebGL/MediaRecorder. |
+| Mockup PNG / WebM | Conservados. Generación PNG y WebM comprobada en Chromium con WebGL; Safari y dispositivos físicos pendientes. |
 | Patrones / máscaras / sombras / degradados | No existen herramientas dedicadas. Reutilizar el render por capa en lugar de abrir otro editor. |
 | Escenarios / plantillas comerciales | Pendientes. La escena actual es fondo y luces fijas. |
 

@@ -6,7 +6,8 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 let dragStart=null,gestureHistory=false,importGeneration=0;
-let queueAutosave=()=>{};
+let documentWidth=20,documentHeight=8.5;
+let queueAutosave=()=>{},preferredGuides=$('showGuides').checked;
 let elements=[],selected=-1,dragging=false,resizing=false,resizeStart=null,history=[],redoStack=[],meshGroup,texture,renderer,scene,camera,controls,animRequest,renderQueued=false;
 // Lienzo exclusivo para texturas: nunca contiene bordes de selección.
 const textureCanvas=document.createElement('canvas');
@@ -15,14 +16,19 @@ const notify=s=>{$('notice').textContent=s};
 const dimensions={mug:[20,8.5],tumbler:[23,21],shirt:[30,35],tote:[28,30],notebook:[15,21],mousepad:[22,18],cushion:[28,28],keychain:[4,4]};
 function setDimForProduct(){let p=$('product').value, d=dimensions[p];if(!d)return;
   if(p==='mug'||p==='tumbler')setPrintRotation(DEFAULT_PRINT_ROTATION_DEG);$('widthCm').value=d[0];$('heightCm').value=d[1]; updateDimensions(); buildModel();focusDesignFront()}
-function updateDimensions(){let w=+($('widthCm').value)||20,h=+($('heightCm').value)||8.5;w=Math.max(1,Math.min(100,w));h=Math.max(1,Math.min(100,h));$('widthCm').value=w;$('heightCm').value=h;canvas.width=Math.min(1200,Math.round(4096*w/h));canvas.height=Math.round(canvas.width*h/w);
+function updateDimensions(){let w=+($('widthCm').value)||20,h=+($('heightCm').value)||8.5;w=Math.max(1,Math.min(100,w));h=Math.max(1,Math.min(100,h));$('widthCm').value=w;$('heightCm').value=h;documentWidth=w;documentHeight=h;canvas.width=Math.min(1200,Math.round(4096*w/h));canvas.height=Math.round(canvas.width*h/w);
 textureCanvas.width=canvas.width;textureCanvas.height=canvas.height;
 $('canvasWrap').style.aspectRatio=`${w} / ${h}`;
 $('resolution').textContent=`${w} × ${h} cm`;draw();updateImageControls()}
-function addHistory(){history.push(JSON.stringify(elements.map(e=>({...e,img:undefined}))));if(history.length>40)history.shift();redoStack=[]}
-function restore(s){elements=JSON.parse(s);for(const e of elements)if(e.type==='image'){e.img=new Image();e.img.onload=()=>{draw();requestAnimationFrame(()=>resync3D());};e.img.src=e.data}selected=-1;draw();if($('selectedTextStatus'))refreshSelectedLabel();updateImageControls()}
-function undo(){if(!history.length)return;redoStack.push(JSON.stringify(elements.map(e=>({...e,img:undefined}))));restore(history.pop())}
-function redo(){if(!redoStack.length)return;history.push(JSON.stringify(elements.map(e=>({...e,img:undefined}))));restore(redoStack.pop())}
+function copyElements(source=elements){return source.map(e=>({...e,...(e.glitter?{glitter:{...e.glitter}}:{})}))}
+function trimHistory(){
+ const pixels=()=>{const seen=new Set();let n=0;for(const list of [elements,...history,...redoStack])for(const e of list)if(e.type==='image'&&e.img&&!seen.has(e.data)){seen.add(e.data);n+=e.img.naturalWidth*e.img.naturalHeight}return n};
+ while(history.length+redoStack.length>40||pixels()>ASSET_LIMITS.totalPixels){if(history.length)history.shift();else if(redoStack.length)redoStack.shift();else break}
+}
+function addHistory(){history.push(copyElements());redoStack=[];trimHistory()}
+function restore(state){elements=copyElements(state);selected=-1;draw();refreshSelectedLabel();updateImageControls()}
+function undo(){if(!history.length)return;redoStack.push(copyElements());restore(history.pop())}
+function redo(){if(!redoStack.length)return;history.push(copyElements());restore(redoStack.pop())}
 function getImage(e){if(!e.img && e.data){e.img=new Image();e.img.onload=()=>{draw();requestAnimationFrame(()=>resync3D());};e.img.src=e.data}return e.img}
 
 // Compatibilidad: las imágenes guardadas en V0.5 solo tenían scale.
@@ -84,7 +90,7 @@ function paintDesign(target,width,height){
   }
 }
 function draw(){
-  queueAutosave();
+  trimHistory();queueAutosave();
   refreshLayers();
   paintDesign(ctx,canvas.width,canvas.height);
   // El borde punteado es interfaz de edición y no forma parte del diseño.
@@ -147,7 +153,7 @@ canvas.addEventListener('wheel',ev=>{
   }
   draw();
 },{passive:false});
-$('addText').onclick=()=>{addHistory();elements.push({type:'text',text:$('textValue').value||'Texto',color:$('textColor').value,size:+$('fontSize').value,x:.5,y:.5});selected=elements.length-1;refreshSelectedLabel();updateImageControls();draw();focusDesignFront()};
+$('addText').onclick=()=>{if(elements.length>=500){notify('Máximo 500 capas');return}addHistory();elements.push({type:'text',text:$('textValue').value||'Texto',color:$('textColor').value,size:+$('fontSize').value,x:.5,y:.5});selected=elements.length-1;refreshSelectedLabel();updateImageControls();draw();focusDesignFront()};
 // Los controles son un borrador: escribir nunca modifica automáticamente otra capa.
 function refreshSelectedLabel(){
   const e=elements[selected];
@@ -186,13 +192,13 @@ $('rotatePlus').onclick=()=>setPrintRotation(printRotationDeg+5);
 $('rotationViewFront').onclick=focusDesignFront;
 $('rotationNumber').addEventListener('change',e=>setPrintRotation(e.target.value));
 $('widthCm').onchange=()=>{updateDimensions();buildModel()};$('heightCm').onchange=updateDimensions;$('product').onchange=()=>{setDimForProduct();updateRotationToolbar()};
-function projectSnapshot(){return {version:2,glitter:readGlitterControls(),product:$('product').value,color:$('productColor').value,width:+$('widthCm').value,height:+$('heightCm').value,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,viewerBackground:$('viewerBackground').value,showGuides:$('showGuides').checked,elements:elements.map(({img,...e})=>e)}}
+function projectSnapshot(){return {version:2,glitter:readGlitterControls(),product:$('product').value,color:$('productColor').value,width:documentWidth,height:documentHeight,printRotationDeg,mirrorMode:getMirrorMode(),finishMode,viewerBackground:$('viewerBackground').value,showGuides:preferredGuides,keepImageRatio:$('keepImageRatio').checked,elements:elements.map(({img,...e})=>e)}}
 function applyPreparedProject({data,warnings}){
  applyGlitterControls(data.glitter);$('product').value=data.product;$('productColor').value=data.color;finishMode=data.finishMode;$('finishMode').value=finishMode;
  $('mirrorModeIndividual').checked=data.mirrorMode==='espejo';$('widthCm').value=data.width;$('heightCm').value=data.height;
  elements=data.elements;selected=-1;history=[];redoStack=[];printRotationDeg=data.printRotationDeg;
  if(['#17253a','#e6eaf0','#ffffff'].includes(data.viewerBackground)){$('viewerBackground').value=data.viewerBackground;if(scene)scene.background=new THREE.Color(data.viewerBackground)}
- if(typeof data.showGuides==='boolean')$('showGuides').checked=data.showGuides;
+ if(typeof data.showGuides==='boolean'){preferredGuides=data.showGuides;$('showGuides').checked=data.showGuides}if(typeof data.keepImageRatio==='boolean')$('keepImageRatio').checked=data.keepImageRatio;
  $('rotationDeg').value=String(printRotationDeg);$('rotationValue').textContent=`${Math.round(printRotationDeg)}°`;$('rotationNumber').value=String(Math.round(printRotationDeg));
  updateDimensions();refreshSelectedLabel();buildModel();focusDesignFront();updateRotationToolbar();queueAutosave();notify(warnings.length?'Proyecto cargado. '+warnings.join(' '):'Proyecto cargado');
 }
@@ -528,7 +534,7 @@ function resync3D({resetView=false, selectedObject=false}={}){
   if(resetView){
     if(selectedObject && elements[selected] && ['mug','tumbler'].includes($('product').value)){
       const x=Math.max(0,Math.min(1,Number(elements[selected].x)||0.5));
-      const angle=THREE.MathUtils.degToRad(printRotationDeg)+(0.5-x)*printArc;
+      const angle=THREE.MathUtils.degToRad(printRotationDeg)+(x-0.5)*printArc;
       camera.position.set(5.7*Math.sin(angle),1,5.7*Math.cos(angle));
       controls.target.set(0,0,0);controls.update();
     }else{focusDesignFront();}
@@ -553,7 +559,7 @@ $('exportMockup').onclick=()=>{
 
 // V0.8: herramientas de exportación y presentación sin servidor ni pagos.
 $('viewerBackground').addEventListener('change',e=>scene.background=new THREE.Color(e.target.value));
-$('showGuides').addEventListener('change',()=>buildModel());
+$('showGuides').addEventListener('change',()=>{preferredGuides=$('showGuides').checked;buildModel()});
 $('exportJpg').addEventListener('click',async()=>{
   try{const {w,h}=cmPrint(),c=renderToExportCanvas(getMirrorMode()),raw=await canvasBlob(c,'image/jpeg',.97);
     saveBlob(jpegWithDpi(await raw.arrayBuffer()),`impresion_${w}x${h}cm_${getMirrorMode()}_300ppp.jpg`);
@@ -620,7 +626,7 @@ function readGlitterControls(){return glitterSettings({palette:$('glitterPalette
 function applyGlitterControls(value){const s=glitterSettings(value);for(const [id,key]of [['glitterPalette','palette'],['glitterColor','color'],['glitterSize','size'],['glitterIntensity','intensity'],['glitterFinish','finish']])$(id).value=s[key];paintGlitter(glitterCtx,512,256,s,{material:true});glitterTexture.needsUpdate=true;}
 for(const id of ['glitterPalette','glitterColor','glitterSize','glitterIntensity','glitterFinish'])$(id).onchange=()=>{applyGlitterControls(readGlitterControls());buildModel()};
 $('applyGlitterLayer').onclick=()=>{const e=elements[selected];if(e?.type!=='glitter'||e.locked){notify('Selecciona una capa glitter desbloqueada.');return}addHistory();e.glitter=readGlitterControls();draw()};
-$('addGlitterLayer').onclick=()=>{addHistory();elements.unshift({type:'glitter',x:.5,y:.5,locked:false,glitter:readGlitterControls()});selected=0;draw();notify('Glitter simulado añadido al arte imprimible, debajo del diseño.');};
+$('addGlitterLayer').onclick=()=>{if(elements.length>=500){notify('Máximo 500 capas');return}addHistory();elements.unshift({type:'glitter',x:.5,y:.5,locked:false,glitter:readGlitterControls()});selected=0;draw();notify('Glitter simulado añadido al arte imprimible, debajo del diseño.');};
 function refreshLayers(){
  const list=$('layerList');if(!list)return;list.replaceChildren();
  for(let i=elements.length-1;i>=0;i--){const e=elements[i],row=document.createElement('div');row.className='btnrow';
@@ -644,9 +650,9 @@ try{
  if(current){try{applyPreparedProject(await prepareProject(current.document));showSaveStatus('saved')}catch(error){showSaveStatus('error',error);notify('La copia actual no se pudo recuperar. Usa Restaurar versión anterior o abre un JSON; no se sobrescribió la copia.')}}
  else autosaveStatus.textContent='Autoguardado local activo';
  autosave=createAutosave({store:documentStore,snapshot:projectSnapshot,status:showSaveStatus});
- let observed=JSON.stringify(projectSnapshot());queueAutosave=()=>{const next=JSON.stringify(projectSnapshot());if(next!==observed){observed=next;autosave.schedule()}};
+ const assetIDs=new WeakMap();let nextID=0;const fingerprint=()=>{const state=projectSnapshot();state.elements=elements.map(({img,data,...e})=>{if(img&&!assetIDs.has(img))assetIDs.set(img,++nextID);return {...e,asset:img?assetIDs.get(img):null}});return JSON.stringify(state)};let observed=fingerprint();queueAutosave=()=>{const next=fingerprint();if(next!==observed){observed=next;autosave.schedule()}};
  for(const event of ['input','change','click'])document.addEventListener(event,()=>queueMicrotask(queueAutosave));
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autosave.flush()});window.addEventListener('pagehide',()=>autosave.flush());
  $('restorePrevious').onclick=async()=>{try{const old=await documentStore.read('previous');if(!old){notify('Todavía no hay una versión anterior.');return}const before=JSON.stringify(projectSnapshot()),prepared=await prepareProject(old.document);if(before!==JSON.stringify(projectSnapshot()))throw Error('El documento cambió; vuelve a intentarlo');applyPreparedProject(prepared);await autosave.flush();notify('Versión anterior restaurada; la versión reemplazada queda como respaldo.')}catch(error){notify('No se pudo restaurar: '+error.message)}};
 }catch(error){showSaveStatus('error',error);$('restorePrevious').title='Almacenamiento local no disponible'}
-finally{startupControls.forEach(([node,disabled])=>node.disabled=disabled);updateImageControls()}
+finally{startupControls.forEach(([node,disabled])=>node.disabled=disabled);if(!autosave)$('restorePrevious').disabled=true;updateImageControls()}

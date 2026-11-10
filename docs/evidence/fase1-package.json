@@ -1,0 +1,14 @@
+{
+  "archive": "FEP_EDITOR_PRO_FASE1_PAGES.zip",
+  "sha256": "e4cfa79ffca1b73db80edf6f54c85c50e9a6b9f939dcfb626a583f8bb7ab0022",
+  "passed": true,
+  "checks": [
+    "static imports from extracted ZIP",
+    "WebGL canvas",
+    "text editing",
+    "autosave across reload",
+    "no external requests",
+    "no missing dependencies",
+    "no JS errors"
+  ]
+}
