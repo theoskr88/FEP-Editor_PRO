@@ -1,0 +1,22 @@
+{
+  "programs": [],
+  "stream_groups": [],
+  "streams": [
+    {
+      "width": 570,
+      "height": 552,
+      "avg_frame_rate": "24/1",
+      "nb_read_frames": "72"
+    }
+  ],
+  "format": {
+    "duration": "2.958000"
+  },
+  "passed": 4,
+  "sha256": "6b5cbd4cdb75bff444d641156dad52fd1adff2e15d658dd4482f7c61325b8881",
+  "viewpointFrameSha256": [
+    "d886f7944e4f7ba8703ce14a1a4369b415f3cd0bd3eef7ac45afc0cae11f6769",
+    "d4b7f222005a5074ac0d389a4035f551a36d4ffa48bab36e827d78b80789458e"
+  ],
+  "note": "72 decoded frames, 24 fps, duration within one frame, orbit changes pixels. Software renderer; no device performance certification."
+}

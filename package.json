@@ -22,11 +22,13 @@
     "test:vector": "node tests/vector-browser.mjs",
     "test:acceptance": "node tests/acceptance-browser.mjs",
     "test:profiles": "node tests/profiles-browser.mjs",
-    "test:creative": "node tests/creative-browser.mjs"
+    "test:creative": "node tests/creative-browser.mjs",
+    "test:mockup": "node tests/mockup-browser.mjs"
   },
   "dependencies": {
     "clipper-lib": "6.4.2",
-    "three": "0.170.0"
+    "three": "0.170.0",
+    "webm-muxer": "5.1.4"
   },
   "devDependencies": {
     "playwright-core": "1.58.2"

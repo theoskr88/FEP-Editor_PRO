@@ -1,0 +1,9 @@
+export const MOCKUP_PRESETS={original:{name:'Original',background:'#17253a',floor:'#d4dce3',key:2.8,fill:1,ambient:2},studio:{name:'Estudio blanco',background:'#f1f4f7',floor:'#e1e6eb',key:3.2,fill:.65,ambient:.9},table:{name:'Mesa cálida',background:'#e8dfd4',floor:'#a58564',key:3.4,fill:.5,ambient:.8},workshop:{name:'Taller',background:'#435366',floor:'#88939e',key:3.8,fill:.9,ambient:.6},commercial:{name:'Escena comercial',background:'#eee2d4',floor:'#d6bd9f',key:3,fill:1,ambient:1}};
+export const CAMERA_PRESETS={original:[0,1,5.7],front:[0,.4,5.7],hero:[3.8,2.2,4.8],left:[-5.7,1,0],top:[0,6,.5]};
+export function normalizeMockup(input={},legacyBackground='#17253a'){
+ if(!input||typeof input!=='object'||Array.isArray(input))throw Error('Escena inválida');const s={preset:'original',background:legacyBackground||'#17253a',floor:'#d4dce3',key:2.8,fill:1,ambient:2,exposure:1,shadows:false,roughness:null,bodyTexture:'none',camera:'original',photoWidth:1920,videoFps:24,videoSeconds:6,videoHeight:720,...input};
+ if(typeof s.preset!=='string'||typeof s.camera!=='string'||!Object.hasOwn(MOCKUP_PRESETS,s.preset)||!Object.hasOwn(CAMERA_PRESETS,s.camera)||!['none','ceramic','fabric'].includes(s.bodyTexture)||![1280,1920,3840].includes(s.photoWidth)||![15,24,30].includes(s.videoFps)||![720,1080].includes(s.videoHeight))throw Error('Escenario, cámara o formato inválido');
+ for(const key of ['background','floor'])if(typeof s[key]!=='string'||!/^#[0-9a-f]{6}$/i.test(s[key]))throw Error('Color de escena inválido');
+ for(const key of ['key','fill','ambient'])if(!Number.isFinite(s[key])||s[key]<0||s[key]>6)throw Error('Luz fuera de rango');
+ if(!Number.isFinite(s.exposure)||s.exposure<.3||s.exposure>2||!Number.isFinite(s.videoSeconds)||s.videoSeconds<3||s.videoSeconds>12||typeof s.shadows!=='boolean'||(s.roughness!==null&&(!Number.isFinite(s.roughness)||s.roughness<0||s.roughness>1)))throw Error('Acabado o video fuera de rango');return s;
+}

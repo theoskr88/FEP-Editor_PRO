@@ -1,0 +1,38 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('#tab-scene')[22m
+[2m    - locator resolved to <button role="tab" type="button" tabindex="-1" id="tab-scene" data-tool="scene" aria-selected="false" aria-expanded="false" aria-controls="panel-scene">…</button>[22m
+[2m  - attempting click action[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <dialog open="" id="startScreen" aria-labelledby="startTitle">…</dialog> intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <dialog open="" id="startScreen" aria-labelledby="startTitle">…</dialog> intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 100ms[22m
+[2m    55 × waiting for element to be visible, enabled and stable[22m
+[2m       - element is visible, enabled and stable[22m
+[2m       - scrolling into view if needed[22m
+[2m       - done scrolling[22m
+[2m       - <dialog open="" id="startScreen" aria-labelledby="startTitle">…</dialog> intercepts pointer events[22m
+[2m     - retrying click action[22m
+[2m       - waiting 500ms[22m
+
+    at reveal (/workspace/FEP-Editor_PRO/tests/navigation.mjs:6:271)
+    at async Proxy.<anonymous> (/workspace/FEP-Editor_PRO/tests/navigation.mjs:11:230)
+    at async file:///workspace/FEP-Editor_PRO/tests/mockup-fallback.mjs:2:286 {
+  name: 'TimeoutError'
+}
+
+Node.js v24.22.1

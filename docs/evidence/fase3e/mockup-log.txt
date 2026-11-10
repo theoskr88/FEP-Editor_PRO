@@ -1,0 +1,27 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+    -5.7,
++   0.9999999999999999,
++   3.4902433775699566e-16
+-   1,
+-   0
+  ]
+
+    at file:///workspace/FEP-Editor_PRO/tests/mockup-browser.mjs:5:564
+    at async check (file:///workspace/FEP-Editor_PRO/tests/mockup-browser.mjs:3:103)
+    at async file:///workspace/FEP-Editor_PRO/tests/mockup-browser.mjs:5:2 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [ -5.7, 0.9999999999999999, 3.4902433775699566e-16 ],
+  expected: [ -5.7, 1, 0 ],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

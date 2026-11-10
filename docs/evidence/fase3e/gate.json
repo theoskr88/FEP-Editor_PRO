@@ -1,0 +1,20 @@
+{
+  "phase": "fase3e",
+  "base": "c4c1906",
+  "gate": "passed locally",
+  "reports": {
+    "acceptance.json": 20,
+    "mockup-browser.json": 8,
+    "mockup-fallback.json": 1,
+    "video-validation.json": 4,
+    "profiles-browser.json": 4,
+    "creative-browser.json": 15
+  },
+  "unitTests": 72,
+  "staticPackageChecks": 24,
+  "testedRuntimeSha256": "fa1b5c53c3706655b5b985dc2978fcc86bbda3f2de953ef39373b5b3801ecea4",
+  "deployed": false,
+  "physicalDevicesTested": false,
+  "physicalPrintingTested": false,
+  "hardwarePlotterTested": false
+}

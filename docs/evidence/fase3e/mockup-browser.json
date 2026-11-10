@@ -1,0 +1,46 @@
+{
+  "passed": 8,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "five local scenarios, editable lighting, shadow and camera change actual mockup only",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "procedural body texture and roughness preserve print and physical glitter settings",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "HD PNG has 1920×1080 pixels, hides guides and restores viewport and editability",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "video quality and duration persist; scene recovery leaves original art intact",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "five local scenarios, editable lighting, shadow and camera change actual mockup only",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "procedural body texture and roughness preserve print and physical glitter settings",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "HD PNG has 1920×1080 pixels, hides guides and restores viewport and editability",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "video quality and duration persist; scene recovery leaves original art intact",
+      "passed": true
+    }
+  ],
+  "physicalFrameRateCertified": false
+}

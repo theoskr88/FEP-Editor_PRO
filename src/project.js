@@ -1,8 +1,9 @@
-import {validateCreative,validatePatternBudget} from './creative.js?v=fase3d-20261110';
-import {profileById,profileVariant} from './product-profiles.js?v=fase3d-20261110';
-import {validateVector} from './vector.js?v=fase3d-20261110';
-import {normalizeFreeDesign,validateShape} from './free-design.js?v=fase3d-20261110';
-import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase3d-20261110';
+import {normalizeMockup} from './mockup-settings.js?v=fase3e-20261110';
+import {validateCreative,validatePatternBudget} from './creative.js?v=fase3e-20261110';
+import {profileById,profileVariant} from './product-profiles.js?v=fase3e-20261110';
+import {validateVector} from './vector.js?v=fase3e-20261110';
+import {normalizeFreeDesign,validateShape} from './free-design.js?v=fase3e-20261110';
+import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=fase3e-20261110';
 // Validate before changing any live editor state. Legacy V1 remains readable.
 export function validateProject(data){
  if(!data||typeof data!=='object'||![undefined,1,2].includes(data.version)||!Array.isArray(data.elements)||data.elements.length>500)throw Error('Formato o número de capas inválido');
@@ -34,6 +35,7 @@ export function normalizeProject(input){
  for(const e of data.elements)if(e.type==='glitter')e.glitter=normalizeGlitter(e.glitter);
  if(data.finishMode==='magic'){warnings.push('El acabado antiguo se sustituyó por normal; el diseño se conservó.');data.finishMode='standard'}
  delete data.magicHeat;
+ data.mockup=normalizeMockup(data.mockup,data.viewerBackground);
  data.mode=data.mode||'product';data.freeDesign=normalizeFreeDesign(data.freeDesign);
  data.version=2;data.finishMode=['standard','glitter'].includes(data.finishMode)?data.finishMode:'standard';
  data.product=profileById(data.product)?data.product:'mug';data.profileVariant=profileVariant(data.profileVariant);

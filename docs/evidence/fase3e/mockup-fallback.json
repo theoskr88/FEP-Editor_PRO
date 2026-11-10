@@ -1,0 +1,9 @@
+{
+  "passed": 1,
+  "decoder": [
+    570,
+    552
+  ],
+  "mode": "MediaRecorder fallback without WebCodecs",
+  "realTimeFrameRateCertified": false
+}
