@@ -1,6 +1,6 @@
 {
   "archive": "FEP_EDITOR_PRO_FASE1_PAGES.zip",
-  "sha256": "e4cfa79ffca1b73db80edf6f54c85c50e9a6b9f939dcfb626a583f8bb7ab0022",
+  "sha256": "5eb2acae28ce73124d57892946bae4e3422c85809a52c659235380fa3620b2aa",
   "passed": true,
   "checks": [
     "static imports from extracted ZIP",
