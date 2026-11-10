@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {normalizeProject} from '../src/project.js';
+import {imageInfo,ASSET_LIMITS} from '../src/assets.js';
+import {prepareProject} from '../src/imports.js';
+import {createAutosave} from '../src/persistence.js';
+const text={type:'text',text:'HOLA',size:65,x:.5,y:.5,color:'#000000'};
+test('legacy finish migration preserves art without mutating input',()=>{const input={version:1,finishMode:'magic',magicHeat:50,elements:[text]};const {data,warnings}=normalizeProject(input);assert.deepEqual(data.elements,[text]);assert.equal(data.finishMode,'standard');assert.equal(data.magicHeat,undefined);assert.equal(warnings.length,1);assert.equal(input.finishMode,'magic')});
+test('normalizes printable glitter under artwork and retains V2 settings',()=>{const layer={type:'glitter',x:.5,y:.5};const {data}=normalizeProject({version:2,printRotationDeg:450,glitter:{palette:'gold'},elements:[text,layer]});assert.equal(data.elements[0].type,'glitter');assert.equal(data.printRotationDeg,90);assert.equal(data.glitter.palette,'gold')});
+const png=(w,h)=>{const b=new Uint8Array(24);b.set([137,80,78,71,13,10,26,10]);b.set([73,72,68,82],12);const d=new DataView(b.buffer);d.setUint32(16,w);d.setUint32(20,h);return b};
+test('image dimensions preflight rejects huge allocation and corrupt headers',()=>{assert.equal(imageInfo(png(4000,4000)).pixels,16_000_000);assert.throws(()=>imageInfo(png(4001,4000)),/grande/);assert.throws(()=>imageInfo(png(8193,1)),/grande/);assert.throws(()=>imageInfo(new Uint8Array([1,2,3])),/dañada/);assert.equal(ASSET_LIMITS.totalPixels,32_000_000)});
+test('corrupt embedded image rejects preparation without mutating input',async()=>{const input={elements:[{type:'image',x:.5,y:.5,data:'data:image/png;base64,YWJj'}]};const before=JSON.stringify(input);await assert.rejects(prepareProject(input),/dañada/);assert.equal(JSON.stringify(input),before)});
+test('invalid material payload rejects before state application',()=>assert.throws(()=>normalizeProject({glitter:null,elements:[text]}),/material/));
+test('autosave debounces to latest snapshot and reports failure',async()=>{let current={value:1};const stored=[],states=[];const a=createAutosave({store:{write:async d=>stored.push(d)},snapshot:()=>current,status:s=>states.push(s),delay:5});a.schedule();current={value:2};a.schedule();await new Promise(r=>setTimeout(r,20));assert.deepEqual(stored,[{value:2}]);assert.equal(states.at(-1),'saved');let message;const failing=createAutosave({store:{write:async()=>{throw Error('quota')}},snapshot:()=>current,status:(s,e)=>{message=[s,e?.message]}});assert.equal(await failing.flush(),false);assert.deepEqual(message,['error','quota'])});
+test('autosave serializes in-flight writes to preserve backup ordering',async()=>{const writes=[];let version=1,release;const gate=new Promise(r=>release=r);const a=createAutosave({store:{write:async d=>{if(d.version===1)await gate;writes.push(d.version)}},snapshot:()=>({version}),status:()=>{}});const first=a.flush();version=2;const second=a.flush();release();await Promise.all([first,second]);assert.deepEqual(writes,[1,2])});
