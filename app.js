@@ -1,34 +1,37 @@
-import {zonesFor,emptyZones,zoneCanvasWidth,copyZoneLayers,allProjectLayers} from './src/zones.js?v=cierre-a-20261111';
-import {createTextileMaps} from './src/textile-materials.js?v=cierre-a-20261111';
-import {zipFiles} from './src/zip-store.js?v=cierre-a-20261111';
-import {encodeVideoFrames} from './src/video-frames.js?v=cierre-a-20261111';
-import {normalizeMockup} from './src/mockup-settings.js?v=cierre-a-20261111';
-import {createMockupControls} from './src/mockup-controls.js?v=cierre-a-20261111';
-import {validateCreative,validatePatternBudget,paintCreativeText,creativeTextBounds,paintCreativeImage,CREATIVE_TEMPLATES} from './src/creative.js?v=cierre-a-20261111';
-import {createCreativeControls} from './src/creative-controls.js?v=cierre-a-20261111';
-import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById} from './src/product-profiles.js?v=cierre-a-20261111';
-import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=cierre-a-20261111';
-import {createVectorControls} from './src/vector-controls.js?v=cierre-a-20261111';
-import {getSticker} from './src/stickers.js?v=cierre-a-20261111';
-import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=cierre-a-20261111';
-import {createFreeControls} from './src/free-controls.js?v=cierre-a-20261111';
-import {validateProject,validateStickerLayer} from './src/project.js?v=cierre-a-20261111';
-import {createLayerList,layerName} from './src/layer-ui.js?v=cierre-a-20261111';
-import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=cierre-a-20261111';
-import {createGlitterCache} from './src/glitter-cache.js?v=cierre-a-20261111';
-import {createGlitterControls} from './src/glitter-controls.js?v=cierre-a-20261111';
-import {prepareProject} from './src/imports.js?v=cierre-a-20261111';
-import {prepareImageFile,enforceDocumentBudget as enforceLayerBudget,ASSET_LIMITS} from './src/assets.js?v=cierre-a-20261111';
-import {openDocumentStore,createAutosave} from './src/persistence.js?v=cierre-a-20261111';
+import {openProjectLibrary,createProjectSession,cleanDocument} from './src/projects.js?v=cierre-b1-20261111';
+import {createProjectManager} from './src/project-manager.js?v=cierre-b1-20261111';
+import {zonesFor,emptyZones,zoneCanvasWidth,copyZoneLayers,allProjectLayers} from './src/zones.js?v=cierre-b1-20261111';
+import {createTextileMaps} from './src/textile-materials.js?v=cierre-b1-20261111';
+import {zipFiles} from './src/zip-store.js?v=cierre-b1-20261111';
+import {encodeVideoFrames} from './src/video-frames.js?v=cierre-b1-20261111';
+import {normalizeMockup} from './src/mockup-settings.js?v=cierre-b1-20261111';
+import {createMockupControls} from './src/mockup-controls.js?v=cierre-b1-20261111';
+import {validateCreative,validatePatternBudget,paintCreativeText,creativeTextBounds,paintCreativeImage,CREATIVE_TEMPLATES} from './src/creative.js?v=cierre-b1-20261111';
+import {createCreativeControls} from './src/creative-controls.js?v=cierre-b1-20261111';
+import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById} from './src/product-profiles.js?v=cierre-b1-20261111';
+import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=cierre-b1-20261111';
+import {createVectorControls} from './src/vector-controls.js?v=cierre-b1-20261111';
+import {getSticker} from './src/stickers.js?v=cierre-b1-20261111';
+import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=cierre-b1-20261111';
+import {createFreeControls} from './src/free-controls.js?v=cierre-b1-20261111';
+import {validateProject,validateStickerLayer} from './src/project.js?v=cierre-b1-20261111';
+import {createLayerList,layerName} from './src/layer-ui.js?v=cierre-b1-20261111';
+import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=cierre-b1-20261111';
+import {createGlitterCache} from './src/glitter-cache.js?v=cierre-b1-20261111';
+import {createGlitterControls} from './src/glitter-controls.js?v=cierre-b1-20261111';
+import {prepareProject} from './src/imports.js?v=cierre-b1-20261111';
+import {prepareImageFile,enforceDocumentBudget as enforceLayerBudget,ASSET_LIMITS} from './src/assets.js?v=cierre-b1-20261111';
+import {openDocumentStore,createAutosave} from './src/persistence.js?v=cierre-b1-20261111';
 let sceneSettings=normalizeMockup(),sceneController,photoBusy=false;
 let materialVariant='original';
 let THREE,OrbitControls,resizeViewer=()=>{};
 let recovering=true,stickerController,stickerPainter,stickerGeometry,stickerReady;
-if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=cierre-a-20261111')).initInterface()}catch{}}
+if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=cierre-b1-20261111')).initInterface()}catch{}}
 const ui=window.__fepUI||{refresh(){}};
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 let dragStart=null,gestureHistory=false,importGeneration=0;
 let documentWidth=20,documentHeight=8.5,editorMode='product',freeDesign=normalizeFreeDesign(),freeController,vectorController,creativeController;
+let projectManager,projectLibrary,projectSession,projectSwitchBusy=false,resetSaveFingerprint=()=>{};
 let queueAutosave=()=>{},preferredGuides=$('showGuides').checked;
 let freeDocument=null,freeSession=null,productZones={},zoneProduct=null,zoneBusy=false,textileMaps;
 let elements=[],selected=-1,dragging=false,resizing=false,resizeStart=null,history=[],redoStack=[],meshGroup,texture,renderer,scene,camera,controls,animRequest,renderQueued=false;
@@ -268,7 +271,7 @@ function applyPreparedProject({data,warnings}){
 $('save').onclick=()=>saveBlob(new Blob([JSON.stringify(projectSnapshot())],{type:'application/json'}),'proyecto-estudio3d.json');
 $('load').onclick=()=>$('projectFile').click();
 $('projectFile').onchange=async ev=>{
- const f=ev.target.files?.[0];ev.target.value='';if(!f)return;const generation=++importGeneration,before=JSON.stringify(projectSnapshot());
+ const f=ev.target.files?.[0];ev.target.value='';if(!f)return;if(projectManager){try{await projectManager.importProject(f)}catch(error){notify(error.message)}return;}const generation=++importGeneration,before=JSON.stringify(projectSnapshot());
  try{if(f.size>100_000_000)throw Error('Proyecto demasiado grande (máximo 100 MB para zonas)');let raw;try{raw=JSON.parse(await f.text())}catch{throw Error('El archivo no contiene JSON válido')}
  if(f.size>ASSET_LIMITS.projectBytes&&raw.zoneSchema!==1)throw Error('Proyecto de una zona demasiado grande (máximo 30 MB)');const prepared=await prepareProject(raw);if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(generation!==importGeneration)return;if(JSON.stringify(projectSnapshot())!==before)throw Error('El documento cambió durante la importación; vuelve a abrir el archivo');applyPreparedProject(prepared)
  }catch(error){notify('No se pudo abrir el proyecto: '+error.message)}
@@ -458,7 +461,7 @@ function focusPrintEdge(edge){
 
 function init3D(){textileMaps=createTextileMaps(THREE);const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,Math.max(1,node.clientWidth)/Math.max(1,node.clientHeight),.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(Math.max(1,node.clientWidth),Math.max(1,node.clientHeight));node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;controls.addEventListener('change',()=>{if(!recording&&!photoBusy&&scene&&editorMode==='product')renderer.render(scene,camera)});scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE?.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);if(!recording&&!photoBusy&&editorMode==='product')controls.update()}animate();const resize=()=>{if(recording||photoBusy)return;const w=node.clientWidth,h=node.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);renderer.render(scene,camera)};resizeViewer=resize;typeof ResizeObserver==='function'?new ResizeObserver(resize).observe(node):window.addEventListener('resize',resize)}
 async function loadProductGLB(profile,root,bodyMaterial,printMaterial){
- try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js?v=cierre-a-20261111');const loader=new GLTFLoader();let gltf;try{gltf=await deadline(loader.loadAsync(profile.url),15000,'No respondió el modelo GLB')}catch(error){if(!profile.gltfURL)throw error;gltf=await deadline(loader.loadAsync(profile.gltfURL),15000,'No respondió el modelo glTF de respaldo')}
+ try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js?v=cierre-b1-20261111');const loader=new GLTFLoader();let gltf;try{gltf=await deadline(loader.loadAsync(profile.url),15000,'No respondió el modelo GLB')}catch(error){if(!profile.gltfURL)throw error;gltf=await deadline(loader.loadAsync(profile.gltfURL),15000,'No respondió el modelo glTF de respaldo')}
   if(root!==modelRoot){gltf.scene.traverse(o=>{o.geometry?.dispose();if(o.material)for(const m of(Array.isArray(o.material)?o.material:[o.material]))m.dispose()});bodyMaterial.dispose();printMaterial.dispose();return}
   gltf.scene.scale.setScalar(profile.worldScale);printMaterial.map=texture;printMaterial.needsUpdate=true;let printMeshes=0;
   gltf.scene.traverse(mesh=>{if(!mesh.isMesh)return;const old=mesh.material;if(profile.multiZone){const def=zonesFor(profile.id).find(z=>z.mesh===mesh.name);mesh.material=textileMaps.material(profile.id,def?.id,$('productColor').value,mesh.name);const v=PRODUCT_VARIANTS[materialVariant];if(materialVariant!=='original'){mesh.material.roughness=v.roughness;mesh.material.metalness=v.metalness}if(def)printMeshes++;}else if(mesh.name===profile.printMesh){printMeshes++;mesh.material=printMaterial;mesh.scale.set(Math.min(1,documentWidth/profile.printCm[0]),Math.min(1,documentHeight/profile.printCm[1]),1)}else mesh.material=bodyMaterial;for(const material of(Array.isArray(old)?old:[old]))material.dispose()});
@@ -739,15 +742,28 @@ function showSaveStatus(state,error){autosaveStatus.dataset.state=state;autosave
 let documentStore,autosave;
 const startupControls=[...document.querySelectorAll('button,input,select')].filter(n=>!n.matches('[role=tab],[data-open-tool],#closeTools,#copyStartupReport')).map(node=>[node,node.disabled]);startupControls.forEach(([node])=>node.disabled=true);
 try{
- documentStore=await openDocumentStore();
- const current=await deadline(documentStore.read(),6000,'La lectura del guardado local no respondió');
+ projectLibrary=await openProjectLibrary();
+ const thumbnail=()=>{const c=document.createElement('canvas');c.width=240;c.height=160;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,240,160);const scale=Math.min(240/textureCanvas.width,160/textureCanvas.height);x.drawImage(textureCanvas,(240-textureCanvas.width*scale)/2,(160-textureCanvas.height*scale)/2,textureCanvas.width*scale,textureCanvas.height*scale);return c.toDataURL('image/webp',.8)};
+ projectSession=createProjectSession(projectLibrary,{thumbnail});documentStore=projectSession;
+ if(!await projectLibrary.setting('legacyMigrated')){const legacy=await openDocumentStore();try{for(const key of ['previous','current']){const old=await legacy.read(key);if(old){try{const prepared=await prepareProject(old.document),id=await projectLibrary.create(prepared.data,'Recuperado · '+(key==='current'?'último proyecto':'versión anterior'));await projectSession.activate(id)}catch(error){notify('Se conservó un guardado anterior que no se pudo migrar: '+error.message)}}}await projectLibrary.setting('legacyMigrated',true)}finally{legacy.close()}}
+ let freshLibrary=false;let active=await projectLibrary.active();if(!active){const list=await projectLibrary.list();if(list.length)active=list[0].id;else{active=await projectLibrary.create(projectSnapshot(),'Sin título',thumbnail());freshLibrary=true}}await projectSession.activate(active);
+ const current=freshLibrary?null:await deadline(documentStore.read(),6000,'La lectura del guardado local no respondió');
  if(current){try{const prepared=await deadline(prepareProject(current.document),10000,'No terminó la recuperación de imágenes');if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');applyPreparedProject(prepared);$('startScreen').close();showSaveStatus('saved')}catch(error){window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);notify('La copia actual no se pudo recuperar. Usa Restaurar versión anterior o abre un JSON; no se sobrescribió la copia.')}}
  else autosaveStatus.textContent='Autoguardado local activo';
  autosave=createAutosave({store:documentStore,snapshot:projectSnapshot,status:showSaveStatus});
  if(window.__fepBoot?.stages.storage.state!=='failed')window.__fepBoot?.stage('storage','ready');
- const assetIDs=new WeakMap();let nextID=0;const fingerprint=()=>{const state=projectSnapshot();const light=list=>list.map(({img,data,...e})=>{if(img&&!assetIDs.has(img))assetIDs.set(img,++nextID);return {...e,asset:img?assetIDs.get(img):null}});state.elements=light(elements);if(state.freeDocument)state.freeDocument.elements=light(freeDocument.elements);if(state.productZones)for(const[p,g]of Object.entries(productZones))for(const[id,z]of Object.entries(g.zones))state.productZones[p].zones[id].elements=light(z.elements);return JSON.stringify(state)};let observed=fingerprint();queueAutosave=()=>{const next=fingerprint();if(next!==observed){observed=next;autosave.schedule()}};
+ const assetIDs=new WeakMap();let nextID=0;const fingerprint=()=>{const state=projectSnapshot();const light=list=>list.map(({img,data,...e})=>{if(img&&!assetIDs.has(img))assetIDs.set(img,++nextID);return {...e,asset:img?assetIDs.get(img):null}});state.elements=light(elements);if(state.freeDocument)state.freeDocument.elements=light(freeDocument.elements);if(state.productZones)for(const[p,g]of Object.entries(productZones))for(const[id,z]of Object.entries(g.zones))state.productZones[p].zones[id].elements=light(z.elements);return JSON.stringify(state)};let observed=fingerprint();resetSaveFingerprint=()=>{observed=fingerprint()};queueAutosave=()=>{if(recovering||projectSwitchBusy||!projectSession.id)return;const next=fingerprint();if(next!==observed){observed=next;autosave.schedule()}};
  for(const event of ['input','change','click'])document.addEventListener(event,()=>queueMicrotask(queueAutosave));
- document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autosave.flush()});window.addEventListener('pagehide',()=>autosave.flush());
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!projectSwitchBusy&&projectSession.id)autosave.flush()});window.addEventListener('pagehide',()=>{if(!projectSwitchBusy&&projectSession.id)autosave.flush()});
+
+ const initialDocument=cleanDocument(projectSnapshot());initialDocument.elements=[];delete initialDocument.productZones;delete initialDocument.zoneSchema;delete initialDocument.freeDocument;
+ const transition=async(fn)=>{if(projectSwitchBusy)throw Error('Espera al cambio de proyecto');projectSwitchBusy=true;recovering=true;++importGeneration;const controls=[...document.querySelectorAll('button,input,select')].filter(n=>!n.closest('#projectsDialog')).map(n=>[n,n.disabled]);controls.forEach(([n])=>n.disabled=true);try{if(projectSession.id&&!await autosave.flush())throw Error('No se pudo guardar el proyecto actual. Exporta un respaldo antes de cambiar');autosave.cancel();return await fn()}finally{resetSaveFingerprint();recovering=false;projectSwitchBusy=false;controls.forEach(([n,v])=>n.disabled=v)}};
+ const prepare=async raw=>{const p=await prepareProject(raw);if(allProjectLayers(p.data).some(e=>e.type==='sticker'))await stickerReady;return p};
+ const open=async(id,removeId)=>transition(async()=>{if(removeId){await projectLibrary.remove(removeId);if(removeId!==projectSession.id)return;const list=await projectLibrary.list();id=list[0]?.id||null}if(!id){await projectSession.activate(null);showSaveStatus('Sin proyecto abierto');return}const record=await projectLibrary.get(id);if(!record)throw Error('Proyecto no encontrado');const prepared=await prepare(record.document);applyPreparedProject(prepared);await projectSession.activate(id);showSaveStatus('saved');$('startScreen').close()});
+ const create=async name=>transition(async()=>{const prepared=await prepare(initialDocument);const id=await projectLibrary.create(prepared.data,name);applyPreparedProject(prepared);await projectSession.activate(id);await autosave.flush();$('startScreen').showModal()});
+ const importProject=async file=>{if(file.size>100000000)throw Error('El respaldo supera 100 MB');const raw=JSON.parse(await file.text()),prepared=await prepare(raw.format==='fep-project'?raw.document:raw);return transition(async()=>{const id=await projectLibrary.create(prepared.data,raw.format==='fep-project'?raw.name:file.name.replace(/\.json$/i,''));applyPreparedProject(prepared);await projectSession.activate(id);await autosave.flush();$('startScreen').close()})};
+ const exportProject=async id=>{if(id===projectSession.id&&!await autosave.flush())throw Error('No se pudo guardar antes del respaldo');const [record,list]=await Promise.all([projectLibrary.get(id),projectLibrary.list()]);const name=list.find(p=>p.id===id)?.name||'Proyecto';saveBlob(new Blob([JSON.stringify({format:'fep-project',version:1,name,document:record.document})],{type:'application/json'}),name+'.json')};
+ projectManager=createProjectManager({library:projectLibrary,session:projectSession,open,create,importProject,exportProject,notify});$('myProjects').onclick=()=>{projectManager.show();$('projectMenu').open=false};
  $('restorePrevious').onclick=async()=>{try{const old=await documentStore.read('previous');if(!old){notify('Todavía no hay una versión anterior.');return}const before=JSON.stringify(projectSnapshot()),prepared=await prepareProject(old.document);if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(before!==JSON.stringify(projectSnapshot()))throw Error('El documento cambió; vuelve a intentarlo');applyPreparedProject(prepared);await autosave.flush();notify('Versión anterior restaurada; la versión reemplazada queda como respaldo.')}catch(error){notify('No se pudo restaurar: '+error.message)}};
 }catch(error){window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);$('restorePrevious').title='Almacenamiento local no disponible'}
 finally{recovering=false;freeController?.ready();startupControls.forEach(([node,disabled])=>node.disabled=disabled);if(!autosave)$('restorePrevious').disabled=true;updateImageControls();glitterControls.switchMode(glitterControls.mode());update3DControls();stickerController?.sync();if(!stickerController&&$('stickerInsert'))$('stickerInsert').disabled=true}
@@ -756,7 +772,7 @@ function deadline(promise,ms,message){let timer;return Promise.race([promise,new
 
 async function loadStickers(){
  try{
-  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=cierre-a-20261111'),import('./src/sticker-renderer.js?v=cierre-a-20261111')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=cierre-a-20261111');
+  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=cierre-b1-20261111'),import('./src/sticker-renderer.js?v=cierre-b1-20261111')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=cierre-b1-20261111');
   stickerController=uiModule.createStickerControls({selected:()=>elements[selected],dimensions:cmPrint,busy:()=>recovering,notify,insert:definition=>{
    if(recovering)return;if(elements.length>=500){notify('Máximo 500 capas');return}
    const layer={type:'sticker',stickerId:definition.id,stickerName:definition.name,x:.5,y:.5,...initialLayerSize(.28,.75),color:'#e6eef9',outlineColor:'#52697e',outlineWidth:definition.shapes[0].stroke?1.5:0,rotation:0,flipX:false,flipY:false,shadow:false,...(definition.textBox?{label:{text:'',size:14,color:'#172b4d'}}:{})};validateStickerLayer(layer);addHistory();elements.push(layer);selected=elements.length-1;loadSelectedTextIntoInputs();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Sticker añadido: '+definition.name)

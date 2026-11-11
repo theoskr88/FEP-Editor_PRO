@@ -1,4 +1,4 @@
-import {shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,textToPaths} from './vector.js?v=cierre-a-20261111';
+import {shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,textToPaths} from './vector.js?v=cierre-b1-20261111';
 export function createVectorControls({state,commit,exportSVG,notify}){
  const get=id=>document.getElementById(id);let optionsKey='',lastLayer;
  const run=fn=>{try{fn()}catch(error){notify(error.message)}};

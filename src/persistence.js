@@ -7,8 +7,8 @@ export function openDocumentStore(indexedDB=globalThis.indexedDB){
 }
 export function createAutosave({store,snapshot,status,delay=700}){
  let timer,revision=0,queue=Promise.resolve();
- function flush(){clearTimeout(timer);const ownRevision=++revision;let document;try{document=snapshot()}catch(error){status('error',error);return Promise.resolve(false)}status('saving');
+ function flush(){clearTimeout(timer);const ownRevision=++revision;let document;try{document=store.capture?store.capture(snapshot()):snapshot()}catch(error){status('error',error);return Promise.resolve(false)}status('saving');
   queue=queue.catch(()=>{}).then(()=>store.write(document)).then(()=>{if(ownRevision===revision)status('saved');return true},error=>{status('error',error);return false});return queue;
  }
- return {schedule(){++revision;clearTimeout(timer);status('saving');timer=setTimeout(flush,delay)},flush,cancel(){clearTimeout(timer)}};
+ return {schedule(){++revision;clearTimeout(timer);status('saving');timer=setTimeout(flush,delay)},flush,cancel(){++revision;clearTimeout(timer)}};
 }

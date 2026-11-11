@@ -1,4 +1,4 @@
-import {glitterSettings,palettes,glitterPresets,applyGlitterPreset} from './glitter.js?v=cierre-a-20261111';
+import {glitterSettings,palettes,glitterPresets,applyGlitterPreset} from './glitter.js?v=cierre-b1-20261111';
 export function createGlitterControls({get=id=>document.getElementById(id),preview,onMaterialChange=()=>{},onDraftChange=()=>{}}={}){
  let material=glitterSettings(),draft=glitterSettings(),mode='print';
  const ids=[['glitterPalette','palette'],['glitterColor','color'],['glitterSize','size'],['glitterIntensity','intensity'],['glitterFinish','finish']];

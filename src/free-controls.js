@@ -1,4 +1,4 @@
-import {fromCm,toCm,pageSize,rulerTicks,SHAPE_NAMES} from './free-design.js?v=cierre-a-20261111';
+import {fromCm,toCm,pageSize,rulerTicks,SHAPE_NAMES} from './free-design.js?v=cierre-b1-20261111';
 export function createFreeControls({state,settings,format,switchMode,insertShape,editShape,align,notify}){
  const get=id=>document.getElementById(id),dialog=get('startScreen');let guideSignature='',lastShape;
  function close(){dialog.close();document.getElementById('tab-product').focus()}
