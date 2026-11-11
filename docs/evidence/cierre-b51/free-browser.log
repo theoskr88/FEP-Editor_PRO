@@ -1,0 +1,27 @@
+PASS free desktop initial choice opens the same editor in free mode
+PASS free desktop A4, A3, Carta, units, orientation and custom dimensions are physical
+PASS free desktop white and transparent art; rules, grid and guides never enter raster
+PASS free desktop text, image, sticker and editable native shape share layers and history
+PASS free desktop zoom changes display geometry, preserves exports and supports pointer movement
+PASS free desktop actual PNG, JPEG and PDF use correct dimensions, alpha and final mirror
+PASS free desktop free artwork joins the existing print sheet at physical size
+PASS free desktop JSON, autosave recovery and invalid settings remain atomic in both modes
+PASS free desktop switch to product retains all layers, restores viewer and accepts legacy files
+PASS free mobile initial choice opens the same editor in free mode
+PASS free mobile A4, A3, Carta, units, orientation and custom dimensions are physical
+PASS free mobile white and transparent art; rules, grid and guides never enter raster
+PASS free mobile text, image, sticker and editable native shape share layers and history
+PASS free mobile zoom changes display geometry, preserves exports and supports pointer movement
+PASS free mobile actual PNG, JPEG and PDF use correct dimensions, alpha and final mirror
+PASS free mobile free artwork joins the existing print sheet at physical size
+PASS free mobile JSON, autosave recovery and invalid settings remain atomic in both modes
+PASS free mobile switch to product retains all layers, restores viewer and accepts legacy files
+PASS free noWebGL initial choice opens the same editor in free mode
+PASS free noWebGL A4, A3, Carta, units, orientation and custom dimensions are physical
+PASS free noWebGL white and transparent art; rules, grid and guides never enter raster
+PASS free noWebGL text, image, sticker and editable native shape share layers and history
+PASS free noWebGL zoom changes display geometry, preserves exports and supports pointer movement
+PASS free noWebGL actual PNG, JPEG and PDF use correct dimensions, alpha and final mirror
+PASS free noWebGL free artwork joins the existing print sheet at physical size
+PASS free noWebGL JSON, autosave recovery and invalid settings remain atomic in both modes
+PASS free noWebGL switch to product retains all layers, restores viewer and accepts legacy files

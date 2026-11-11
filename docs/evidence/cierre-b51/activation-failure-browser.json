@@ -1,0 +1,12 @@
+[
+  {
+    "mode": "desktop",
+    "passed": true,
+    "name": "failure writing active project pointer leaves live A and its binding intact; later open B works"
+  },
+  {
+    "mode": "mobile",
+    "passed": true,
+    "name": "failure writing active project pointer leaves live A and its binding intact; later open B works"
+  }
+]

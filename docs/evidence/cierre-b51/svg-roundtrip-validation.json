@@ -1,0 +1,27 @@
+{
+  "tool": "Inkscape 1.4 (e7c3feb100, 2024-10-09)",
+  "results": [
+    {
+      "name": "physical cut SVG contains paths without embedded photographs or text objects",
+      "passed": true
+    },
+    {
+      "name": "Inkscape imports and resaves editable physical 200 x 90 mm SVG",
+      "passed": true
+    },
+    {
+      "name": "Inkscape raster validation uses correct physical page dimensions",
+      "passed": true
+    },
+    {
+      "name": "Inkscape PDF retains the physical page at scale",
+      "passed": true
+    },
+    {
+      "name": "actual editable cut bounds remain inside the physical sheet",
+      "passed": true
+    }
+  ],
+  "passed": 5,
+  "physicalPlotterTested": false
+}

@@ -1,0 +1,10 @@
+PASS projects desktop catalog, thumbnail, type and modification date
+PASS projects desktop rename and duplicate retain independent artwork
+PASS projects desktop search and alphabetical ordering
+PASS projects desktop export/import portable originals and opening separate projects
+PASS projects desktop delete requires confirmation and preserves other projects
+PASS projects mobile catalog, thumbnail, type and modification date
+PASS projects mobile rename and duplicate retain independent artwork
+PASS projects mobile search and alphabetical ordering
+PASS projects mobile export/import portable originals and opening separate projects
+PASS projects mobile delete requires confirmation and preserves other projects

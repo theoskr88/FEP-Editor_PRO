@@ -1,0 +1,22 @@
+[
+  {
+    mode: 'desktop',
+    passed: true,
+    name: 'GLB, live texture, variants, colour, physical height, recovery and rapid switching'
+  },
+  {
+    mode: 'mobile',
+    passed: true,
+    name: 'GLB, live texture, variants, colour, physical height, recovery and rapid switching'
+  },
+  {
+    mode: 'gltf',
+    passed: true,
+    name: 'JSON glTF with embedded buffer loads when binary GLB is unavailable'
+  },
+  {
+    mode: 'fault',
+    passed: true,
+    name: 'invalid GLB keeps 2D editing and permits return to original product'
+  }
+]

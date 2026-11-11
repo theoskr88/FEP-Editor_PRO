@@ -1,0 +1,22 @@
+[
+  {
+    "width": 320,
+    "passed": true,
+    "name": "Six operations with long names, native confirmation, backup recovery and export"
+  },
+  {
+    "width": 375,
+    "passed": true,
+    "name": "Six operations with long names, native confirmation, backup recovery and export"
+  },
+  {
+    "width": 768,
+    "passed": true,
+    "name": "Six operations with long names, native confirmation, backup recovery and export"
+  },
+  {
+    "width": 1440,
+    "passed": true,
+    "name": "Six operations with long names, native confirmation, backup recovery and export"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    mode: 'desktop',
+    delayThree: 0,
+    name: 'free project restores; product renders without ResizeObserver after lazy model allocation',
+    passed: true
+  },
+  {
+    mode: 'desktop',
+    delayThree: 1800,
+    name: 'free project restores; product renders without ResizeObserver after lazy model allocation',
+    passed: true
+  },
+  {
+    mode: 'mobile',
+    delayThree: 0,
+    name: 'free project restores; product renders without ResizeObserver after lazy model allocation',
+    passed: true
+  },
+  {
+    mode: 'mobile',
+    delayThree: 1800,
+    name: 'free project restores; product renders without ResizeObserver after lazy model allocation',
+    passed: true
+  }
+]

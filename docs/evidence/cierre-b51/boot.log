@@ -1,0 +1,14 @@
+REPRODUCED resize [ 'ResizeObserver is not a constructor' ]
+REPRODUCED media [ 'media.addEventListener is not a function' ]
+REPRODUCED hasOwn [ 'Object.hasOwn is not a function' ]
+REPRODUCED glitter-export [
+  "The requested module './glitter.js' does not provide an export named 'applyGlitterPreset'"
+]
+PASS boot normal
+PASS boot stale unversioned glitter cache
+PASS boot mobile
+PASS boot legacy APIs
+PASS boot missing Three MIME fallback
+PASS boot missing sticker module
+PASS boot stalled IndexedDB
+PASS boot asynchronous 3D loading

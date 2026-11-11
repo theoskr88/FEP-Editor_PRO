@@ -1,0 +1,32 @@
+[
+  {
+    "mode": "desktop",
+    "name": "complete verified assets cached separately from local projects",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "partial update rejected without replacing previous complete application",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "atomic update preserves projects and old client resource versions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "complete verified assets cached separately from local projects",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "partial update rejected without replacing previous complete application",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "atomic update preserves projects and old client resource versions",
+    "passed": true
+  }
+]

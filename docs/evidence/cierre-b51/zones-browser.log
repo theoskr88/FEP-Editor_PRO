@@ -1,0 +1,26 @@
+PASS zones desktop shirt independent canvases, dimensions, layers and curved UV materials
+PASS zones desktop shirt copy appends independent layers with physical size and per-zone undo
+PASS zones desktop shirt real before-after presentation, front/back rotation and transparent print
+PASS zones desktop shirt all-zone ZIP contains correct PNGs, independent physical dimensions and no scene
+PASS zones desktop shirt autosave, JSON and inactive face recovery are identical
+PASS zones desktop shirt multi-view HD ZIP and real 360 video include all mapped faces
+PASS zones desktop cushion independent canvases, dimensions, layers and curved UV materials
+PASS zones desktop cushion copy appends independent layers with physical size and per-zone undo
+PASS zones desktop cushion real before-after presentation, front/back rotation and transparent print
+PASS zones desktop cushion all-zone ZIP contains correct PNGs, independent physical dimensions and no scene
+PASS zones desktop cushion autosave, JSON and inactive face recovery are identical
+PASS zones desktop cushion multi-view HD ZIP and real 360 video include all mapped faces
+PASS zones desktop consolidated sheet keeps zone sizes, mirror and free mode leaves stored faces unchanged
+PASS zones mobile shirt independent canvases, dimensions, layers and curved UV materials
+PASS zones mobile shirt copy appends independent layers with physical size and per-zone undo
+PASS zones mobile shirt real before-after presentation, front/back rotation and transparent print
+PASS zones mobile shirt all-zone ZIP contains correct PNGs, independent physical dimensions and no scene
+PASS zones mobile shirt autosave, JSON and inactive face recovery are identical
+PASS zones mobile shirt multi-view HD ZIP and real 360 video include all mapped faces
+PASS zones mobile cushion independent canvases, dimensions, layers and curved UV materials
+PASS zones mobile cushion copy appends independent layers with physical size and per-zone undo
+PASS zones mobile cushion real before-after presentation, front/back rotation and transparent print
+PASS zones mobile cushion all-zone ZIP contains correct PNGs, independent physical dimensions and no scene
+PASS zones mobile cushion autosave, JSON and inactive face recovery are identical
+PASS zones mobile cushion multi-view HD ZIP and real 360 video include all mapped faces
+PASS zones mobile consolidated sheet keeps zone sizes, mirror and free mode leaves stored faces unchanged

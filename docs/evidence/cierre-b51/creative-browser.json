@@ -1,0 +1,80 @@
+{
+  "passed": 15,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "curved typography, tracking, stroke, shadow and gradient render real changed pixels",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "crop and ellipse mask preserve source photo and produce actual white clipped corners",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "repeat uses configurable physical motifs, gap, rotation and staggered layout",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "templates add native independent layers and retain existing artwork",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "creative projects recover unchanged and exports retain mirror with print/cut separation",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "curved typography, tracking, stroke, shadow and gradient render real changed pixels",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "crop and ellipse mask preserve source photo and produce actual white clipped corners",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "repeat uses configurable physical motifs, gap, rotation and staggered layout",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "templates add native independent layers and retain existing artwork",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "creative projects recover unchanged and exports retain mirror with print/cut separation",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "curved typography, tracking, stroke, shadow and gradient render real changed pixels",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "crop and ellipse mask preserve source photo and produce actual white clipped corners",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "repeat uses configurable physical motifs, gap, rotation and staggered layout",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "templates add native independent layers and retain existing artwork",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "creative projects recover unchanged and exports retain mirror with print/cut separation",
+      "passed": true
+    }
+  ]
+}

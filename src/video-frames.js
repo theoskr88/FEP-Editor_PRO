@@ -5,7 +5,7 @@ export async function encodeVideoFrames({canvas,fps,seconds,render,progress,sign
  if(typeof VideoEncoder==='undefined'||typeof VideoFrame==='undefined')return null;
  const config={codec:'vp09.00.10.08',width:canvas.width,height:canvas.height,bitrate:3000000,framerate:fps};
  let supported;try{supported=await VideoEncoder.isConfigSupported(config)}catch{return null}if(!supported.supported)return null;
- const {Muxer,ArrayBufferTarget}=await import('../vendor/webm-muxer.js?v=fep-f2922fbf7e7adae7'),target=new ArrayBufferTarget(),muxer=new Muxer({target,video:{codec:'V_VP9',width:canvas.width,height:canvas.height,frameRate:fps},firstTimestampBehavior:'offset'});
+ const {Muxer,ArrayBufferTarget}=await import('../vendor/webm-muxer.js?v=fep-6a4c2734f7b31778'),target=new ArrayBufferTarget(),muxer=new Muxer({target,video:{codec:'V_VP9',width:canvas.width,height:canvas.height,frameRate:fps},firstTimestampBehavior:'offset'});
  let failure;const encoder=new VideoEncoder({output:(chunk,metadata)=>muxer.addVideoChunk(chunk,metadata),error:error=>{failure=error}}),plan=videoFramePlan(fps,seconds),count=plan.length;
  try{encoder.configure(supported.config);for(let index=0;index<count;index++){
   if(signal?.aborted)throw new DOMException('Video cancelado','AbortError');if(failure)throw failure;render(plan[index].fraction);const frame=new VideoFrame(canvas,{timestamp:plan[index].timestamp,duration:plan[index].duration});try{encoder.encode(frame,{keyFrame:index%Math.max(1,fps*2)===0})}finally{frame.close()}

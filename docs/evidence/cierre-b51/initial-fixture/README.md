@@ -1,0 +1,1 @@
+Intentos preliminares conservados para trazabilidad. Las esperas asíncronas y los bytes del manifiesto del servidor de ensayo se corrigieron según HOTFIX_B51.md. No son evidencia de fallos finales de Chrome. Los resultados aceptados están en ../hotfix-browser.json y ../summary.json.

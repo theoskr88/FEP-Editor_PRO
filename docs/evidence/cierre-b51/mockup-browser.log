@@ -1,0 +1,8 @@
+PASS mockup desktop five local scenarios, editable lighting, shadow and camera change actual mockup only
+PASS mockup desktop procedural body texture and roughness preserve print and physical glitter settings
+PASS mockup desktop HD PNG has 1920×1080 pixels, hides guides and restores viewport and editability
+PASS mockup desktop video quality and duration persist; scene recovery leaves original art intact
+PASS mockup mobile five local scenarios, editable lighting, shadow and camera change actual mockup only
+PASS mockup mobile procedural body texture and roughness preserve print and physical glitter settings
+PASS mockup mobile HD PNG has 1920×1080 pixels, hides guides and restores viewport and editability
+PASS mockup mobile video quality and duration persist; scene recovery leaves original art intact

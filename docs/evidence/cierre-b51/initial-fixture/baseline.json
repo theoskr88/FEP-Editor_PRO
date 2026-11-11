@@ -1,0 +1,32 @@
+[
+  {
+    "name": "B5 button layout",
+    "width": 320,
+    "overflowingButtons": 126,
+    "reproduced": true
+  },
+  {
+    "name": "B5 button layout",
+    "width": 375,
+    "overflowingButtons": 105,
+    "reproduced": true
+  },
+  {
+    "name": "B5 button layout",
+    "width": 768,
+    "overflowingButtons": 105,
+    "reproduced": true
+  },
+  {
+    "name": "B5 button layout",
+    "width": 1440,
+    "overflowingButtons": 105,
+    "reproduced": true
+  },
+  {
+    "name": "B5 missing cached bootstrap after browser restart",
+    "reproduced": true,
+    "boot": false,
+    "diagnostic": true
+  }
+]

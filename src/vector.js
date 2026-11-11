@@ -1,6 +1,6 @@
-import {gradientFill} from './creative.js?v=fep-f2922fbf7e7adae7';
-import Clipper from '../vendor/clipper.js?v=fep-f2922fbf7e7adae7';
-import glyphs from '../vendor/font-outlines.js?v=fep-f2922fbf7e7adae7';
+import {gradientFill} from './creative.js?v=fep-6a4c2734f7b31778';
+import Clipper from '../vendor/clipper.js?v=fep-6a4c2734f7b31778';
+import glyphs from '../vendor/font-outlines.js?v=fep-6a4c2734f7b31778';
 const SCALE=10000;
 export function validateVector(e){
  if(!Array.isArray(e.paths)||!e.paths.length||e.paths.length>512)throw Error('Trazado vacío o demasiado complejo');let count=0;

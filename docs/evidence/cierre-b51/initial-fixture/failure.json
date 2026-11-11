@@ -1,0 +1,33 @@
+{
+  "boot": {
+    "release": "cierre-b5",
+    "path": "/",
+    "stages": {
+      "ui": {
+        "state": "ready"
+      },
+      "design": {
+        "state": "ready"
+      },
+      "three": {
+        "state": "ready"
+      },
+      "storage": {
+        "state": "ready"
+      },
+      "sheet": {
+        "state": "ready"
+      },
+      "stickers": {
+        "state": "ready"
+      }
+    }
+  },
+  "controller": "http://127.0.0.1:36227/sw.js",
+  "htmlBuild": "fep-f2922fbf7e7adae7",
+  "cache": [
+    "fep-editor-app-fep-f2922fbf7e7adae7",
+    "fep-editor-app-fep-c688b427a878ac9c"
+  ],
+  "diagnostic": "Interfaz: ready\nDiseño 2D: ready\nMockup 3D: ready\nRecuperación local: ready\nPlancha: ready\nBiblioteca de stickers: ready"
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "mode": "desktop",
+    "name": "cancelled multi-image import preserves active project and library",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "cancelled multi-image import preserves active project and library",
+    "passed": true
+  }
+]

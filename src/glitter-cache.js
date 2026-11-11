@@ -1,4 +1,4 @@
-import {glitterSettings,paintGlitter} from './glitter.js?v=fep-f2922fbf7e7adae7';
+import {glitterSettings,paintGlitter} from './glitter.js?v=fep-6a4c2734f7b31778';
 // Small LRU, shared by 2D canvas, texture, preview and every export. No per-frame
 // particle painting and no history-retained raster tiles.
 export function createGlitterCache({width=1024,height=512,limit=8,createCanvas=()=>document.createElement('canvas')}={}){

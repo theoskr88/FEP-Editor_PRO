@@ -1,0 +1,10 @@
+PASS safety desktop quota preserves durable version and truthful error
+PASS safety desktop interrupt preserves durable version and truthful error
+PASS safety desktop restart restores last completed transaction and bounded history
+PASS safety desktop corrupt digest blocks autosave and user restores a validated backup
+PASS safety desktop legacy migration is idempotent and leaves original store intact
+PASS safety mobile quota preserves durable version and truthful error
+PASS safety mobile interrupt preserves durable version and truthful error
+PASS safety mobile restart restores last completed transaction and bounded history
+PASS safety mobile corrupt digest blocks autosave and user restores a validated backup
+PASS safety mobile legacy migration is idempotent and leaves original store intact

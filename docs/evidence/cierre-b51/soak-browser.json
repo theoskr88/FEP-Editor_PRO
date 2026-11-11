@@ -1,0 +1,280 @@
+[
+  {
+    "mode": "desktop",
+    "passed": true,
+    "durationMs": 306859,
+    "iterations": 29,
+    "samples": [
+      {
+        "iteration": 0,
+        "product": "mug",
+        "elapsedMs": 4367,
+        "textures": 8,
+        "geometries": 5,
+        "programs": 3,
+        "maps": 6,
+        "history": 14,
+        "heap": 18464507,
+        "heapUsed": 14242944
+      },
+      {
+        "iteration": 5,
+        "product": "cushion",
+        "elapsedMs": 52167,
+        "textures": 11,
+        "geometries": 18,
+        "programs": 9,
+        "maps": 6,
+        "history": 24,
+        "heap": 19466612,
+        "heapUsed": 14986668
+      },
+      {
+        "iteration": 10,
+        "product": "shirt",
+        "elapsedMs": 85527,
+        "textures": 11,
+        "geometries": 23,
+        "programs": 11,
+        "maps": 6,
+        "history": 30,
+        "heap": 19807118,
+        "heapUsed": 15352048
+      },
+      {
+        "iteration": 15,
+        "product": "mug",
+        "elapsedMs": 138058,
+        "textures": 11,
+        "geometries": 17,
+        "programs": 13,
+        "maps": 6,
+        "history": 34,
+        "heap": 19686390,
+        "heapUsed": 15421576
+      },
+      {
+        "iteration": 20,
+        "product": "cushion",
+        "elapsedMs": 194154,
+        "textures": 11,
+        "geometries": 18,
+        "programs": 9,
+        "maps": 6,
+        "history": 50,
+        "heap": 19935590,
+        "heapUsed": 15455424
+      },
+      {
+        "iteration": 25,
+        "product": "shirt",
+        "elapsedMs": 261854,
+        "textures": 11,
+        "geometries": 23,
+        "programs": 11,
+        "maps": 6,
+        "history": 8,
+        "heap": 19285772,
+        "heapUsed": 14818436
+      }
+    ],
+    "last": {
+      "textures": 11,
+      "geometries": 23,
+      "programs": 11,
+      "maps": 6,
+      "history": 12,
+      "heap": 19498069,
+      "heapUsed": 15039808
+    },
+    "heapThreshold": 39132364,
+    "physicalDevice": false
+  },
+  {
+    "mode": "mobile",
+    "passed": true,
+    "durationMs": 303357,
+    "iterations": 69,
+    "samples": [
+      {
+        "iteration": 0,
+        "product": "mug",
+        "elapsedMs": 4332,
+        "textures": 8,
+        "geometries": 5,
+        "programs": 3,
+        "maps": 6,
+        "history": 14,
+        "heap": 18522868,
+        "heapUsed": 14295904
+      },
+      {
+        "iteration": 5,
+        "product": "cushion",
+        "elapsedMs": 46781,
+        "textures": 11,
+        "geometries": 18,
+        "programs": 9,
+        "maps": 6,
+        "history": 24,
+        "heap": 19517995,
+        "heapUsed": 15037160
+      },
+      {
+        "iteration": 10,
+        "product": "shirt",
+        "elapsedMs": 74971,
+        "textures": 11,
+        "geometries": 23,
+        "programs": 11,
+        "maps": 6,
+        "history": 30,
+        "heap": 19903805,
+        "heapUsed": 15448820
+      },
+      {
+        "iteration": 15,
+        "product": "mug",
+        "elapsedMs": 107243,
+        "textures": 11,
+        "geometries": 17,
+        "programs": 13,
+        "maps": 6,
+        "history": 34,
+        "heap": 19770237,
+        "heapUsed": 15505508
+      },
+      {
+        "iteration": 20,
+        "product": "cushion",
+        "elapsedMs": 131176,
+        "textures": 11,
+        "geometries": 18,
+        "programs": 9,
+        "maps": 6,
+        "history": 50,
+        "heap": 20013365,
+        "heapUsed": 15533200
+      },
+      {
+        "iteration": 25,
+        "product": "shirt",
+        "elapsedMs": 156614,
+        "textures": 11,
+        "geometries": 23,
+        "programs": 12,
+        "maps": 6,
+        "history": 8,
+        "heap": 19308269,
+        "heapUsed": 14844200
+      },
+      {
+        "iteration": 30,
+        "product": "mug",
+        "elapsedMs": 176868,
+        "textures": 11,
+        "geometries": 17,
+        "programs": 14,
+        "maps": 6,
+        "history": 14,
+        "heap": 19406649,
+        "heapUsed": 15137780
+      },
+      {
+        "iteration": 35,
+        "product": "cushion",
+        "elapsedMs": 196400,
+        "textures": 11,
+        "geometries": 18,
+        "programs": 10,
+        "maps": 6,
+        "history": 26,
+        "heap": 19749465,
+        "heapUsed": 15264732
+      },
+      {
+        "iteration": 40,
+        "product": "shirt",
+        "elapsedMs": 215834,
+        "textures": 11,
+        "geometries": 23,
+        "programs": 12,
+        "maps": 6,
+        "history": 30,
+        "heap": 19961197,
+        "heapUsed": 15500724
+      },
+      {
+        "iteration": 45,
+        "product": "mug",
+        "elapsedMs": 239398,
+        "textures": 11,
+        "geometries": 17,
+        "programs": 13,
+        "maps": 6,
+        "history": 8,
+        "heap": 19087574,
+        "heapUsed": 14811960
+      },
+      {
+        "iteration": 50,
+        "product": "cushion",
+        "elapsedMs": 252813,
+        "textures": 11,
+        "geometries": 18,
+        "programs": 9,
+        "maps": 6,
+        "history": 18,
+        "heap": 19573700,
+        "heapUsed": 15084136
+      },
+      {
+        "iteration": 55,
+        "product": "shirt",
+        "elapsedMs": 266148,
+        "textures": 11,
+        "geometries": 23,
+        "programs": 11,
+        "maps": 6,
+        "history": 24,
+        "heap": 19852440,
+        "heapUsed": 15388180
+      },
+      {
+        "iteration": 60,
+        "product": "mug",
+        "elapsedMs": 279472,
+        "textures": 11,
+        "geometries": 17,
+        "programs": 13,
+        "maps": 6,
+        "history": 28,
+        "heap": 19699508,
+        "heapUsed": 15425692
+      },
+      {
+        "iteration": 65,
+        "product": "cushion",
+        "elapsedMs": 294777,
+        "textures": 11,
+        "geometries": 18,
+        "programs": 9,
+        "maps": 6,
+        "history": 10,
+        "heap": 19301694,
+        "heapUsed": 14801004
+      }
+    ],
+    "last": {
+      "textures": 11,
+      "geometries": 18,
+      "programs": 9,
+      "maps": 6,
+      "history": 16,
+      "heap": 19481704,
+      "heapUsed": 14988172
+    },
+    "heapThreshold": 38897098,
+    "physicalDevice": false
+  }
+]

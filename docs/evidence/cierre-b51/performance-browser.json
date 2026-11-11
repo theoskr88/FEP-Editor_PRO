@@ -1,0 +1,50 @@
+[
+  {
+    "mode": "desktop",
+    "name": "twenty varied projects retain original images and independent zones",
+    "passed": true,
+    "durationMs": 348
+  },
+  {
+    "mode": "desktop",
+    "name": "repeated real UI project changes release prior WebGL models and maps",
+    "passed": true,
+    "durationMs": 41101
+  },
+  {
+    "mode": "desktop",
+    "name": "active duplication includes latest pending change",
+    "passed": true,
+    "durationMs": 1394
+  },
+  {
+    "mode": "desktop",
+    "name": "cooperative video cancel restores camera and editor without an output",
+    "passed": true,
+    "durationMs": 2654
+  },
+  {
+    "mode": "mobile",
+    "name": "twenty varied projects retain original images and independent zones",
+    "passed": true,
+    "durationMs": 292
+  },
+  {
+    "mode": "mobile",
+    "name": "repeated real UI project changes release prior WebGL models and maps",
+    "passed": true,
+    "durationMs": 28733
+  },
+  {
+    "mode": "mobile",
+    "name": "active duplication includes latest pending change",
+    "passed": true,
+    "durationMs": 1032
+  },
+  {
+    "mode": "mobile",
+    "name": "cooperative video cancel restores camera and editor without an output",
+    "passed": true,
+    "durationMs": 1250
+  }
+]

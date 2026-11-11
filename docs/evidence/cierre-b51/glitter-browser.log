@@ -1,0 +1,33 @@
+PASS desktop all glitter controls stay in the left tool column
+PASS desktop gold → #1249FF turns preview blue; applying changes only selected layer
+PASS desktop layer visibility, opacity, lock, duplicate and undo remain independent
+PASS desktop physical blue changes mockup only, excluding material from PNG/JPEG/PDF
+PASS desktop palettes synchronize color; resets and mode switches never apply a draft to another layer
+PASS desktop HOLA and a photo stay above printable glitter in canvas and export
+PASS desktop stable rendering and bounded texture cache; lighting changes without regenerating maps
+PASS desktop JSON and autosave roundtrip material, draft and layer colors independently
+PASS desktop image added after export updates artwork and physical texture
+PASS desktop 20×9 cm pieces keep scale and browser print receives a decoded sheet
+PASS desktop no errors or external dependencies; editor still usable without WebGL
+PASS touch all glitter controls stay in the left tool column
+PASS touch gold → #1249FF turns preview blue; applying changes only selected layer
+PASS touch layer visibility, opacity, lock, duplicate and undo remain independent
+PASS touch physical blue changes mockup only, excluding material from PNG/JPEG/PDF
+PASS touch palettes synchronize color; resets and mode switches never apply a draft to another layer
+PASS touch HOLA and a photo stay above printable glitter in canvas and export
+PASS touch stable rendering and bounded texture cache; lighting changes without regenerating maps
+PASS touch JSON and autosave roundtrip material, draft and layer colors independently
+PASS touch image added after export updates artwork and physical texture
+PASS touch 20×9 cm pieces keep scale and browser print receives a decoded sheet
+PASS touch no errors or external dependencies; editor still usable without WebGL
+PASS noWebGL all glitter controls stay in the left tool column
+PASS noWebGL gold → #1249FF turns preview blue; applying changes only selected layer
+PASS noWebGL layer visibility, opacity, lock, duplicate and undo remain independent
+PASS noWebGL physical blue changes mockup only, excluding material from PNG/JPEG/PDF
+PASS noWebGL palettes synchronize color; resets and mode switches never apply a draft to another layer
+PASS noWebGL HOLA and a photo stay above printable glitter in canvas and export
+PASS noWebGL stable rendering and bounded texture cache; lighting changes without regenerating maps
+PASS noWebGL JSON and autosave roundtrip material, draft and layer colors independently
+PASS noWebGL image added after export updates artwork and physical texture
+PASS noWebGL 20×9 cm pieces keep scale and browser print receives a decoded sheet
+PASS noWebGL no errors or external dependencies; editor still usable without WebGL

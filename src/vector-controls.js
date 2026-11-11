@@ -1,4 +1,4 @@
-import {shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,textToPaths} from './vector.js?v=fep-f2922fbf7e7adae7';
+import {shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,textToPaths} from './vector.js?v=fep-6a4c2734f7b31778';
 export function createVectorControls({state,commit,exportSVG,notify}){
  const get=id=>document.getElementById(id);let optionsKey='',lastLayer;
  const run=fn=>{try{fn()}catch(error){notify(error.message)}};

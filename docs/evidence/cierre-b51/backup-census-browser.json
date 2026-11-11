@@ -1,0 +1,222 @@
+[
+  {
+    "mode": "desktop",
+    "name": "new local project created from visible UI",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 0 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 1 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 2 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 3 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 4 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 5 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 6 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 7 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 8 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 9 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 10 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 11 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 12 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 13 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 14 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 15 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 16 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 17 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 18 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "portable project 19 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "forty-two projects survive; pagination limits cards, never storage",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "new local project created from visible UI",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 0 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 1 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 2 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 3 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 4 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 5 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 6 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 7 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 8 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 9 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 10 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 11 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 12 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 13 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 14 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 15 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 16 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 17 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 18 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "portable project 19 preserves originals, hidden faces and physical dimensions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "forty-two projects survive; pagination limits cards, never storage",
+    "passed": true
+  }
+]

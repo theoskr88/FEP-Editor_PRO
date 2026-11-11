@@ -1,0 +1,7 @@
+{
+  "executable": "/workspace/.tools/chrome-b51/unpacked/opt/google/chrome/chrome",
+  "version": "157.0.8103.50",
+  "persistentProfiles": true,
+  "baseline": "601ae80",
+  "build": "fep-6a4c2734f7b31778"
+}

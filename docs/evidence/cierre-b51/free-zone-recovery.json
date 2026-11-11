@@ -1,0 +1,15 @@
+{
+  "passed": 2,
+  "results": [
+    {
+      "mode": "desktop",
+      "passed": true,
+      "name": "free A3, layers, physical format and product face survive roundtrip and cold recovery"
+    },
+    {
+      "mode": "mobile",
+      "passed": true,
+      "name": "free A3, layers, physical format and product face survive roundtrip and cold recovery"
+    }
+  ]
+}

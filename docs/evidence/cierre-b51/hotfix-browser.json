@@ -1,0 +1,88 @@
+[
+  {
+    "name": "B5 button layout",
+    "width": 320,
+    "overflowingButtons": 126,
+    "reproduced": true
+  },
+  {
+    "name": "B5 button layout",
+    "width": 375,
+    "overflowingButtons": 105,
+    "reproduced": true
+  },
+  {
+    "name": "B5 button layout",
+    "width": 768,
+    "overflowingButtons": 105,
+    "reproduced": true
+  },
+  {
+    "name": "B5 button layout",
+    "width": 1440,
+    "overflowingButtons": 105,
+    "reproduced": true
+  },
+  {
+    "name": "B5 missing cached bootstrap after browser restart",
+    "reproduced": true,
+    "boot": false,
+    "diagnostic": true
+  },
+  {
+    "name": "B5 missing cached bootstrap fails online",
+    "reproduced": true
+  },
+  {
+    "name": "B5 damaged persistent profile upgraded without deleting projects",
+    "passed": true
+  },
+  {
+    "name": "Responsive cards",
+    "width": 320,
+    "passed": true
+  },
+  {
+    "name": "Responsive cards",
+    "width": 375,
+    "passed": true
+  },
+  {
+    "name": "Responsive cards",
+    "width": 768,
+    "passed": true
+  },
+  {
+    "name": "Responsive cards",
+    "width": 1440,
+    "passed": true
+  },
+  {
+    "name": "Missing bootstrap and corrupt app repaired online after restart",
+    "passed": true
+  },
+  {
+    "name": "Incomplete offline cache displays recovery, then restores online",
+    "passed": true
+  },
+  {
+    "name": "Cached JS/CSS with correct bytes but wrong MIME repaired after restart",
+    "passed": true
+  },
+  {
+    "name": "Fresh Chrome installation restarts offline with existing IndexedDB",
+    "passed": true
+  },
+  {
+    "name": "Corrupt cached manifest and HTML repaired with pinned hashes after restart",
+    "passed": true
+  },
+  {
+    "name": "Healthy B5 upgrade waits for confirmed save and preserves 21 projects",
+    "passed": true
+  },
+  {
+    "name": "Existing B5 tab stays open and receives verified B5 resources after activation",
+    "passed": true
+  }
+]

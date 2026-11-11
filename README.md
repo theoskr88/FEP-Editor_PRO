@@ -1,3 +1,13 @@
+# Hotfix B5.1
+
+Rama `desarrollo/hotfix-b5-1`, base B5 `601ae80`. Recuperación verificada de caché y arranque, más tarjetas adaptables de Mis proyectos. No se borran proyectos/IndexedDB, no se inicia Cierre C y no se publica producción.
+
+[Informe, pruebas, capturas y reversión](docs/HOTFIX_B51.md) · [Evidencias B5.1](docs/evidence/cierre-b51/) · [Entregables](entregables/)
+
+Después de cambiar runtime/compatibilidad ejecutar `python3 scripts/finalize-offline.py`, repetir pruebas y empaquetar con `npm run package -- --phase CIERRE_B51`. La causa concreta del perfil del sitio publicado no se ha confirmado; el informe distingue los defectos reproducidos de B5 y las pruebas con Google Chrome persistente.
+
+---
+
 # Cierre B — Base local y offline para el futuro empaquetado móvil
 
 Rama de desarrollo: `desarrollo/cierre-b-v1`. La entrega actual conserva el editor aprobado y añade Mis proyectos, guardado transaccional, respaldos e integridad, funcionamiento offline verificable y controles de memoria. No se ha publicado en producción ni se han integrado cuentas, nube o pagos propios.

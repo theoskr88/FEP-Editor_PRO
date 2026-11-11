@@ -1,0 +1,40 @@
+{
+  "phase": "cierre-b51",
+  "base": "601ae8055f54a501b7b1975bf13b9129f877ca30",
+  "unitTests": 121,
+  "unitFailures": 0,
+  "mainSuites": 28,
+  "mainSuiteFailures": 0,
+  "supplementalSuites": {
+    "backup-census-browser.json": 44,
+    "no-webgl-browser.json": 2,
+    "conflict-browser.json": 2,
+    "activation-failure-browser.json": 2,
+    "soak-browser.json": 2,
+    "compat/reliability.json": 16,
+    "svg-validation.json": 5,
+    "svg-roundtrip-validation.json": 5
+  },
+  "totalSuiteScripts": 36,
+  "packagedRuntimeChecks": 32,
+  "pagesSha256": "35dda2d8680108446d0f4530a313730ad0e0ce5be5cde45ded1e931eeeec876c",
+  "deployed": false,
+  "nativeBuildsProduced": false,
+  "physicalDevicesTested": false,
+  "physicalPrintingTested": false,
+  "physicalPlotterTested": false,
+  "initialFailuresRetained": true,
+  "focusedChromeChecks": {
+    "hotfix-browser.json": 18,
+    "actions-browser.json": 4,
+    "acceptance.json": 20
+  },
+  "browser": {
+    "executable": "/workspace/.tools/chrome-b51/unpacked/opt/google/chrome/chrome",
+    "version": "157.0.8103.50",
+    "persistentProfiles": true,
+    "baseline": "601ae80",
+    "build": "fep-6a4c2734f7b31778"
+  },
+  "productionProfileCauseConfirmed": false
+}

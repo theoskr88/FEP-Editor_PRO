@@ -1,0 +1,45 @@
+{
+  "passed": 8,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "eight integrated procedural sets render without changing production PNG",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "lighting styles, actual shadow strength and softness affect the rendered canvas only",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "standard coloured ceramic receives transparent ink without an artificial white rectangle",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "scene, light and shadow settings survive native JSON and autosave recovery",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "eight integrated procedural sets render without changing production PNG",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "lighting styles, actual shadow strength and softness affect the rendered canvas only",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "standard coloured ceramic receives transparent ink without an artificial white rectangle",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "scene, light and shadow settings survive native JSON and autosave recovery",
+      "passed": true
+    }
+  ]
+}
