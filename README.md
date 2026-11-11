@@ -1,10 +1,12 @@
-# FEP Editor PRO · Zonas múltiples · Entrega 1
+# FEP Editor PRO · Camino a V1.0 · Cierre A
 
-Polera con frente, espalda y dos mangas; cojín con lados A/B. Cada cara conserva medidas, capas, historial de sesión y textura curva independiente. [Comparativa real antes/después](docs/COMPARATIVA_ZONAS1.md) · [Pruebas](docs/ZONAS1_PRUEBAS.md) · [Reversión](docs/ZONAS1_REVERSION.md).
+Polera con frente, espalda y dos mangas; cojín con lados A/B; bolsa con frente/reverso y libreta con portada/contraportada. Ocho escenas comerciales procedurales, tinta transparente y producción separada del mockup. Cada cara conserva medidas, capas, historial de sesión y textura independiente de superficie. [Comparativa real antes/después](docs/CIERRE_A_COMPARATIVAS.md) · [Pruebas](docs/CIERRE_A_PRUEBAS.md) · [Reversión](docs/CIERRE_A_REVERSION.md).
+
+Decisión comercial: pago único objetivo US$9,99, sin suscripciones, cuentas obligatorias ni nube de proyectos. El Cierre A conserva el paquete web para revisión y empaquetado posterior; Android/iOS, validación integral offline, gestor y tiendas corresponden a B/C/D. No se integran pagos ni se publica.
 
 Diseño libre y personalización 3D comparten el mismo documento, capas, guardado e impresión. Se conserva el editor recibido, sus ocho modelos, lienzo y módulo de planchas. La interfaz original se amplía con controles de capas y glitter; no se sustituye por otro editor.
 
-[Cambios, diagnóstico del error de carga, biblioteca y reversión](docs/ZONAS1_TECNICO.md). La corrección está validada localmente; la comprobación de las URLs públicas sigue pendiente por bloqueo de red del entorno. No se ha desplegado.
+[Cambios, diagnóstico del error de carga, biblioteca y reversión](docs/CIERRE_A.md). La corrección está validada localmente; la comprobación de las URLs públicas sigue pendiente por bloqueo de red del entorno. No se ha desplegado.
 
 ## Ejecución local
 
@@ -39,19 +41,21 @@ npm run test:creative
 npm run test:mockup
 npm run test:print
 npm run test:zones
+npm run test:accessories
+npm run test:scenes
 node tests/zones-visual.mjs
 node tests/zones-migration.mjs
 node tests/zones-race.mjs
 node tests/free-zone-recovery.mjs
-python3 tests/validate-zones-video.py
+python3 tests/validate-cierre-a-files.py
 python3 tests/validate-svg.py
 npm run package
 npm run test:package
 ```
 
-Las pruebas de navegador requieren Chromium instalado. La validación externa de SVG requiere Inkscape; la de PDF requiere Poppler y Pillow. El análisis de video usa ffprobe/ffmpeg. Las suites anteriores navegan las pestañas/acordeones reales mediante un ayudante; `test:interface` recorre la interfaz directamente. La evidencia actual se escribe en `docs/evidence/zonas1`, sin sobrescribir Fase 2A. Bloquean conexiones externas; las pruebas normales usan los archivos locales del paquete. `test:package` extrae el ZIP de Pages y lo sirve sin inyección de código de pruebas. `tests/baseline.mjs` es un diagnóstico histórico del commit `175591e`, no parte de las pruebas normales.
+Las pruebas de navegador requieren Chromium instalado. La validación externa de SVG requiere Inkscape; la de PDF requiere Poppler y Pillow. El análisis de video usa ffprobe/ffmpeg. Las suites anteriores navegan las pestañas/acordeones reales mediante un ayudante; `test:interface` recorre la interfaz directamente. La evidencia actual se escribe en `docs/evidence/cierre-a`, sin sobrescribir Fase 2A. Bloquean conexiones externas; las pruebas normales usan los archivos locales del paquete. `test:package` extrae el ZIP de Pages y lo sirve sin inyección de código de pruebas. `tests/baseline.mjs` es un diagnóstico histórico del commit `175591e`, no parte de las pruebas normales.
 
-`npm run package` escribe los ZIP `FEP_EDITOR_PRO_ZONAS1_PAGES.zip` y `FEP_EDITOR_PRO_ZONAS1_FUENTE.zip` en `/workspace/deliverables` (alternativa: `python3 scripts/package.py --out /ruta/de/salida`). Generar desde una copia de trabajo limpia para una entrega reproducible. No despliega. El ZIP de fuente incluye archivos versionados y excluye ZIP generados, cachés y `node_modules`; ejecutar `npm ci` para las pruebas. El ZIP de Pages se sirve directamente con `index.html` en la raíz.
+`npm run package` escribe los ZIP `FEP_EDITOR_PRO_CIERRE_A_PAGES.zip` y `FEP_EDITOR_PRO_CIERRE_A_FUENTE.zip` en `/workspace/deliverables` (alternativa: `python3 scripts/package.py --out /ruta/de/salida`). Generar desde una copia de trabajo limpia para una entrega reproducible. No despliega. El ZIP fuente incluye todo el código, pruebas, modelos, licencias, documentación y evidencia del Cierre A. Las evidencias binarias de fases anteriores se conservan en Git y sus ZIP originales, sin duplicarlas en esta entrega. Excluye ZIP de entrega, cachés y `node_modules`; ejecutar `npm ci` para las pruebas. El ZIP de Pages se sirve directamente con `index.html` en la raíz.
 
 ## Seis pestañas, un mismo editor
 
@@ -59,7 +63,7 @@ Producto, Diseño, Capas, Efectos, Escena e Imprimir. En escritorio, herramienta
 
 Fino, grueso, metálico y holográfico son preajustes del motor glitter existente. El holográfico imprimible simula colores; el material 3D aproxima iridescencia. El arte de sublimación no incorpora el revestimiento físico. Se conserva el catálogo, incluido el panel propio de la Fase 3C. No hay Taza mágica.
 
-[Diseño, compatibilidad, límites y reversión](docs/ZONAS1_TECNICO.md) · [Pruebas y capturas](docs/RESULTADOS.md).
+[Diseño, compatibilidad, límites y reversión](docs/CIERRE_A.md) · [Pruebas y capturas](docs/RESULTADOS.md).
 
 ## Glitter: un selector de color, dos destinos
 
@@ -80,3 +84,5 @@ Lista ordenada de delante hacia atrás, selección, visibilidad, bloqueo, duplic
 No se ha desplegado ni conectado infraestructura remota.
 
 [Consolidación, límites y reversión](docs/CAMBIOS.md) · [Pruebas y pendientes](docs/RESULTADOS.md). El acabado antiguo de revelado por calor se migra a normal al importar proyectos; conserva el arte y avisa.
+
+Para repetir auditorías y capturas de una versión anterior se requiere el repositorio con su historial Git y los ZIP ZONAS1 conservados en `entregables/`. Las pruebas normales de la versión actual usan sus recursos locales.

@@ -1,4 +1,4 @@
-import {gradientFill} from './creative.js?v=zonas1-20261110';
+import {gradientFill} from './creative.js?v=cierre-a-20261111';
 // Shared physical units and native vector primitives. No alternate editor or raster SVG export.
 export const PAGE_PRESETS={A4:[21,29.7],A3:[29.7,42],Carta:[21.59,27.94]};
 export const UNIT_CM={cm:1,mm:.1,in:2.54};

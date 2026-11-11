@@ -25,7 +25,9 @@
     "test:creative": "node tests/creative-browser.mjs",
     "test:mockup": "node tests/mockup-browser.mjs",
     "test:print": "node tests/print-browser.mjs",
-    "test:zones": "node tests/zones-browser.mjs"
+    "test:zones": "node tests/zones-browser.mjs",
+    "test:accessories": "node tests/accessories-browser.mjs",
+    "test:scenes": "node tests/scenes-browser.mjs"
   },
   "dependencies": {
     "clipper-lib": "6.4.2",

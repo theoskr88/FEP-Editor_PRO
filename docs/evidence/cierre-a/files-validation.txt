@@ -1,0 +1,8 @@
+PASS decoded 360: shirt
+PASS decoded 360: cushion
+PASS decoded 360: tote
+PASS decoded 360: notebook
+PASS physical A3 PDF: tote
+PASS physical A3 PDF: notebook
+PASS rollback with actual ZONAS1 validator: tote
+PASS rollback with actual ZONAS1 validator: notebook

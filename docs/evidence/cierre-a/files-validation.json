@@ -1,0 +1,76 @@
+{
+  "passed": 8,
+  "results": [
+    {
+      "name": "shirt video",
+      "passed": true,
+      "frames": 45,
+      "fps": 15,
+      "size": [
+        570,
+        681
+      ],
+      "sha256": "7e933e1da883e0580800f68a3a58bf74d61c2b5e9d0cf62ccd581df0e030e4eb"
+    },
+    {
+      "name": "cushion video",
+      "passed": true,
+      "frames": 45,
+      "fps": 15,
+      "size": [
+        570,
+        681
+      ],
+      "sha256": "3bed945631a363cc616eaf44064be34f9fde6b57773ab0556e66d902557e0a04"
+    },
+    {
+      "name": "tote video",
+      "passed": true,
+      "frames": 45,
+      "fps": 15,
+      "size": [
+        570,
+        681
+      ],
+      "sha256": "26fbb8fb2a7f61a048baf91405a271e05e35cdbeb6b6d9162324c99a9456a2bd"
+    },
+    {
+      "name": "notebook video",
+      "passed": true,
+      "frames": 45,
+      "fps": 15,
+      "size": [
+        570,
+        681
+      ],
+      "sha256": "8eac69831e36d44cff0911b35bb91d1d5a9ab12e5517f517d5574325f4be9737"
+    },
+    {
+      "name": "tote PDF",
+      "passed": true,
+      "pages": 2,
+      "pdfinfo": "Custom Metadata: no\nMetadata Stream: no\nTagged:          no\nUserProperties:  no\nSuspects:        no\nForm:            none\nJavaScript:      no\nPages:           2\nEncrypted:       no\nPage size:       841.89 x 1190.55 pts (A3)\nPage rot:        0\nFile size:       362878 bytes\nOptimized:       no\nPDF version:     1.4\n"
+    },
+    {
+      "name": "notebook PDF",
+      "passed": true,
+      "pages": 1,
+      "pdfinfo": "Custom Metadata: no\nMetadata Stream: no\nTagged:          no\nUserProperties:  no\nSuspects:        no\nForm:            none\nJavaScript:      no\nPages:           1\nEncrypted:       no\nPage size:       841.89 x 1190.55 pts (A3)\nPage rot:        0\nFile size:       188198 bytes\nOptimized:       no\nPDF version:     1.4\n"
+    },
+    {
+      "name": "tote backwards-compatible backup",
+      "passed": true,
+      "validator": "actual unmodified ZONAS1 project.js",
+      "facesPreserved": true,
+      "originalUntouched": true
+    },
+    {
+      "name": "notebook backwards-compatible backup",
+      "passed": true,
+      "validator": "actual unmodified ZONAS1 project.js",
+      "facesPreserved": true,
+      "originalUntouched": true
+    }
+  ],
+  "physicalPrintingTested": false
+}

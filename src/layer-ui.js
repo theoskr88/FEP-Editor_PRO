@@ -1,6 +1,6 @@
-import {paintCreativeText,paintCreativeImage} from './creative.js?v=zonas1-20261110';
-import {paintVector} from './vector.js?v=zonas1-20261110';
-import {paintShape,SHAPE_NAMES} from './free-design.js?v=zonas1-20261110';
+import {paintCreativeText,paintCreativeImage} from './creative.js?v=cierre-a-20261111';
+import {paintVector} from './vector.js?v=cierre-a-20261111';
+import {paintShape,SHAPE_NAMES} from './free-design.js?v=cierre-a-20261111';
 // Layer presentation, reusing rows and small canvas thumbnails. Document actions
 // stay in app.js; selecting or painting a thumbnail never modifies the design.
 export function layerName(layer){return layer.type==='text'?(layer.text||'Texto vacío'):layer.type==='vector'?(layer.role==='cut'?'Contorno de corte':'Trazado editable'):layer.type==='shape'?(SHAPE_NAMES[layer.shape]||'Figura'):layer.type==='glitter'?'Glitter imprimible':layer.type==='sticker'?(layer.stickerName||'Sticker'):'Imagen'}

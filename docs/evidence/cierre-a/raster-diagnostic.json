@@ -1,0 +1,10 @@
+{
+  "passed": 1,
+  "dimensions": [
+    2362,
+    1004
+  ],
+  "changedPixels": 2,
+  "maxChannelDifference": 1,
+  "note": "Original GPU-backed export: two antialiasing pixels after HD render; scene pixels and document state not involved. Production contexts isolated from GPU rendering in the fix."
+}

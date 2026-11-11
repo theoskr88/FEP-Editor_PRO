@@ -1,6 +1,6 @@
-import {packSheets,printQuality,printSettings,readPrintDpi,PRINT_LIMITS} from './src/print-layout.js?v=zonas1-20261110';
-import {pdfPrintJob} from './src/print-pdf.js?v=zonas1-20261110';
-import {imageInfo} from './src/assets.js?v=zonas1-20261110';
+import {packSheets,printQuality,printSettings,readPrintDpi,PRINT_LIMITS} from './src/print-layout.js?v=cierre-a-20261111';
+import {pdfPrintJob} from './src/print-pdf.js?v=cierre-a-20261111';
+import {imageInfo} from './src/assets.js?v=cierre-a-20261111';
 /* Plancha de impresión — V0.9.0, independiente del visor 3D. */
 const el=id=>document.getElementById(id);
 const presets={A4:[21,29.7],Carta:[21.59,27.94],Oficio:[21.6,33],A3:[29.7,42],A2:[42,59.4]};
@@ -46,10 +46,10 @@ function fullCanvas(page=currentPage){
   const {w,h}=printSettings(dims()),W=Math.round(w/2.54*300),H=Math.round(h/2.54*300);
   if(W*H>40e6)throw Error('La hoja supera el límite seguro de 40 millones de píxeles');
   const normal=document.createElement('canvas');normal.width=W;normal.height=H;
-  paint(normal.getContext('2d'),false,page);
+  paint(normal.getContext('2d',{willReadFrequently:true}),false,page);
   if(!el('sheetMirrorMode').checked)return normal;
   const reflected=document.createElement('canvas');reflected.width=W;reflected.height=H;
-  const ctx=reflected.getContext('2d');ctx.translate(W,0);ctx.scale(-1,1);
+  const ctx=reflected.getContext('2d',{willReadFrequently:true});ctx.translate(W,0);ctx.scale(-1,1);
   ctx.drawImage(normal,0,0);normal.width=normal.height=1;
   return reflected;
 }

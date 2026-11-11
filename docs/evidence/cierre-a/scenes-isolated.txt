@@ -1,0 +1,24 @@
+CHECK scene studio
+CHECK scene table
+CHECK scene marble
+CHECK scene desk
+CHECK scene cafe
+CHECK scene textile
+CHECK scene minimal
+CHECK scene gradient
+PASS scenes desktop eight integrated procedural sets render without changing production PNG
+PASS scenes desktop lighting styles, actual shadow strength and softness affect the rendered canvas only
+PASS scenes desktop standard coloured ceramic receives transparent ink without an artificial white rectangle
+PASS scenes desktop scene, light and shadow settings survive native JSON and autosave recovery
+CHECK scene studio
+CHECK scene table
+CHECK scene marble
+CHECK scene desk
+CHECK scene cafe
+CHECK scene textile
+CHECK scene minimal
+CHECK scene gradient
+PASS scenes mobile eight integrated procedural sets render without changing production PNG
+PASS scenes mobile lighting styles, actual shadow strength and softness affect the rendered canvas only
+PASS scenes mobile standard coloured ceramic receives transparent ink without an artificial white rectangle
+PASS scenes mobile scene, light and shadow settings survive native JSON and autosave recovery

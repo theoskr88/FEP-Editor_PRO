@@ -1,0 +1,80 @@
+{
+  "passed": 15,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "shape conversion, node edit, subdivision and undo are real document operations",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "union, difference and intersection preserve operands and physical dimensions",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "cut offset never enters PNG or 3D art, and SVG separates raster print data",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "local font becomes editable paths; missing glyph never fabricates a cut",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "vector project autosave/recovery is atomic and retains cut roles and nodes",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "shape conversion, node edit, subdivision and undo are real document operations",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "union, difference and intersection preserve operands and physical dimensions",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "cut offset never enters PNG or 3D art, and SVG separates raster print data",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "local font becomes editable paths; missing glyph never fabricates a cut",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "vector project autosave/recovery is atomic and retains cut roles and nodes",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "shape conversion, node edit, subdivision and undo are real document operations",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "union, difference and intersection preserve operands and physical dimensions",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "cut offset never enters PNG or 3D art, and SVG separates raster print data",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "local font becomes editable paths; missing glyph never fabricates a cut",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "vector project autosave/recovery is atomic and retains cut roles and nodes",
+      "passed": true
+    }
+  ]
+}

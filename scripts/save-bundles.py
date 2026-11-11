@@ -1,10 +1,11 @@
 """Verify complete source and tested Pages archives; retain previous phase bundles."""
+from package_manifest import source_files
 from pathlib import Path
 from zipfile import ZipFile
 import sys,json,hashlib,subprocess,shutil
-phase=sys.argv[1].upper();out=Path('/workspace/deliverables');evidence=Path('docs/evidence')/phase.lower();runtime=out/f'FEP_EDITOR_PRO_{phase}_PAGES.zip';source=out/f'FEP_EDITOR_PRO_{phase}_FUENTE.zip'
+phase=sys.argv[1].upper();out=Path('/workspace/deliverables');evidence=Path('docs/evidence')/phase.lower().replace('_','-');runtime=out/f'FEP_EDITOR_PRO_{phase}_PAGES.zip';source=out/f'FEP_EDITOR_PRO_{phase}_FUENTE.zip'
 assert hashlib.sha256(runtime.read_bytes()).hexdigest()==json.loads((evidence/'package.json').read_text())['sha256']
-files={p for p in subprocess.check_output(['git','ls-files','-z']).decode().strip('\0').split('\0') if not p.startswith('entregables/')}
+files=set(source_files(subprocess.check_output(['git','ls-files','-z']).decode().strip('\0').split('\0'),phase))
 with ZipFile(source) as z:
  assert z.testzip() is None and set(z.namelist())==files
  for name in files:assert z.read(name)==Path(name).read_bytes(),name

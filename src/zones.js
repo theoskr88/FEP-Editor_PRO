@@ -1,6 +1,8 @@
 // Optional V2 extension. One editor viewport; independent documents and GPU maps.
 export const ZONE_PROFILES={
  shirt:[{id:'front',name:'Frente',cm:[30,35],mesh:'Zone_front',surface:[52,70],center:[.5,.56],camera:[0,.5,5.7]},{id:'back',name:'Espalda',cm:[30,35],mesh:'Zone_back',surface:[52,70],center:[.5,.56],camera:[0,.5,-5.7]},{id:'leftSleeve',name:'Manga izquierda',cm:[12,10],mesh:'Zone_leftSleeve',surface:[48,22],center:[.5,.5],camera:[3.8,1,4.8]},{id:'rightSleeve',name:'Manga derecha',cm:[12,10],mesh:'Zone_rightSleeve',surface:[48,22],center:[.5,.5],camera:[-3.8,1,4.8]}],
+ tote:[{id:'front',name:'Frente',cm:[28,30],mesh:'Zone_front',surface:[36,41],center:[.5,.55],camera:[0,.5,5.7]},{id:'back',name:'Reverso',cm:[28,30],mesh:'Zone_back',surface:[36,41],center:[.5,.55],camera:[0,.5,-5.7]}],
+ notebook:[{id:'front',name:'Portada',cm:[15,21],mesh:'Zone_front',surface:[17,23],center:[.5,.5],camera:[0,.5,5.7]},{id:'back',name:'Contraportada',cm:[15,21],mesh:'Zone_back',surface:[17,23],center:[.5,.5],camera:[0,.5,-5.7]}],
  cushion:[{id:'a',name:'Lado A',cm:[28,28],mesh:'Zone_a',surface:[40,40],center:[.5,.5],camera:[0,.5,5.7]},{id:'b',name:'Lado B',cm:[28,28],mesh:'Zone_b',surface:[40,40],center:[.5,.5],camera:[0,.5,-5.7]}]
 };
 export const zonesFor=id=>ZONE_PROFILES[id]||[];

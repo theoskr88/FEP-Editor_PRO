@@ -1,0 +1,24 @@
+CHECK scene studio
+CHECK scene table
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'ae7ddb3c57d04facf90cc6ce1fe9633bd54cf516eeb6fef02a9504e0f7a77a17'
+- '80fb74651e7928055c50251fa2dc1e6c3a90a8e37b59d90f996bbbc781548361'
+
+    at file:///workspace/FEP-Editor_PRO/tests/scenes-browser.mjs:6:694
+    at async check (file:///workspace/FEP-Editor_PRO/tests/scenes-browser.mjs:4:97)
+    at async file:///workspace/FEP-Editor_PRO/tests/scenes-browser.mjs:6:2 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'ae7ddb3c57d04facf90cc6ce1fe9633bd54cf516eeb6fef02a9504e0f7a77a17',
+  expected: '80fb74651e7928055c50251fa2dc1e6c3a90a8e37b59d90f996bbbc781548361',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

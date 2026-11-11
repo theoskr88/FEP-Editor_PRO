@@ -1,10 +1,10 @@
-import {normalizeZoneBank} from './zones.js?v=zonas1-20261110';
-import {normalizeMockup} from './mockup-settings.js?v=zonas1-20261110';
-import {validateCreative,validatePatternBudget} from './creative.js?v=zonas1-20261110';
-import {profileById,profileVariant} from './product-profiles.js?v=zonas1-20261110';
-import {validateVector} from './vector.js?v=zonas1-20261110';
-import {normalizeFreeDesign,validateShape} from './free-design.js?v=zonas1-20261110';
-import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=zonas1-20261110';
+import {normalizeZoneBank} from './zones.js?v=cierre-a-20261111';
+import {normalizeMockup} from './mockup-settings.js?v=cierre-a-20261111';
+import {validateCreative,validatePatternBudget} from './creative.js?v=cierre-a-20261111';
+import {profileById,profileVariant} from './product-profiles.js?v=cierre-a-20261111';
+import {validateVector} from './vector.js?v=cierre-a-20261111';
+import {normalizeFreeDesign,validateShape} from './free-design.js?v=cierre-a-20261111';
+import {glitterSettings,migrateLegacyGlitter,GLITTER_SCHEMA} from './glitter.js?v=cierre-a-20261111';
 // Validate before changing any live editor state. Legacy V1 remains readable.
 export function validateProject(data){
  if(!data||typeof data!=='object'||![undefined,1,2].includes(data.version)||!Array.isArray(data.elements)||data.elements.length>500)throw Error('Formato o número de capas inválido');

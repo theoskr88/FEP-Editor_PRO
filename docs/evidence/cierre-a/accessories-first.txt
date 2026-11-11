@@ -1,0 +1,12 @@
+PASS accessory desktop tote independent front and back dimensions, text, image and sticker layers
+PASS accessory desktop tote copy appends independent layers and target undo does not alter source
+PASS accessory desktop tote autosave, native JSON and cold recovery retain both faces and physical dimensions
+PASS accessory desktop tote individual physical PNG/JPEG/PDF and real cut SVG retain the active face
+PASS accessory desktop tote all-zone ZIP has valid CRC, distinct face dimensions and print unchanged by scenery
+PASS accessory desktop tote consolidated sheets preserve both original sizes and download real multipage PDF
+PASS accessory desktop tote two HD views use actual front and back and restore the editor
+PASS accessory desktop tote actual 360 video decodes with every face mapped and remains editable
+PASS accessory desktop notebook independent front and back dimensions, text, image and sticker layers
+PASS accessory desktop notebook copy appends independent layers and target undo does not alter source
+PASS accessory desktop notebook autosave, native JSON and cold recovery retain both faces and physical dimensions
+PASS accessory desktop notebook individual physical PNG/JPEG/PDF and real cut SVG retain the active face

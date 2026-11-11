@@ -1,0 +1,23 @@
+
+> fep-editor-pro@0.9.5 test:boot
+> node tests/boot.mjs
+
+REPRODUCED resize [ 'ResizeObserver is not a constructor' ]
+REPRODUCED media [ 'media.addEventListener is not a function' ]
+REPRODUCED hasOwn [ 'Object.hasOwn is not a function' ]
+REPRODUCED glitter-export [
+  "The requested module './glitter.js' does not provide an export named 'applyGlitterPreset'"
+]
+PASS boot normal
+PASS boot stale unversioned glitter cache
+PASS boot mobile
+PASS boot legacy APIs
+PASS boot missing Three MIME fallback
+PASS boot missing sticker module
+PASS boot stalled IndexedDB
+PASS boot asynchronous 3D loading
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

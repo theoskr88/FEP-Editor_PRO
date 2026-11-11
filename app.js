@@ -1,30 +1,30 @@
-import {zonesFor,emptyZones,zoneCanvasWidth,copyZoneLayers,allProjectLayers} from './src/zones.js?v=zonas1-20261110';
-import {createTextileMaps} from './src/textile-materials.js?v=zonas1-20261110';
-import {zipFiles} from './src/zip-store.js?v=zonas1-20261110';
-import {encodeVideoFrames} from './src/video-frames.js?v=zonas1-20261110';
-import {normalizeMockup} from './src/mockup-settings.js?v=zonas1-20261110';
-import {createMockupControls} from './src/mockup-controls.js?v=zonas1-20261110';
-import {validateCreative,validatePatternBudget,paintCreativeText,creativeTextBounds,paintCreativeImage,CREATIVE_TEMPLATES} from './src/creative.js?v=zonas1-20261110';
-import {createCreativeControls} from './src/creative-controls.js?v=zonas1-20261110';
-import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById} from './src/product-profiles.js?v=zonas1-20261110';
-import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=zonas1-20261110';
-import {createVectorControls} from './src/vector-controls.js?v=zonas1-20261110';
-import {getSticker} from './src/stickers.js?v=zonas1-20261110';
-import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=zonas1-20261110';
-import {createFreeControls} from './src/free-controls.js?v=zonas1-20261110';
-import {validateProject,validateStickerLayer} from './src/project.js?v=zonas1-20261110';
-import {createLayerList,layerName} from './src/layer-ui.js?v=zonas1-20261110';
-import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=zonas1-20261110';
-import {createGlitterCache} from './src/glitter-cache.js?v=zonas1-20261110';
-import {createGlitterControls} from './src/glitter-controls.js?v=zonas1-20261110';
-import {prepareProject} from './src/imports.js?v=zonas1-20261110';
-import {prepareImageFile,enforceDocumentBudget as enforceLayerBudget,ASSET_LIMITS} from './src/assets.js?v=zonas1-20261110';
-import {openDocumentStore,createAutosave} from './src/persistence.js?v=zonas1-20261110';
+import {zonesFor,emptyZones,zoneCanvasWidth,copyZoneLayers,allProjectLayers} from './src/zones.js?v=cierre-a-20261111';
+import {createTextileMaps} from './src/textile-materials.js?v=cierre-a-20261111';
+import {zipFiles} from './src/zip-store.js?v=cierre-a-20261111';
+import {encodeVideoFrames} from './src/video-frames.js?v=cierre-a-20261111';
+import {normalizeMockup} from './src/mockup-settings.js?v=cierre-a-20261111';
+import {createMockupControls} from './src/mockup-controls.js?v=cierre-a-20261111';
+import {validateCreative,validatePatternBudget,paintCreativeText,creativeTextBounds,paintCreativeImage,CREATIVE_TEMPLATES} from './src/creative.js?v=cierre-a-20261111';
+import {createCreativeControls} from './src/creative-controls.js?v=cierre-a-20261111';
+import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById} from './src/product-profiles.js?v=cierre-a-20261111';
+import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=cierre-a-20261111';
+import {createVectorControls} from './src/vector-controls.js?v=cierre-a-20261111';
+import {getSticker} from './src/stickers.js?v=cierre-a-20261111';
+import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=cierre-a-20261111';
+import {createFreeControls} from './src/free-controls.js?v=cierre-a-20261111';
+import {validateProject,validateStickerLayer} from './src/project.js?v=cierre-a-20261111';
+import {createLayerList,layerName} from './src/layer-ui.js?v=cierre-a-20261111';
+import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=cierre-a-20261111';
+import {createGlitterCache} from './src/glitter-cache.js?v=cierre-a-20261111';
+import {createGlitterControls} from './src/glitter-controls.js?v=cierre-a-20261111';
+import {prepareProject} from './src/imports.js?v=cierre-a-20261111';
+import {prepareImageFile,enforceDocumentBudget as enforceLayerBudget,ASSET_LIMITS} from './src/assets.js?v=cierre-a-20261111';
+import {openDocumentStore,createAutosave} from './src/persistence.js?v=cierre-a-20261111';
 let sceneSettings=normalizeMockup(),sceneController,photoBusy=false;
 let materialVariant='original';
 let THREE,OrbitControls,resizeViewer=()=>{};
 let recovering=true,stickerController,stickerPainter,stickerGeometry,stickerReady;
-if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=zonas1-20261110')).initInterface()}catch{}}
+if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=cierre-a-20261111')).initInterface()}catch{}}
 const ui=window.__fepUI||{refresh(){}};
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 let dragStart=null,gestureHistory=false,importGeneration=0;
@@ -144,7 +144,7 @@ function draw(){
     ctx.restore();
   }
   paintDesign(textureCtx,textureCanvas.width,textureCanvas.height);
-  if(finishMode==='glitter')updateGlitterArtwork();updateTexture();
+  if(finishMode==='glitter'||['mug','tumbler'].includes($('product').value))updateGlitterArtwork();updateTexture();
   if($('mirrorPreview'))refreshIndividualPreview();
 }
 function bounds(e){if(e?.type==='text'&&(e.typography||e.gradient))return creativeTextBounds(ctx,e,canvas.width,canvas.height);if(e?.type==='vector')return vectorBounds(e,canvas.width,canvas.height);if(e?.type==='shape')return shapeBounds(e,canvas.width,canvas.height);if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
@@ -234,7 +234,7 @@ $('rotateMinus').onclick=()=>setPrintRotation(printRotationDeg-5);
 $('rotatePlus').onclick=()=>setPrintRotation(printRotationDeg+5);
 $('rotationViewFront').onclick=focusDesignFront;
 $('rotationNumber').addEventListener('change',e=>setPrintRotation(e.target.value));
-$('widthCm').onchange=()=>{updateDimensions();buildModel()};$('heightCm').onchange=()=>{updateDimensions();if(profileById($('product').value)?.kind==='glb')buildModel()};$('product').onchange=()=>{setDimForProduct();updateRotationToolbar()};
+$('widthCm').onchange=()=>{updateDimensions();if(!profileById($('product').value)?.multiZone)buildModel()};$('heightCm').onchange=()=>{updateDimensions();if(profileById($('product').value)?.kind==='glb'&&!profileById($('product').value)?.multiZone)buildModel()};$('product').onchange=()=>{setDimForProduct();updateRotationToolbar()};
 const zoneHistories=new Map();
 function captureZone(){if(!zoneProduct||editorMode!=='product')return;const g=productZones[zoneProduct];if(!g)return;g.zones[g.active]={width:documentWidth,height:documentHeight,elements};zoneHistories.set(zoneProduct+':'+g.active,{history,redoStack,selected})}
 function captureFree(){if(editorMode==='free'&&(freeDocument||Object.keys(productZones).length)){freeDocument={width:documentWidth,height:documentHeight,elements,freeDesign:normalizeFreeDesign(freeDesign)};freeSession={history,redoStack,selected}}}
@@ -246,7 +246,7 @@ function focusZone(){const def=zonesFor(zoneProduct).find(z=>z.id===productZones
 function openZoneProduct(product,id){++importGeneration;const previous=zoneProduct;captureZone();const fresh=!productZones[product],g=productZones[product]??=emptyZones(product);if(fresh&&elements.length&&!previous)g.zones[g.active].elements=copyElements();if(id&&!zonesFor(product).some(z=>z.id===id))throw Error('Zona no disponible');g.active=id||g.active;zoneProduct=product;const z=g.zones[g.active];elements=z.elements;const past=zoneHistories.get(product+':'+g.active);history=past?.history||[];redoStack=past?.redoStack||[];selected=past?.selected??-1;$('widthCm').value=z.width;$('heightCm').value=z.height;documentWidth=z.width;documentHeight=z.height;updateDimensions();refreshSelectedLabel();syncZoneUI();if(previous!==product||!modelRoot?.children.length)buildModel();focusZone();updateRotationToolbar();queueAutosave();}
 function paintZone(target,w,h,doc){paintDesign(target,w,h,{source:doc.elements,pageWidth:doc.width,pageHeight:doc.height,referenceWidth:zoneCanvasWidth(doc.width,doc.height),transparent:true})}
 function syncTextileMaps(product=zoneProduct){if(!textileMaps||!product||!productZones[product])return;captureZone();textileMaps.update(product,productZones[product],$('productColor').value,paintZone)}
-function renderZoneCanvas(doc,mirror=false){const c=document.createElement('canvas');c.width=Math.round(doc.width/2.54*300);c.height=Math.round(doc.height/2.54*300);if(c.width*c.height>40e6)throw Error('La zona supera 40 megapíxeles a 300 ppp');paintZone(c.getContext('2d'),c.width,c.height,doc);return mirror?mirrorFinishedImage(c):c}
+function renderZoneCanvas(doc,mirror=false){const c=document.createElement('canvas');c.width=Math.round(doc.width/2.54*300);c.height=Math.round(doc.height/2.54*300);if(c.width*c.height>40e6)throw Error('La zona supera 40 megapíxeles a 300 ppp');paintZone(c.getContext('2d',{willReadFrequently:true}),c.width,c.height,doc);return mirror?mirrorFinishedImage(c):c}
 $('zoneSelect').onchange=()=>{if(!zoneBusy)openZoneProduct(zoneProduct,$('zoneSelect').value)};
 $('zoneCopy').onclick=()=>{try{captureZone();const g=productZones[zoneProduct],target=g.zones[$('zoneCopyTarget').value],source=g.zones[g.active];if(!target)throw Error('Selecciona destino');const additions=copyZoneLayers(source,target,copyElements);if(target.elements.length+additions.length>500)throw Error('Máximo 500 capas por zona');const all=Object.values(productZones).flatMap(g=>Object.values(g.zones).flatMap(z=>z.elements));enforceLayerBudget([...all,...additions,...(freeDocument?freeDocument.elements:[])]);const candidate=[...target.elements,...additions];validateProject({width:target.width,height:target.height,elements:candidate});const key=zoneProduct+':'+$('zoneCopyTarget').value,past=zoneHistories.get(key)||{history:[],redoStack:[],selected:-1};past.history.push(copyElements(target.elements));if(past.history.length>40)past.history.shift();past.redoStack=[];zoneHistories.set(key,past);target.elements=candidate;syncTextileMaps();renderer?.render(scene,camera);queueAutosave();notify('Diseño copiado como capas independientes; medidas físicas conservadas')}catch(e){notify(e.message)}};
 $('zoneExportAll').onclick=async()=>{if(zoneBusy||!zoneProduct)return;captureZone();zoneBusy=true;syncZoneUI();try{const product=zoneProduct,project=projectSnapshot(),mirror=getMirrorMode(),docs=Object.fromEntries(Object.entries(productZones[product].zones).map(([id,z])=>[id,{...z,elements:copyElements(z.elements)}])),files=[],manifest={product,dpi:300,mirror,zones:[]};for(const def of zonesFor(product)){const doc=docs[def.id],c=renderZoneCanvas(doc,mirror==='espejo'),raw=await canvasBlob(c,'image/png');files.push({name:def.id+'.png',data:pngWithDpi(await raw.arrayBuffer())});manifest.zones.push({id:def.id,widthCm:doc.width,heightCm:doc.height,filename:def.id+'.png'});c.width=c.height=1}files.push({name:'manifest.json',data:JSON.stringify(manifest,null,2)},{name:'proyecto-completo.json',data:JSON.stringify(project,null,2)});saveBlob(await zipFiles(files),product+'-zonas-impresion.zip');notify('Zonas exportadas · PNG transparentes a 300 ppp · sin escenario')}catch(e){notify('No se pudieron exportar las zonas: '+e.message)}finally{zoneBusy=false;syncZoneUI()}};
@@ -278,7 +278,7 @@ function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.create
 function mirrorFinishedImage(source){
   const output=document.createElement('canvas');
   output.width=source.width;output.height=source.height;
-  const context=output.getContext('2d');
+  const context=output.getContext('2d',{willReadFrequently:true});
   context.save();
   context.translate(output.width,0);
   context.scale(-1,1);
@@ -293,7 +293,7 @@ function renderToExportCanvas(mode='normal'){
   const w=Math.round(+$('widthCm').value/2.54*300),h=Math.round(+$('heightCm').value/2.54*300);
   if(w*h>40e6)throw Error('Área demasiado grande para este dispositivo');
   source.width=w;source.height=h;
-  paintDesign(source.getContext('2d'),w,h);
+  paintDesign(source.getContext('2d',{willReadFrequently:true}),w,h);
   return mode==='espejo' ? mirrorFinishedImage(source) : source;
 }
 function refreshIndividualPreview(){
@@ -345,7 +345,7 @@ function jpegWithDpi(buffer,dpi=300){
   return new Blob([a.subarray(0,2),app0,a.subarray(2)],{type:'image/jpeg'});
 }
 // PDF independiente del diálogo de impresión: tamaño de página = tamaño del lienzo.
-function whiteCanvas(source){const c=document.createElement('canvas');c.width=source.width;c.height=source.height;const x=c.getContext('2d');x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);x.drawImage(source,0,0);return c}
+function whiteCanvas(source){const c=document.createElement('canvas');c.width=source.width;c.height=source.height;const x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);x.drawImage(source,0,0);return c}
 async function pdfAtPhysicalSize(canvas,wCm,hCm){
   const original=canvas;if(zoneProduct)canvas=whiteCanvas(canvas);
   const jpg=new Uint8Array(await (await canvasBlob(canvas,'image/jpeg',.98)).arrayBuffer());
@@ -446,6 +446,7 @@ function focusDesignFront(){
   controls.update();
   renderer.render(scene,camera);
 }
+function focusPrintedSurface(){if(!camera||!controls)return;if(zoneProduct){focusZone();return}if(['mug','tumbler'].includes($('product').value)){const a=THREE.MathUtils.degToRad(printRotationDeg);camera.position.set(5.7*Math.sin(a),1,5.7*Math.cos(a));controls.target.set(0,0,0);controls.update();renderer.render(scene,camera)}else focusDesignFront()}
 function focusPrintEdge(edge){
   if(!camera || !controls) return;
   const theta=(edge==='start' ? -printArc/2 : printArc/2)+THREE.MathUtils.degToRad(printRotationDeg);
@@ -457,15 +458,15 @@ function focusPrintEdge(edge){
 
 function init3D(){textileMaps=createTextileMaps(THREE);const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,Math.max(1,node.clientWidth)/Math.max(1,node.clientHeight),.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(Math.max(1,node.clientWidth),Math.max(1,node.clientHeight));node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;controls.addEventListener('change',()=>{if(!recording&&!photoBusy&&scene&&editorMode==='product')renderer.render(scene,camera)});scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE?.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);if(!recording&&!photoBusy&&editorMode==='product')controls.update()}animate();const resize=()=>{if(recording||photoBusy)return;const w=node.clientWidth,h=node.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);renderer.render(scene,camera)};resizeViewer=resize;typeof ResizeObserver==='function'?new ResizeObserver(resize).observe(node):window.addEventListener('resize',resize)}
 async function loadProductGLB(profile,root,bodyMaterial,printMaterial){
- try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js?v=zonas1-20261110');const loader=new GLTFLoader();let gltf;try{gltf=await deadline(loader.loadAsync(profile.url),15000,'No respondió el modelo GLB')}catch(error){if(!profile.gltfURL)throw error;gltf=await deadline(loader.loadAsync(profile.gltfURL),15000,'No respondió el modelo glTF de respaldo')}
+ try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js?v=cierre-a-20261111');const loader=new GLTFLoader();let gltf;try{gltf=await deadline(loader.loadAsync(profile.url),15000,'No respondió el modelo GLB')}catch(error){if(!profile.gltfURL)throw error;gltf=await deadline(loader.loadAsync(profile.gltfURL),15000,'No respondió el modelo glTF de respaldo')}
   if(root!==modelRoot){gltf.scene.traverse(o=>{o.geometry?.dispose();if(o.material)for(const m of(Array.isArray(o.material)?o.material:[o.material]))m.dispose()});bodyMaterial.dispose();printMaterial.dispose();return}
   gltf.scene.scale.setScalar(profile.worldScale);printMaterial.map=texture;printMaterial.needsUpdate=true;let printMeshes=0;
-  gltf.scene.traverse(mesh=>{if(!mesh.isMesh)return;const old=mesh.material;if(profile.multiZone){const def=zonesFor(profile.id).find(z=>z.mesh===mesh.name);mesh.material=textileMaps.material(profile.id,def?.id,$('productColor').value);const v=PRODUCT_VARIANTS[materialVariant];if(materialVariant!=='original'){mesh.material.roughness=v.roughness;mesh.material.metalness=v.metalness}if(def)printMeshes++;}else if(mesh.name===profile.printMesh){printMeshes++;mesh.material=printMaterial;mesh.scale.set(Math.min(1,documentWidth/profile.printCm[0]),Math.min(1,documentHeight/profile.printCm[1]),1)}else mesh.material=bodyMaterial;for(const material of(Array.isArray(old)?old:[old]))material.dispose()});
-  if(!printMeshes)throw Error('El GLB no contiene su superficie imprimible');if(profile.multiZone&&printMeshes!==zonesFor(profile.id).length)throw Error('Faltan superficies de zona');root.add(gltf.scene);if(profile.multiZone){bodyMaterial.dispose();printMaterial.dispose();fitTextileView()}$('profileStatus').dataset.state='ready';$('profileStatus').textContent=profile.multiZone?'Modelo textil propio · superficies curvas · '+printMeshes+' zonas independientes':documentWidth>profile.printCm[0]||documentHeight>profile.printCm[1]?'Área solicitada mayor que la placa; el visor limita al tamaño físico. Revisa medidas.':'Modelo propio · 100 × 100 × 3 mm · calibración digital';resizeViewer();sceneController?.refresh();resync3D({silent:true});
+  gltf.scene.traverse(mesh=>{if(!mesh.isMesh)return;const old=mesh.material;if(profile.multiZone){const def=zonesFor(profile.id).find(z=>z.mesh===mesh.name);mesh.material=textileMaps.material(profile.id,def?.id,$('productColor').value,mesh.name);const v=PRODUCT_VARIANTS[materialVariant];if(materialVariant!=='original'){mesh.material.roughness=v.roughness;mesh.material.metalness=v.metalness}if(def)printMeshes++;}else if(mesh.name===profile.printMesh){printMeshes++;mesh.material=printMaterial;mesh.scale.set(Math.min(1,documentWidth/profile.printCm[0]),Math.min(1,documentHeight/profile.printCm[1]),1)}else mesh.material=bodyMaterial;for(const material of(Array.isArray(old)?old:[old]))material.dispose()});
+  if(!printMeshes)throw Error('El GLB no contiene su superficie imprimible');if(profile.multiZone&&printMeshes!==zonesFor(profile.id).length)throw Error('Faltan superficies de zona');root.add(gltf.scene);if(profile.multiZone){bodyMaterial.dispose();printMaterial.dispose();fitTextileView()}$('profileStatus').dataset.state='ready';$('profileStatus').textContent=profile.multiZone?'Vista 3D lista · '+printMeshes+' zonas de impresión':documentWidth>profile.printCm[0]||documentHeight>profile.printCm[1]?'Área solicitada mayor que la placa; el visor limita al tamaño físico. Revisa medidas.':'Modelo propio · 100 × 100 × 3 mm · calibración digital';resizeViewer();sceneController?.refresh();resync3D({silent:true});
  }catch(error){if(root===modelRoot){$('profileStatus').dataset.state='failed';$('profileStatus').textContent='No se pudo cargar el modelo: '+error.message;notify('Modelo no disponible; diseño y exportación 2D conservados')}}finally{update3DControls()}
 }
 function addGeo(geo,mat,x=0,y=0,z=0,rotateX=0){let o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);o.rotation.x=rotateX;modelRoot.add(o);return o}
-function buildModel(){if(!scene)return;const profile=profileById($('product').value);$('profileStatus').dataset.state=profile?.kind==='glb'?'loading':'ready';$('profileStatus').textContent=profile?.kind==='glb'?'Cargando modelo 3D…':'Perfil original · medidas configurables';update3DControls();if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material]))material.dispose()})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&['mug','tumbler'].includes(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.04,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';let printMat=new THREE.MeshStandardMaterial({map:physical?physicalArtTexture:texture,transparent:physical,depthWrite:!physical,roughness:.65,side:THREE.FrontSide});window.printMat=printMat;const variant=PRODUCT_VARIANTS[materialVariant];if(!physical&&variant.roughness!==null){plain.roughness=variant.roughness;plain.metalness=variant.metalness}if(profile?.multiZone){productZones[p]??=emptyZones(p);syncTextileMaps(p)}if(profile?.kind==='glb'){loadProductGLB(profile,modelRoot,plain,printMat);return;}
+function buildModel(){if(!scene)return;const profile=profileById($('product').value);$('profileStatus').dataset.state=profile?.kind==='glb'?'loading':'ready';$('profileStatus').textContent=profile?.kind==='glb'?'Cargando modelo 3D…':'Perfil original · medidas configurables';update3DControls();if(modelRoot){scene.remove(modelRoot);modelRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const material of(Array.isArray(o.material)?o.material:[o.material])){if(material.userData.ownedMap)material.map?.dispose();material.dispose()}})}modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&['mug','tumbler'].includes(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshPhysicalMaterial({color:c,roughness:p==='mug'?.24:p==='tumbler'?.32:.5,metalness:p==='tumbler'?.12:.015,clearcoat:['mug','tumbler'].includes(p)?.65:.1,clearcoatRoughness:.18,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';const wrapped=['mug','tumbler'].includes(p);let printMat=new THREE.MeshPhysicalMaterial({map:physical||wrapped?physicalArtTexture:texture,transparent:physical||wrapped,depthWrite:!(physical||wrapped),roughness:wrapped?.28:.65,clearcoat:wrapped?.65:0,clearcoatRoughness:.18,side:THREE.FrontSide});window.printMat=printMat;const variant=PRODUCT_VARIANTS[materialVariant];if(!physical&&variant.roughness!==null){plain.roughness=variant.roughness;plain.metalness=variant.metalness}if(profile?.multiZone){productZones[p]??=emptyZones(p);syncTextileMaps(p)}if(profile?.kind==='glb'){loadProductGLB(profile,modelRoot,plain,printMat);return;}
 if(p==='mug'||p==='tumbler'){let r=p==='mug'?.93:.66,h=p==='mug'?2.05:3;// Cuerpo completo sin arte: evita repetir el archivo en toda la taza.
 if(p==='mug'){
   // Taza 11 oz de paredes lisas, base discreta y labio delgado (foto de referencia).
@@ -526,20 +527,6 @@ if(p==='mug'){
   addGeo(new THREE.CylinderGeometry(r,r,.08,96),plain,0,-h/2,0);
   addGeo(new THREE.CylinderGeometry(.77,.7,.14,96),new THREE.MeshStandardMaterial({color:'#cbd5df',metalness:.4,roughness:.35}),0,h/2+.09,0)
 }}
-else if(p==='tote'){
-  const cloth=new THREE.MeshStandardMaterial({color:c,roughness:.93,side:THREE.DoubleSide});
-  addGeo(new THREE.BoxGeometry(2.65,2.55,.22),cloth,0,-.25,0);
-  addGeo(new THREE.PlaneGeometry(2.32,2.12),printMat,0,-.29,.125);
-  for(let x of [-.71,.71]){
-    const curve=new THREE.CatmullRomCurve3([new THREE.Vector3(x-.20,.94,.04),new THREE.Vector3(x-.16,1.58,.04),new THREE.Vector3(x+.15,1.59,.04),new THREE.Vector3(x+.20,.94,.04)]);
-    addGeo(new THREE.TubeGeometry(curve,24,.07,8,false),cloth);
-  }
-}
-else if(p==='notebook'){
-  addGeo(new THREE.BoxGeometry(2.15,3,.15),plain);
-  addGeo(new THREE.PlaneGeometry(1.98,2.91),printMat,.07,0,.085);
-  for(let y=-1.25;y<=1.25;y+=.24){addGeo(new THREE.TorusGeometry(.095,.025,6,20),new THREE.MeshStandardMaterial({color:'#9daec1',metalness:.7,roughness:.2}),-1.1,y,.15)}
-}
 else if(p==='mousepad'){
   const mat=new THREE.MeshStandardMaterial({color:c,roughness:.93,side:THREE.DoubleSide});
   const geo=new THREE.BoxGeometry(3.1,.065,2.28);addGeo(geo,mat,0,0,0);
@@ -704,7 +691,7 @@ creativeController=createCreativeControls({state:()=>({elements,selected,w:docum
  apply:patch=>{const current=elements[selected];if(!current||current.locked)throw Error('Selecciona una capa desbloqueada');const next={...current,...patch};for(const key of ['gradient','typography','crop','mask','repeat'])if(next[key]===null)delete next[key];validateCreative(next);const list=elements.map((e,i)=>i===selected?next:e);validatePatternBudget(list,documentWidth,documentHeight);addHistory();elements[selected]=next;draw();updateImageControls()},
  template:id=>{const template=CREATIVE_TEMPLATES[id];if(!template)throw Error('Plantilla no disponible');const additions=JSON.parse(JSON.stringify(template.elements));if(elements.length+additions.length>500)throw Error('Máximo 500 capas');enforceDocumentBudget([...elements,...additions]);addHistory();elements.push(...additions);selected=elements.length-1;draw();notify('Plantilla añadida como capas editables; diseño anterior conservado')}
 });
-sceneController=createMockupControls({state:()=>sceneSettings,context:()=>({THREE,scene,renderer,camera,controls,modelRoot,texture,physicalArtTexture,fitView:fitTextileView}),notify,patch:(values,options={})=>{sceneSettings=normalizeMockup({...sceneSettings,...values});sceneController.refresh(options);queueAutosave()}});
+sceneController=createMockupControls({state:()=>sceneSettings,context:()=>({THREE,scene,renderer,camera,controls,modelRoot,texture,physicalArtTexture,fitView:fitTextileView,focusPrint:focusPrintedSurface}),notify,patch:(values,options={})=>{sceneSettings=normalizeMockup({...sceneSettings,...values});sceneController.refresh(options);queueAutosave()}});
 updateDimensions();updateRotationToolbar();
 async function startThree(){
  try{
@@ -769,7 +756,7 @@ function deadline(promise,ms,message){let timer;return Promise.race([promise,new
 
 async function loadStickers(){
  try{
-  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=zonas1-20261110'),import('./src/sticker-renderer.js?v=zonas1-20261110')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=zonas1-20261110');
+  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=cierre-a-20261111'),import('./src/sticker-renderer.js?v=cierre-a-20261111')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=cierre-a-20261111');
   stickerController=uiModule.createStickerControls({selected:()=>elements[selected],dimensions:cmPrint,busy:()=>recovering,notify,insert:definition=>{
    if(recovering)return;if(elements.length>=500){notify('Máximo 500 capas');return}
    const layer={type:'sticker',stickerId:definition.id,stickerName:definition.name,x:.5,y:.5,...initialLayerSize(.28,.75),color:'#e6eef9',outlineColor:'#52697e',outlineWidth:definition.shapes[0].stroke?1.5:0,rotation:0,flipX:false,flipY:false,shadow:false,...(definition.textBox?{label:{text:'',size:14,color:'#172b4d'}}:{})};validateStickerLayer(layer);addHistory();elements.push(layer);selected=elements.length-1;loadSelectedTextIntoInputs();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Sticker añadido: '+definition.name)

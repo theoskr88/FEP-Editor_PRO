@@ -1,0 +1,45 @@
+
+> fep-editor-pro@0.9.5 test:glitter
+> node tests/glitter-browser.mjs && node tests/print-files.mjs
+
+PASS desktop all glitter controls stay in the left tool column
+PASS desktop gold → #1249FF turns preview blue; applying changes only selected layer
+PASS desktop layer visibility, opacity, lock, duplicate and undo remain independent
+PASS desktop physical blue changes mockup only, excluding material from PNG/JPEG/PDF
+PASS desktop palettes synchronize color; resets and mode switches never apply a draft to another layer
+PASS desktop HOLA and a photo stay above printable glitter in canvas and export
+PASS desktop stable rendering and bounded texture cache; lighting changes without regenerating maps
+PASS desktop JSON and autosave roundtrip material, draft and layer colors independently
+PASS desktop image added after export updates artwork and physical texture
+PASS desktop 20×9 cm pieces keep scale and browser print receives a decoded sheet
+PASS desktop no errors or external dependencies; editor still usable without WebGL
+PASS touch all glitter controls stay in the left tool column
+PASS touch gold → #1249FF turns preview blue; applying changes only selected layer
+PASS touch layer visibility, opacity, lock, duplicate and undo remain independent
+PASS touch physical blue changes mockup only, excluding material from PNG/JPEG/PDF
+PASS touch palettes synchronize color; resets and mode switches never apply a draft to another layer
+PASS touch HOLA and a photo stay above printable glitter in canvas and export
+PASS touch stable rendering and bounded texture cache; lighting changes without regenerating maps
+PASS touch JSON and autosave roundtrip material, draft and layer colors independently
+PASS touch image added after export updates artwork and physical texture
+PASS touch 20×9 cm pieces keep scale and browser print receives a decoded sheet
+PASS touch no errors or external dependencies; editor still usable without WebGL
+PASS noWebGL all glitter controls stay in the left tool column
+PASS noWebGL gold → #1249FF turns preview blue; applying changes only selected layer
+PASS noWebGL layer visibility, opacity, lock, duplicate and undo remain independent
+PASS noWebGL physical blue changes mockup only, excluding material from PNG/JPEG/PDF
+PASS noWebGL palettes synchronize color; resets and mode switches never apply a draft to another layer
+PASS noWebGL HOLA and a photo stay above printable glitter in canvas and export
+PASS noWebGL stable rendering and bounded texture cache; lighting changes without regenerating maps
+PASS noWebGL JSON and autosave roundtrip material, draft and layer colors independently
+PASS noWebGL image added after export updates artwork and physical texture
+PASS noWebGL 20×9 cm pieces keep scale and browser print receives a decoded sheet
+PASS noWebGL no errors or external dependencies; editor still usable without WebGL
+PASS actual file mirror image/png { w: 2362, h: 1063, ink: 80987, mismatch: 0, exact: 0 }
+PASS actual file mirror image/jpeg { w: 2362, h: 1063, ink: 80987, mismatch: 10, exact: 103737 }
+PASS actual file mirror application/pdf { w: 2362, h: 1063, ink: 80983, mismatch: 6, exact: 82975 }
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

@@ -1,0 +1,198 @@
+{
+  "passed": 32,
+  "results": [
+    {
+      "mode": "desktop",
+      "product": "tote",
+      "name": "independent front and back dimensions, text, image and sticker layers",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "tote",
+      "name": "copy appends independent layers and target undo does not alter source",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "tote",
+      "name": "autosave, native JSON and cold recovery retain both faces and physical dimensions",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "tote",
+      "name": "individual physical PNG/JPEG/PDF and real cut SVG retain the active face",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "tote",
+      "name": "all-zone ZIP has valid CRC, distinct face dimensions and print unchanged by scenery",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "tote",
+      "name": "consolidated sheets preserve both original sizes and download real multipage PDF",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "tote",
+      "name": "two HD views use actual front and back and restore the editor",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "tote",
+      "name": "actual 360 video decodes with every face mapped and remains editable",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "notebook",
+      "name": "independent front and back dimensions, text, image and sticker layers",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "notebook",
+      "name": "copy appends independent layers and target undo does not alter source",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "notebook",
+      "name": "autosave, native JSON and cold recovery retain both faces and physical dimensions",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "notebook",
+      "name": "individual physical PNG/JPEG/PDF and real cut SVG retain the active face",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "notebook",
+      "name": "all-zone ZIP has valid CRC, distinct face dimensions and print unchanged by scenery",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "notebook",
+      "name": "consolidated sheets preserve both original sizes and download real multipage PDF",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "notebook",
+      "name": "two HD views use actual front and back and restore the editor",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "product": "notebook",
+      "name": "actual 360 video decodes with every face mapped and remains editable",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "tote",
+      "name": "independent front and back dimensions, text, image and sticker layers",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "tote",
+      "name": "copy appends independent layers and target undo does not alter source",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "tote",
+      "name": "autosave, native JSON and cold recovery retain both faces and physical dimensions",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "tote",
+      "name": "individual physical PNG/JPEG/PDF and real cut SVG retain the active face",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "tote",
+      "name": "all-zone ZIP has valid CRC, distinct face dimensions and print unchanged by scenery",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "tote",
+      "name": "consolidated sheets preserve both original sizes and download real multipage PDF",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "tote",
+      "name": "two HD views use actual front and back and restore the editor",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "tote",
+      "name": "actual 360 video decodes with every face mapped and remains editable",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "notebook",
+      "name": "independent front and back dimensions, text, image and sticker layers",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "notebook",
+      "name": "copy appends independent layers and target undo does not alter source",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "notebook",
+      "name": "autosave, native JSON and cold recovery retain both faces and physical dimensions",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "notebook",
+      "name": "individual physical PNG/JPEG/PDF and real cut SVG retain the active face",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "notebook",
+      "name": "all-zone ZIP has valid CRC, distinct face dimensions and print unchanged by scenery",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "notebook",
+      "name": "consolidated sheets preserve both original sizes and download real multipage PDF",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "notebook",
+      "name": "two HD views use actual front and back and restore the editor",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "product": "notebook",
+      "name": "actual 360 video decodes with every face mapped and remains editable",
+      "passed": true
+    }
+  ],
+  "physicalDevicesTested": false
+}

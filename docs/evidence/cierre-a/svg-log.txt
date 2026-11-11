@@ -1,0 +1,1 @@
+PASS Inkscape: import, physical units, offset, mirror and plain SVG re-export

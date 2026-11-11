@@ -1,0 +1,24 @@
+
+> fep-editor-pro@0.9.5 test:vector
+> node tests/vector-browser.mjs
+
+PASS vector desktop shape conversion, node edit, subdivision and undo are real document operations
+PASS vector desktop union, difference and intersection preserve operands and physical dimensions
+PASS vector desktop cut offset never enters PNG or 3D art, and SVG separates raster print data
+PASS vector desktop local font becomes editable paths; missing glyph never fabricates a cut
+PASS vector desktop vector project autosave/recovery is atomic and retains cut roles and nodes
+PASS vector mobile shape conversion, node edit, subdivision and undo are real document operations
+PASS vector mobile union, difference and intersection preserve operands and physical dimensions
+PASS vector mobile cut offset never enters PNG or 3D art, and SVG separates raster print data
+PASS vector mobile local font becomes editable paths; missing glyph never fabricates a cut
+PASS vector mobile vector project autosave/recovery is atomic and retains cut roles and nodes
+PASS vector noWebGL shape conversion, node edit, subdivision and undo are real document operations
+PASS vector noWebGL union, difference and intersection preserve operands and physical dimensions
+PASS vector noWebGL cut offset never enters PNG or 3D art, and SVG separates raster print data
+PASS vector noWebGL local font becomes editable paths; missing glyph never fabricates a cut
+PASS vector noWebGL vector project autosave/recovery is atomic and retains cut roles and nodes
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

@@ -1,0 +1,18 @@
+{
+  "passed": 2,
+  "base": "44f41d3",
+  "results": [
+    {
+      "kind": "FUENTE",
+      "passed": true,
+      "files": 736,
+      "sha256": "ea745e05c1bafa61cf622a97da5c6a72bd089a6304fd8b8c50f9847283f83713"
+    },
+    {
+      "kind": "PAGES",
+      "passed": true,
+      "files": 53,
+      "sha256": "49d063115dcd3871216684b68bc72c29d69a70827c33ad6f2ab3c68584a3a1f2"
+    }
+  ]
+}

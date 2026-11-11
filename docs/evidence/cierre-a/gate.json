@@ -1,0 +1,32 @@
+{
+  "phase": "cierre-a",
+  "base": "ac9bedf",
+  "gate": "passed locally",
+  "reports": {
+    "auditoria-zonas1/integridad.json": 2,
+    "acceptance.json": 20,
+    "zones-browser.json": 26,
+    "accessories-browser.json": 32,
+    "scenes-browser.json": 8,
+    "zones-migration.json": 12,
+    "free-zone-recovery.json": 2,
+    "zones-race.json": 2,
+    "compat/glitter/glitter-browser.json": 33,
+    "compat/glitter/print-files.json": 3,
+    "print-browser.json": 12,
+    "vector-browser.json": 15,
+    "svg-validation.json": 5,
+    "profiles-browser.json": 4,
+    "interface/interface-browser.json": 24,
+    "boot.json": 8,
+    "model-reproducibility.json": 1,
+    "files-validation.json": 8
+  },
+  "unitTests": 94,
+  "staticPackageChecks": 32,
+  "testedRuntimeSha256": "3568d7e3b2fd7a1dd48031f3ef37082c8caa3d05636b4e253100735e128b9f9c",
+  "deployed": false,
+  "physicalDevicesTested": false,
+  "physicalPrintingTested": false,
+  "hardwarePlotterTested": false
+}
