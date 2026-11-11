@@ -1,6 +1,6 @@
-import {packSheets,printQuality,printSettings,readPrintDpi,PRINT_LIMITS} from './src/print-layout.js?v=cierre-b2-20261111';
-import {pdfPrintJob} from './src/print-pdf.js?v=cierre-b2-20261111';
-import {imageInfo} from './src/assets.js?v=cierre-b2-20261111';
+import {packSheets,printQuality,printSettings,readPrintDpi,PRINT_LIMITS} from './src/print-layout.js?v=fep-1a3de09befbf814e';
+import {pdfPrintJob} from './src/print-pdf.js?v=fep-1a3de09befbf814e';
+import {imageInfo} from './src/assets.js?v=fep-1a3de09befbf814e';
 /* Plancha de impresión — V0.9.0, independiente del visor 3D. */
 const el=id=>document.getElementById(id);
 const presets={A4:[21,29.7],Carta:[21.59,27.94],Oficio:[21.6,33],A3:[29.7,42],A2:[42,59.4]};

@@ -1,4 +1,4 @@
-import {normalizeProject} from './project.js?v=cierre-b2-20261111';
+import {normalizeProject} from './project.js?v=fep-1a3de09befbf814e';
 // Local repository. The interface is independent of the DOM and can be backed by a native filesystem.
 export const cleanDocument=value=>JSON.parse(JSON.stringify(value,(key,value)=>key==='img'?undefined:value));
 export function projectName(value){const name=String(value||'Sin título').trim().replace(/[\u0000-\u001f]/g,'').slice(0,100);return name||'Sin título'}

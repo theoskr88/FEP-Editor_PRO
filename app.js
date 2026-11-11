@@ -1,32 +1,32 @@
-import {openProjectLibrary,createProjectSession,cleanDocument,documentDigest} from './src/projects.js?v=cierre-b2-20261111';
-import {createProjectManager} from './src/project-manager.js?v=cierre-b2-20261111';
-import {zonesFor,emptyZones,zoneCanvasWidth,copyZoneLayers,allProjectLayers} from './src/zones.js?v=cierre-b2-20261111';
-import {createTextileMaps} from './src/textile-materials.js?v=cierre-b2-20261111';
-import {zipFiles} from './src/zip-store.js?v=cierre-b2-20261111';
-import {encodeVideoFrames} from './src/video-frames.js?v=cierre-b2-20261111';
-import {normalizeMockup} from './src/mockup-settings.js?v=cierre-b2-20261111';
-import {createMockupControls} from './src/mockup-controls.js?v=cierre-b2-20261111';
-import {validateCreative,validatePatternBudget,paintCreativeText,creativeTextBounds,paintCreativeImage,CREATIVE_TEMPLATES} from './src/creative.js?v=cierre-b2-20261111';
-import {createCreativeControls} from './src/creative-controls.js?v=cierre-b2-20261111';
-import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById} from './src/product-profiles.js?v=cierre-b2-20261111';
-import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=cierre-b2-20261111';
-import {createVectorControls} from './src/vector-controls.js?v=cierre-b2-20261111';
-import {getSticker} from './src/stickers.js?v=cierre-b2-20261111';
-import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=cierre-b2-20261111';
-import {createFreeControls} from './src/free-controls.js?v=cierre-b2-20261111';
-import {validateProject,validateStickerLayer} from './src/project.js?v=cierre-b2-20261111';
-import {createLayerList,layerName} from './src/layer-ui.js?v=cierre-b2-20261111';
-import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=cierre-b2-20261111';
-import {createGlitterCache} from './src/glitter-cache.js?v=cierre-b2-20261111';
-import {createGlitterControls} from './src/glitter-controls.js?v=cierre-b2-20261111';
-import {prepareProject} from './src/imports.js?v=cierre-b2-20261111';
-import {prepareImageFile,enforceDocumentBudget as enforceLayerBudget,ASSET_LIMITS} from './src/assets.js?v=cierre-b2-20261111';
-import {openDocumentStore,createAutosave} from './src/persistence.js?v=cierre-b2-20261111';
+import {openProjectLibrary,createProjectSession,cleanDocument,documentDigest} from './src/projects.js?v=fep-1a3de09befbf814e';
+import {createProjectManager} from './src/project-manager.js?v=fep-1a3de09befbf814e';
+import {zonesFor,emptyZones,zoneCanvasWidth,copyZoneLayers,allProjectLayers} from './src/zones.js?v=fep-1a3de09befbf814e';
+import {createTextileMaps} from './src/textile-materials.js?v=fep-1a3de09befbf814e';
+import {zipFiles} from './src/zip-store.js?v=fep-1a3de09befbf814e';
+import {encodeVideoFrames} from './src/video-frames.js?v=fep-1a3de09befbf814e';
+import {normalizeMockup} from './src/mockup-settings.js?v=fep-1a3de09befbf814e';
+import {createMockupControls} from './src/mockup-controls.js?v=fep-1a3de09befbf814e';
+import {validateCreative,validatePatternBudget,paintCreativeText,creativeTextBounds,paintCreativeImage,CREATIVE_TEMPLATES} from './src/creative.js?v=fep-1a3de09befbf814e';
+import {createCreativeControls} from './src/creative-controls.js?v=fep-1a3de09befbf814e';
+import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById} from './src/product-profiles.js?v=fep-1a3de09befbf814e';
+import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=fep-1a3de09befbf814e';
+import {createVectorControls} from './src/vector-controls.js?v=fep-1a3de09befbf814e';
+import {getSticker} from './src/stickers.js?v=fep-1a3de09befbf814e';
+import {normalizeFreeDesign,fromCm,pageSize,paintShape,shapeBounds,validateShape,alignedPosition} from './src/free-design.js?v=fep-1a3de09befbf814e';
+import {createFreeControls} from './src/free-controls.js?v=fep-1a3de09befbf814e';
+import {validateProject,validateStickerLayer} from './src/project.js?v=fep-1a3de09befbf814e';
+import {createLayerList,layerName} from './src/layer-ui.js?v=fep-1a3de09befbf814e';
+import {paintGlitter,glitterSettings,glitterTextureSize,glitterMaterialProperties,GLITTER_SCHEMA} from './src/glitter.js?v=fep-1a3de09befbf814e';
+import {createGlitterCache} from './src/glitter-cache.js?v=fep-1a3de09befbf814e';
+import {createGlitterControls} from './src/glitter-controls.js?v=fep-1a3de09befbf814e';
+import {prepareProject} from './src/imports.js?v=fep-1a3de09befbf814e';
+import {prepareImageFile,enforceDocumentBudget as enforceLayerBudget,ASSET_LIMITS} from './src/assets.js?v=fep-1a3de09befbf814e';
+import {openDocumentStore,createAutosave} from './src/persistence.js?v=fep-1a3de09befbf814e';
 let sceneSettings=normalizeMockup(),sceneController,photoBusy=false;
 let materialVariant='original';
 let THREE,OrbitControls,resizeViewer=()=>{};
 let recovering=true,stickerController,stickerPainter,stickerGeometry,stickerReady;
-if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=cierre-b2-20261111')).initInterface()}catch{}}
+if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fep-1a3de09befbf814e')).initInterface()}catch{}}
 const ui=window.__fepUI||{refresh(){}};
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 let dragStart=null,gestureHistory=false,importGeneration=0;
@@ -461,7 +461,7 @@ function focusPrintEdge(edge){
 
 function init3D(){textileMaps=createTextileMaps(THREE);const node=$('viewer');scene=new THREE.Scene();scene.background=new THREE.Color('#17253a');camera=new THREE.PerspectiveCamera(40,Math.max(1,node.clientWidth)/Math.max(1,node.clientHeight),.1,100);camera.position.set(0,1,5.7);renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(Math.max(1,node.clientWidth),Math.max(1,node.clientHeight));node.appendChild(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();notify('Se interrumpió el motor gráfico. Puedes recargar la página después de guardar tu proyecto.');});renderer.domElement.addEventListener('webglcontextrestored',()=>{requestAnimationFrame(()=>resync3D());});controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=2.5;controls.maxDistance=11;controls.addEventListener('change',()=>{if(!recording&&!photoBusy&&scene&&editorMode==='product')renderer.render(scene,camera)});scene.add(new THREE.HemisphereLight(0xffffff,0x65738a,2));let light=new THREE.DirectionalLight(0xffffff,2.8);light.position.set(2,4,5);scene.add(light);let light2=new THREE.DirectionalLight(0xffffff,1);light2.position.set(-3,2,-4);scene.add(light2);texture=new THREE.CanvasTexture(textureCanvas);texture.colorSpace=THREE?.SRGBColorSpace;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.flipY=true;texture.needsUpdate=true;buildModel();function animate(){animRequest=requestAnimationFrame(animate);if(!recording&&!photoBusy&&editorMode==='product')controls.update()}animate();const resize=()=>{if(recording||photoBusy)return;const w=node.clientWidth,h=node.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);renderer.render(scene,camera)};resizeViewer=resize;typeof ResizeObserver==='function'?new ResizeObserver(resize).observe(node):window.addEventListener('resize',resize)}
 async function loadProductGLB(profile,root,bodyMaterial,printMaterial){
- try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js?v=cierre-b2-20261111');const loader=new GLTFLoader();let gltf;try{gltf=await deadline(loader.loadAsync(profile.url),15000,'No respondió el modelo GLB')}catch(error){if(!profile.gltfURL)throw error;gltf=await deadline(loader.loadAsync(profile.gltfURL),15000,'No respondió el modelo glTF de respaldo')}
+ try{const {GLTFLoader}=await import('./vendor/GLTFLoader.js?v=fep-1a3de09befbf814e');const loader=new GLTFLoader();let gltf;try{gltf=await deadline(loader.loadAsync(profile.url),15000,'No respondió el modelo GLB')}catch(error){if(!profile.gltfURL)throw error;gltf=await deadline(loader.loadAsync(profile.gltfURL),15000,'No respondió el modelo glTF de respaldo')}
   if(root!==modelRoot){gltf.scene.traverse(o=>{o.geometry?.dispose();if(o.material)for(const m of(Array.isArray(o.material)?o.material:[o.material]))m.dispose()});bodyMaterial.dispose();printMaterial.dispose();return}
   gltf.scene.scale.setScalar(profile.worldScale);printMaterial.map=texture;printMaterial.needsUpdate=true;let printMeshes=0;
   gltf.scene.traverse(mesh=>{if(!mesh.isMesh)return;const old=mesh.material;if(profile.multiZone){const def=zonesFor(profile.id).find(z=>z.mesh===mesh.name);mesh.material=textileMaps.material(profile.id,def?.id,$('productColor').value,mesh.name);const v=PRODUCT_VARIANTS[materialVariant];if(materialVariant!=='original'){mesh.material.roughness=v.roughness;mesh.material.metalness=v.metalness}if(def)printMeshes++;}else if(mesh.name===profile.printMesh){printMeshes++;mesh.material=printMaterial;mesh.scale.set(Math.min(1,documentWidth/profile.printCm[0]),Math.min(1,documentHeight/profile.printCm[1]),1)}else mesh.material=bodyMaterial;for(const material of(Array.isArray(old)?old:[old]))material.dispose()});
@@ -747,7 +747,7 @@ try{
  projectSession=createProjectSession(projectLibrary,{thumbnail});documentStore=projectSession;
  if(!await projectLibrary.setting('legacyMigrated')){const legacy=await openDocumentStore();try{const entries=[];for(const key of ['previous','current']){const old=await legacy.read(key);if(old){try{const prepared=await prepareProject(old.document);entries.push({document:prepared.data,name:'Recuperado · '+(key==='current'?'último proyecto':'versión anterior')})}catch(error){notify('Se conservó un guardado anterior que no se pudo migrar: '+error.message)}}}await projectLibrary.migrateLegacy(entries)}finally{legacy.close()}}
  let freshLibrary=false;let active=await projectLibrary.active();if(!active){const list=await projectLibrary.list();if(list.length)active=list[0].id;else{active=await projectLibrary.create(projectSnapshot(),'Sin título',thumbnail());freshLibrary=true}}await projectSession.activate(active);
- let current,currentError;try{current=freshLibrary?null:await deadline(documentStore.read(),6000,'La lectura del guardado local no respondió')}catch(error){currentError=error} 
+ let current,currentError;try{current=freshLibrary?null:await deadline(documentStore.read(),6000,'La lectura del guardado local no respondió')}catch(error){currentError=error}
  if(current||currentError){try{if(currentError)throw currentError;const prepared=await deadline(prepareProject(current.document),10000,'No terminó la recuperación de imágenes');if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');applyPreparedProject(prepared);$('startScreen').close();showSaveStatus('saved')}catch(error){projectRecoveryError=true;window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);$('startScreen').close();notify('La copia actual no se pudo recuperar. Usa Restaurar versión anterior o abre un JSON; no se sobrescribió la copia.')}}
  else autosaveStatus.textContent='Autoguardado local activo';
  autosave=createAutosave({store:documentStore,snapshot:projectSnapshot,status:showSaveStatus});
@@ -774,7 +774,7 @@ function deadline(promise,ms,message){let timer;return Promise.race([promise,new
 
 async function loadStickers(){
  try{
-  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=cierre-b2-20261111'),import('./src/sticker-renderer.js?v=cierre-b2-20261111')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=cierre-b2-20261111');
+  const [catalog,geometry]=await Promise.all([import('./src/stickers.js?v=fep-1a3de09befbf814e'),import('./src/sticker-renderer.js?v=fep-1a3de09befbf814e')]);stickerGeometry=geometry;stickerPainter=geometry.paintSticker;const uiModule=await import('./src/sticker-controls.js?v=fep-1a3de09befbf814e');
   stickerController=uiModule.createStickerControls({selected:()=>elements[selected],dimensions:cmPrint,busy:()=>recovering,notify,insert:definition=>{
    if(recovering)return;if(elements.length>=500){notify('Máximo 500 capas');return}
    const layer={type:'sticker',stickerId:definition.id,stickerName:definition.name,x:.5,y:.5,...initialLayerSize(.28,.75),color:'#e6eef9',outlineColor:'#52697e',outlineWidth:definition.shapes[0].stroke?1.5:0,rotation:0,flipX:false,flipY:false,shadow:false,...(definition.textBox?{label:{text:'',size:14,color:'#172b4d'}}:{})};validateStickerLayer(layer);addHistory();elements.push(layer);selected=elements.length-1;loadSelectedTextIntoInputs();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Sticker añadido: '+definition.name)
@@ -782,3 +782,6 @@ async function loadStickers(){
   $('stickerLibraryStatus').textContent='Biblioteca local · '+catalog.stickers.length+' elementos vectoriales';window.__fepBoot?.stage('stickers','ready');draw();return true;
  }catch(error){window.__fepBoot?.stage('stickers','failed',error);if($('stickerLibraryStatus'))$('stickerLibraryStatus').textContent='No se pudo cargar la biblioteca: '+error.message;if($('stickerInsert'))$('stickerInsert').disabled=true;return false}
 }
+
+// Called by the explicit offline update button, after durable local persistence.
+window.__fepFlushForUpdate=()=>projectSwitchBusy||projectRecoveryError||!autosave?Promise.resolve(false):projectSession.id?autosave.flush():Promise.resolve(true);

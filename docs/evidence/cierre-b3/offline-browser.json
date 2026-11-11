@@ -1,0 +1,62 @@
+[
+  {
+    "mode": "desktop",
+    "name": "complete verified assets cached separately from local projects",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "cold offline reload, all models, ten zones, scenes, stickers and glitter",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "offline PNG JPEG PDF SVG, sheet and mockup export",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "offline 360 video and free design survive restart",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "partial update rejected without replacing previous complete application",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "atomic update preserves projects and old client resource versions",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "complete verified assets cached separately from local projects",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "cold offline reload, all models, ten zones, scenes, stickers and glitter",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "offline PNG JPEG PDF SVG, sheet and mockup export",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "offline 360 video and free design survive restart",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "partial update rejected without replacing previous complete application",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "atomic update preserves projects and old client resource versions",
+    "passed": true
+  }
+]
