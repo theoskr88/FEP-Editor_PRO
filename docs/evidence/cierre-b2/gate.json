@@ -1,0 +1,17 @@
+{
+  "phase": "cierre-b2",
+  "base": "508bc56",
+  "gate": "passed locally",
+  "reports": {
+    "safety-browser.json": 10,
+    "projects-browser.json": 10,
+    "acceptance.json": 20
+  },
+  "unitTests": 103,
+  "staticPackageChecks": 32,
+  "testedRuntimeSha256": "7d811e580200b64b4dc8882d4bccc41fefee89d04e35520378617cc3e62af930",
+  "deployed": false,
+  "physicalDevicesTested": false,
+  "physicalPrintingTested": false,
+  "hardwarePlotterTested": false
+}

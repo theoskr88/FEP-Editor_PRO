@@ -1,4 +1,4 @@
-import {stickers,stickerCategories,getSticker,searchStickers,stickerSvg} from './stickers.js?v=cierre-b1-20261111';
+import {stickers,stickerCategories,getSticker,searchStickers,stickerSvg} from './stickers.js?v=cierre-b2-20261111';
 export function createStickerControls({get=id=>document.getElementById(id),selected,insert,commit,dimensions,notify,busy=()=>false}){
  let chosen=stickers[0],lastLayer;
  const category=get('stickerCategory'),grid=get('stickerGrid');for(const[id,label]of Object.entries(stickerCategories)){const o=document.createElement('option');o.value=id;o.textContent=label;category.append(o)}

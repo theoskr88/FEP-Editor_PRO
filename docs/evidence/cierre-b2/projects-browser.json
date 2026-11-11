@@ -1,0 +1,52 @@
+[
+  {
+    "mode": "desktop",
+    "name": "catalog, thumbnail, type and modification date",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "rename and duplicate retain independent artwork",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "search and alphabetical ordering",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "export/import portable originals and opening separate projects",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "delete requires confirmation and preserves other projects",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "catalog, thumbnail, type and modification date",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "rename and duplicate retain independent artwork",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "search and alphabetical ordering",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "export/import portable originals and opening separate projects",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "delete requires confirmation and preserves other projects",
+    "passed": true
+  }
+]
