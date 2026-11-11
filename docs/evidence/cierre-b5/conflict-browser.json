@@ -1,0 +1,12 @@
+[
+  {
+    "mode": "desktop",
+    "passed": true,
+    "name": "actual tabs reject stale save, retain durable A and portable B, then save to their own project IDs"
+  },
+  {
+    "mode": "mobile",
+    "passed": true,
+    "name": "actual tabs reject stale save, retain durable A and portable B, then save to their own project IDs"
+  }
+]

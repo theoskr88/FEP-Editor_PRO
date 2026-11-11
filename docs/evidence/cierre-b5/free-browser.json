@@ -1,0 +1,140 @@
+{
+  "passed": 27,
+  "results": [
+    {
+      "mode": "desktop",
+      "name": "initial choice opens the same editor in free mode",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "A4, A3, Carta, units, orientation and custom dimensions are physical",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "white and transparent art; rules, grid and guides never enter raster",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "text, image, sticker and editable native shape share layers and history",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "zoom changes display geometry, preserves exports and supports pointer movement",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "actual PNG, JPEG and PDF use correct dimensions, alpha and final mirror",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "free artwork joins the existing print sheet at physical size",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "JSON, autosave recovery and invalid settings remain atomic in both modes",
+      "passed": true
+    },
+    {
+      "mode": "desktop",
+      "name": "switch to product retains all layers, restores viewer and accepts legacy files",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "initial choice opens the same editor in free mode",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "A4, A3, Carta, units, orientation and custom dimensions are physical",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "white and transparent art; rules, grid and guides never enter raster",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "text, image, sticker and editable native shape share layers and history",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "zoom changes display geometry, preserves exports and supports pointer movement",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "actual PNG, JPEG and PDF use correct dimensions, alpha and final mirror",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "free artwork joins the existing print sheet at physical size",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "JSON, autosave recovery and invalid settings remain atomic in both modes",
+      "passed": true
+    },
+    {
+      "mode": "mobile",
+      "name": "switch to product retains all layers, restores viewer and accepts legacy files",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "initial choice opens the same editor in free mode",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "A4, A3, Carta, units, orientation and custom dimensions are physical",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "white and transparent art; rules, grid and guides never enter raster",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "text, image, sticker and editable native shape share layers and history",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "zoom changes display geometry, preserves exports and supports pointer movement",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "actual PNG, JPEG and PDF use correct dimensions, alpha and final mirror",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "free artwork joins the existing print sheet at physical size",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "JSON, autosave recovery and invalid settings remain atomic in both modes",
+      "passed": true
+    },
+    {
+      "mode": "noWebGL",
+      "name": "switch to product retains all layers, restores viewer and accepts legacy files",
+      "passed": true
+    }
+  ]
+}

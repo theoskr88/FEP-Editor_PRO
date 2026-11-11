@@ -1,0 +1,872 @@
+[
+  {
+    "run": 0,
+    "options": {
+      "mobile": false,
+      "cpuRate": 4,
+      "legacyAPIs": true,
+      "noWebGL": true,
+      "delayThree": 1800
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "failed",
+          "message": "Error creating WebGL context.",
+          "stack": "Error: Error creating WebGL context.\n    at new WebGLRenderer (http://127.0.0.1:36329/vendor/three.module.js?v=fep-9c3e1f9381c897dc:29123:13)\n    at init3D (http://127.0.0.1:36329/app.js?v=fep-9c3e1f9381c897dc:463:290)\n    at startThree (http://127.0.0.1:36329/app.js?v=fep-9c3e1f9381c897dc:709:26)"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 7743
+  },
+  {
+    "run": 1,
+    "options": {
+      "mobile": true,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 4026
+  },
+  {
+    "run": 2,
+    "options": {
+      "mobile": false,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 5230
+  },
+  {
+    "run": 3,
+    "options": {
+      "mobile": true,
+      "cpuRate": 1,
+      "legacyAPIs": true,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 4063
+  },
+  {
+    "run": 4,
+    "options": {
+      "mobile": false,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 5495
+  },
+  {
+    "run": 5,
+    "options": {
+      "mobile": true,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 1800
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 6015
+  },
+  {
+    "run": 6,
+    "options": {
+      "mobile": false,
+      "cpuRate": 4,
+      "legacyAPIs": true,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 7768
+  },
+  {
+    "run": 7,
+    "options": {
+      "mobile": true,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 4110
+  },
+  {
+    "run": 8,
+    "options": {
+      "mobile": false,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": true,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "failed",
+          "message": "Error creating WebGL context.",
+          "stack": "Error: Error creating WebGL context.\n    at new WebGLRenderer (http://127.0.0.1:46087/vendor/three.module.js?v=fep-9c3e1f9381c897dc:29123:13)\n    at init3D (http://127.0.0.1:46087/app.js?v=fep-9c3e1f9381c897dc:463:290)\n    at startThree (http://127.0.0.1:46087/app.js?v=fep-9c3e1f9381c897dc:709:26)"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 4172
+  },
+  {
+    "run": 9,
+    "options": {
+      "mobile": true,
+      "cpuRate": 1,
+      "legacyAPIs": true,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 4100
+  },
+  {
+    "run": 10,
+    "options": {
+      "mobile": false,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 1800
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 6796
+  },
+  {
+    "run": 11,
+    "options": {
+      "mobile": true,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 4028
+  },
+  {
+    "run": 12,
+    "options": {
+      "mobile": false,
+      "cpuRate": 4,
+      "legacyAPIs": true,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 8100
+  },
+  {
+    "run": 13,
+    "options": {
+      "mobile": true,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 4302
+  },
+  {
+    "run": 14,
+    "options": {
+      "mobile": false,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 5067
+  },
+  {
+    "run": 15,
+    "options": {
+      "mobile": true,
+      "cpuRate": 1,
+      "legacyAPIs": true,
+      "noWebGL": false,
+      "delayThree": 1800
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 5807
+  },
+  {
+    "run": 16,
+    "options": {
+      "mobile": false,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": true,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "failed",
+          "message": "Error creating WebGL context.",
+          "stack": "Error: Error creating WebGL context.\n    at new WebGLRenderer (http://127.0.0.1:45293/vendor/three.module.js?v=fep-9c3e1f9381c897dc:29123:13)\n    at init3D (http://127.0.0.1:45293/app.js?v=fep-9c3e1f9381c897dc:463:290)\n    at startThree (http://127.0.0.1:45293/app.js?v=fep-9c3e1f9381c897dc:709:26)"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 3973
+  },
+  {
+    "run": 17,
+    "options": {
+      "mobile": true,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 3906
+  },
+  {
+    "run": 18,
+    "options": {
+      "mobile": false,
+      "cpuRate": 4,
+      "legacyAPIs": true,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 6999
+  },
+  {
+    "run": 19,
+    "options": {
+      "mobile": true,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 4071
+  },
+  {
+    "run": 20,
+    "options": {
+      "mobile": false,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 1800
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 6391
+  },
+  {
+    "run": 21,
+    "options": {
+      "mobile": true,
+      "cpuRate": 1,
+      "legacyAPIs": true,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 3748
+  },
+  {
+    "run": 22,
+    "options": {
+      "mobile": false,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 5348
+  },
+  {
+    "run": 23,
+    "options": {
+      "mobile": true,
+      "cpuRate": 1,
+      "legacyAPIs": false,
+      "noWebGL": false,
+      "delayThree": 0
+    },
+    "health": {
+      "release": "cierre-b5",
+      "path": "/",
+      "stages": {
+        "ui": {
+          "state": "ready"
+        },
+        "design": {
+          "state": "ready"
+        },
+        "three": {
+          "state": "ready"
+        },
+        "storage": {
+          "state": "ready"
+        },
+        "sheet": {
+          "state": "ready"
+        },
+        "stickers": {
+          "state": "ready"
+        }
+      }
+    },
+    "passed": true,
+    "durationMs": 3867
+  }
+]

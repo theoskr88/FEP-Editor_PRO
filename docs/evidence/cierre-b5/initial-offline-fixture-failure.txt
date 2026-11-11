@@ -1,0 +1,44 @@
+PASS offline desktop complete verified assets cached separately from local projects
+PASS offline desktop cold offline reload, all models, ten zones, scenes, stickers and glitter
+DOWNLOAD desktop exportPrint
+DOWNLOAD desktop exportJpg
+DOWNLOAD desktop exportPDF
+DOWNLOAD desktop exportSVG
+DOWNLOAD desktop exportMockup
+DOWNLOAD desktop sheetPng
+PASS offline desktop offline PNG JPEG PDF SVG, sheet and mockup export
+DOWNLOAD desktop exportVideo
+PASS offline desktop offline 360 video and free design survive restart
+PASS offline desktop partial update rejected without replacing previous complete application
+PASS offline desktop atomic update preserves projects and old client resource versions
+PASS offline mobile complete verified assets cached separately from local projects
+PASS offline mobile cold offline reload, all models, ten zones, scenes, stickers and glitter
+DOWNLOAD mobile exportPrint
+DOWNLOAD mobile exportJpg
+DOWNLOAD mobile exportPDF
+DOWNLOAD mobile exportSVG
+DOWNLOAD mobile exportMockup
+DOWNLOAD mobile sheetPng
+PASS offline mobile offline PNG JPEG PDF SVG, sheet and mockup export
+DOWNLOAD mobile exportVideo
+PASS offline mobile offline 360 video and free design survive restart
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+true !== false
+
+    at file:///workspace/FEP-Editor_PRO/tests/offline-browser.mjs:20:521
+    at async check (file:///workspace/FEP-Editor_PRO/tests/offline-browser.mjs:8:496)
+    at async file:///workspace/FEP-Editor_PRO/tests/offline-browser.mjs:20:2 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: true,
+  expected: false,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

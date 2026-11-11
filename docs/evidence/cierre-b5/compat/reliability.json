@@ -1,0 +1,69 @@
+{
+  "passed": 16,
+  "results": [
+    {
+      "name": "legacy migration removes finish UI, retains eight products and art",
+      "passed": true
+    },
+    {
+      "name": "PNG/JPEG/WebP images decode before insertion",
+      "passed": true
+    },
+    {
+      "name": "corrupt image, huge dimensions and corrupt project assets are atomic",
+      "passed": true
+    },
+    {
+      "name": "debounced autosave recovers images, sizes, text, product, glitter and placement after reload",
+      "passed": true
+    },
+    {
+      "name": "previous IndexedDB version restores transactionally",
+      "passed": true
+    },
+    {
+      "name": "HOLA mirror matches every reflected pixel and leaves texture normal",
+      "passed": true
+    },
+    {
+      "name": "PNG and JPEG declare 300 dpi; PDF MediaBox matches physical cm",
+      "passed": true
+    },
+    {
+      "name": "two 20×9 cm pieces fit A4 without scaling; overlaps and overflow rejected",
+      "passed": true
+    },
+    {
+      "name": "plancha mirror is applied once to final raster",
+      "passed": true
+    },
+    {
+      "name": "selected design renders on mug and updates actual WebGL pixels",
+      "passed": true
+    },
+    {
+      "name": "3D texture keeps updating after export and reopen; mockup PNG and video regenerate",
+      "passed": true
+    },
+    {
+      "name": "damaged current autosave keeps backup recoverable without overwriting it",
+      "passed": true
+    },
+    {
+      "name": "quota failure is visible and JSON export remains available",
+      "passed": true
+    },
+    {
+      "name": "no unhandled errors or external service requests",
+      "passed": true
+    },
+    {
+      "name": "mobile touch editor, viewer and rotation reachable",
+      "passed": true
+    },
+    {
+      "name": "storage unavailable keeps editing and JSON export controls available",
+      "passed": true
+    }
+  ]
+}

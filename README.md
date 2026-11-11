@@ -1,3 +1,21 @@
+# Cierre B — Base local y offline para el futuro empaquetado móvil
+
+Rama de desarrollo: `desarrollo/cierre-b-v1`. La entrega actual conserva el editor aprobado y añade Mis proyectos, guardado transaccional, respaldos e integridad, funcionamiento offline verificable y controles de memoria. No se ha publicado en producción ni se han integrado cuentas, nube o pagos propios.
+
+- [Informe B1](docs/CIERRE_B1.md) · [B2](docs/CIERRE_B2.md) · [B3](docs/CIERRE_B3.md) · [B4](docs/CIERRE_B4.md) · [B5 y pendientes](docs/CIERRE_B5.md)
+- [Contrato de almacenamiento y compatibilidad](docs/ALMACENAMIENTO_LOCAL.md)
+- [ZIP de cada etapa y checksums](entregables/) · [Pruebas y capturas B5](docs/evidence/cierre-b5/)
+
+El navegador debe ofrecer IndexedDB para Mis proyectos. Los proyectos pertenecen al dominio y dispositivo; para moverlos usa Exportar/Importar en Mis proyectos. Los JSON nativos anteriores siguen admitidos. Un fallo de guardado no elimina proyectos automáticamente.
+
+El ZIP Pages incluye todos los recursos del editor. La versión web necesita completar una primera descarga en HTTPS/localhost para trabajar offline. La caché se actualiza por versiones completas después de confirmar el guardado. No es todavía un APK/IPA: instalación, archivos nativos y primer uso offline en Android/iOS se validarán en Cierre C. Las pruebas físicas de impresión y plotter siguen pendientes.
+
+Desarrollo: `npm ci`, `npm test`, `npm run serve`. Después de editar el runtime ejecuta `python3 scripts/finalize-offline.py`, prueba de nuevo y genera los ZIP con `npm run package -- --phase CIERRE_B5`. La regresión secuencial principal se reproduce con `python3 scripts/audit-b5.py`; consulta el informe B5 para los recorridos suplementarios y la reversión.
+
+---
+
+## Documentación de entregas anteriores
+
 # FEP Editor PRO · Camino a V1.0 · Cierre A
 
 Polera con frente, espalda y dos mangas; cojín con lados A/B; bolsa con frente/reverso y libreta con portada/contraportada. Ocho escenas comerciales procedurales, tinta transparente y producción separada del mockup. Cada cara conserva medidas, capas, historial de sesión y textura independiente de superficie. [Comparativa real antes/después](docs/CIERRE_A_COMPARATIVAS.md) · [Pruebas](docs/CIERRE_A_PRUEBAS.md) · [Reversión](docs/CIERRE_A_REVERSION.md).

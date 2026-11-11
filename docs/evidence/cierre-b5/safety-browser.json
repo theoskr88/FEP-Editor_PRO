@@ -1,0 +1,52 @@
+[
+  {
+    "mode": "desktop",
+    "name": "quota preserves durable version and truthful error",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "interrupt preserves durable version and truthful error",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "restart restores last completed transaction and bounded history",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "corrupt digest blocks autosave and user restores a validated backup",
+    "passed": true
+  },
+  {
+    "mode": "desktop",
+    "name": "legacy migration is idempotent and leaves original store intact",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "quota preserves durable version and truthful error",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "interrupt preserves durable version and truthful error",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "restart restores last completed transaction and bounded history",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "corrupt digest blocks autosave and user restores a validated backup",
+    "passed": true
+  },
+  {
+    "mode": "mobile",
+    "name": "legacy migration is idempotent and leaves original store intact",
+    "passed": true
+  }
+]

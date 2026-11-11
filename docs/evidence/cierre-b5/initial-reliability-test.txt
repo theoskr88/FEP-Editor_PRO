@@ -1,0 +1,16 @@
+PASS legacy migration removes finish UI, retains eight products and art
+PASS PNG/JPEG/WebP images decode before insertion
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.waitForFunction: Timeout 30000ms exceeded.
+    at Proxy.<anonymous> (/workspace/FEP-Editor_PRO/tests/navigation.mjs:12:272)
+    at upload (/workspace/FEP-Editor_PRO/tests/reliability-browser.mjs:9:173)
+    at async file:///workspace/FEP-Editor_PRO/tests/reliability-browser.mjs:23:190
+    at async check (/workspace/FEP-Editor_PRO/tests/reliability-browser.mjs:7:30)
+    at async file:///workspace/FEP-Editor_PRO/tests/reliability-browser.mjs:20:2 {
+  name: 'TimeoutError'
+}
+
+Node.js v24.22.1

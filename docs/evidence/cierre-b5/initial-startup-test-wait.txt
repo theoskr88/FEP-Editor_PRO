@@ -1,0 +1,23 @@
+PASS repeated startup 0 {"mobile":false,"cpuRate":4,"legacyAPIs":true,"noWebGL":true,"delayThree":1800}
+PASS repeated startup 1 {"mobile":true,"cpuRate":1,"legacyAPIs":false,"noWebGL":false,"delayThree":0}
+PASS repeated startup 2 {"mobile":false,"cpuRate":1,"legacyAPIs":false,"noWebGL":false,"delayThree":0}
+PASS repeated startup 3 {"mobile":true,"cpuRate":1,"legacyAPIs":true,"noWebGL":false,"delayThree":0}
+PASS repeated startup 4 {"mobile":false,"cpuRate":1,"legacyAPIs":false,"noWebGL":false,"delayThree":0}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+true !== false
+
+    at file:///workspace/FEP-Editor_PRO/tests/startup-repeats.mjs:3:805 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: true,
+  expected: false,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

@@ -1,0 +1,28 @@
+{
+  "phase": "cierre-b5",
+  "base": "2947356",
+  "gate": "passed locally",
+  "reports": {
+    "audit-suites.json": 28,
+    "activation-failure-browser.json": 2,
+    "conflict-browser.json": 2,
+    "safety-browser.json": 10,
+    "projects-browser.json": 10,
+    "startup-repeats.json": 24,
+    "backup-census-browser.json": 44,
+    "no-webgl-browser.json": 2,
+    "soak-browser.json": 2,
+    "svg-validation.json": 5,
+    "svg-roundtrip-validation.json": 5,
+    "compat/reliability.json": 16,
+    "acceptance.json": 20,
+    "offline-browser.json": 12
+  },
+  "unitTests": 113,
+  "staticPackageChecks": 32,
+  "testedRuntimeSha256": "4a0fb109eef6f73b45d53e00f97546d7064633c22b062e0d8084167d7bca37cf",
+  "deployed": false,
+  "physicalDevicesTested": false,
+  "physicalPrintingTested": false,
+  "hardwarePlotterTested": false
+}

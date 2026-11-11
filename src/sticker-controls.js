@@ -1,4 +1,4 @@
-import {stickers,stickerCategories,getSticker,searchStickers,stickerSvg} from './stickers.js?v=fep-ebe0075ca6a5038c';
+import {stickers,stickerCategories,getSticker,searchStickers,stickerSvg} from './stickers.js?v=fep-f2922fbf7e7adae7';
 export function createStickerControls({get=id=>document.getElementById(id),selected,insert,commit,dimensions,notify,busy=()=>false}){
  let chosen=stickers[0],lastLayer;
  const category=get('stickerCategory'),grid=get('stickerGrid');for(const[id,label]of Object.entries(stickerCategories)){const o=document.createElement('option');o.value=id;o.textContent=label;category.append(o)}

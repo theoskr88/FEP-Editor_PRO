@@ -1,6 +1,6 @@
-import {packSheets,printQuality,printSettings,readPrintDpi,PRINT_LIMITS} from './src/print-layout.js?v=fep-ebe0075ca6a5038c';
-import {pdfPrintJob} from './src/print-pdf.js?v=fep-ebe0075ca6a5038c';
-import {imageInfo} from './src/assets.js?v=fep-ebe0075ca6a5038c';
+import {packSheets,printQuality,printSettings,readPrintDpi,PRINT_LIMITS} from './src/print-layout.js?v=fep-f2922fbf7e7adae7';
+import {pdfPrintJob} from './src/print-pdf.js?v=fep-f2922fbf7e7adae7';
+import {imageInfo} from './src/assets.js?v=fep-f2922fbf7e7adae7';
 /* Plancha de impresión — V0.9.0, independiente del visor 3D. */
 const el=id=>document.getElementById(id);
 const presets={A4:[21,29.7],Carta:[21.59,27.94],Oficio:[21.6,33],A3:[29.7,42],A2:[42,59.4]};

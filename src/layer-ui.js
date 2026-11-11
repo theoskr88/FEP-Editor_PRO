@@ -1,6 +1,6 @@
-import {paintCreativeText,paintCreativeImage} from './creative.js?v=fep-ebe0075ca6a5038c';
-import {paintVector} from './vector.js?v=fep-ebe0075ca6a5038c';
-import {paintShape,SHAPE_NAMES} from './free-design.js?v=fep-ebe0075ca6a5038c';
+import {paintCreativeText,paintCreativeImage} from './creative.js?v=fep-f2922fbf7e7adae7';
+import {paintVector} from './vector.js?v=fep-f2922fbf7e7adae7';
+import {paintShape,SHAPE_NAMES} from './free-design.js?v=fep-f2922fbf7e7adae7';
 // Layer presentation, reusing rows and small canvas thumbnails. Document actions
 // stay in app.js; selecting or painting a thumbnail never modifies the design.
 export function layerName(layer){return layer.type==='text'?(layer.text||'Texto vacío'):layer.type==='vector'?(layer.role==='cut'?'Contorno de corte':'Trazado editable'):layer.type==='shape'?(SHAPE_NAMES[layer.shape]||'Figura'):layer.type==='glitter'?'Glitter imprimible':layer.type==='sticker'?(layer.stickerName||'Sticker'):'Imagen'}

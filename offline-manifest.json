@@ -1,17 +1,17 @@
 {
-  "build": "fep-ebe0075ca6a5038c",
+  "build": "fep-f2922fbf7e7adae7",
   "files": [
     {
       "path": "app.js",
-      "sha256": "c1c24eb751369485a88cdf5bcb499ccb93c239c47af57c1ac7b625eb69081a89"
+      "sha256": "f91fd3fc94edc86fe5faa800f5c64dadaba1ed2f7304447ae276572a1d0eb3a2"
     },
     {
       "path": "index.html",
-      "sha256": "a5598576426662b4d84e43bf36ca8b0cd10e1914bb4447d43d91bb009de7012b"
+      "sha256": "62b06a1970b17a8254cc202793f9be24f48f13376f9b5cf349dc54e10af20f6a"
     },
     {
       "path": "plancha.js",
-      "sha256": "dc6204d47cda87292e3c7a14ca3e6f160e8e1c82ece867490c22e9b49633d7d4"
+      "sha256": "73ada2fbc955b41932842a86fd576d3e8b30b9b4525b0521323e3123a2d27083"
     },
     {
       "path": "src/assets.js",
@@ -19,7 +19,7 @@
     },
     {
       "path": "src/bootstrap.js",
-      "sha256": "4ddf7de1506580f98d3fcb0dda0fbbd24da9fd5a1bc17515d84eebe2cd33b575"
+      "sha256": "c32fb83ccf9bf94d1b0df075c0aaa0438caef1745a9e2396de4199155c9fff75"
     },
     {
       "path": "src/creative-controls.js",
@@ -31,19 +31,19 @@
     },
     {
       "path": "src/free-controls.js",
-      "sha256": "edc32ce041ce9e4404c2111d31d1fc956ef5fa6dc986e65fe7dfa60b51a2872e"
+      "sha256": "b4bfdd3b65f09f67d70434cfa642cfc1a4429e64b228a7ab56e6bee695d376cd"
     },
     {
       "path": "src/free-design.js",
-      "sha256": "bd5b8ebf0e9117574561aeefa988b8cfdd1c9c56251a14777c801c359f21a1d5"
+      "sha256": "7fb5a57899ccf632f9b66e12d914f50f9df0fbe2bc3161e600e8179a073ff747"
     },
     {
       "path": "src/glitter-cache.js",
-      "sha256": "14d98076b868043d17e8808150b83f062710bfc6cde4c39abafd3eaadb17edb0"
+      "sha256": "af8b2ec16608e0d50c5ad3b8f01c889d76252c0ac2f8bb44e6cb9aa634470cc3"
     },
     {
       "path": "src/glitter-controls.js",
-      "sha256": "061c579a7e20ac327cb310f1ec211a768c45ce86bd3e16a56da66b91413c3117"
+      "sha256": "fce25924e5e1fea98c84fa03949b215b1d5d3c5689bea1fdc4dac5dcbf74190d"
     },
     {
       "path": "src/glitter.js",
@@ -55,7 +55,7 @@
     },
     {
       "path": "src/imports.js",
-      "sha256": "e8c0a9ce9f9536c72587a71f1417ef4fb0394cd68eeebfcc16244b789ac10617"
+      "sha256": "c4827713b53393912497bc8c457051cf6d98e6cd9e364eb1a98bd51ebdab2b11"
     },
     {
       "path": "src/interface.css",
@@ -67,7 +67,7 @@
     },
     {
       "path": "src/layer-ui.js",
-      "sha256": "5d7aa55889e49bcb93b59a4223af5994a391a993c2a7cb92a7459517278d1c7e"
+      "sha256": "cf71771af56db5d145f4e1d493bb5bed1c6f698f46c2d073833faa703e7c4fb4"
     },
     {
       "path": "src/local-operation.js",
@@ -75,7 +75,7 @@
     },
     {
       "path": "src/mockup-controls.js",
-      "sha256": "cb37f473a7f707d504296f8f1e230680a60987d89ba98853cc32b7a3584e183c"
+      "sha256": "78b140c571a957e7568857cd1f1cebf1a9b860ed33d35682e5730af708b2122b"
     },
     {
       "path": "src/mockup-scenes.js",
@@ -103,27 +103,27 @@
     },
     {
       "path": "src/product-profiles.js",
-      "sha256": "a45833e08dd74aa0f54ac6661aab788e3d3fc6ceabd39fad79b73723985105ca"
+      "sha256": "6134764129731dfc915b5eb640d7a84db5d64a31325d1394ac7d9807d61fc0bc"
     },
     {
       "path": "src/project-manager.js",
-      "sha256": "674a22ffedb2da76b9ceca83a986577793bb7a7610059c12732911610a109a80"
+      "sha256": "0f881ed78e224e1e4aca607b994d1cdbd09a16efca656ea48d641a04e5d4d4c5"
     },
     {
       "path": "src/project.js",
-      "sha256": "d8ece35033b11d7db815653708fbeabfe75ba5db0e2642d309ba3132f0453ef0"
+      "sha256": "140c419ba66bb5075049f482949f0899e586f6f80950987c0c5a33164de9b789"
     },
     {
       "path": "src/projects.js",
-      "sha256": "d6064db98f6b7de0274788df9efba95da30b51dd1c3b8ab0438f26eb7fe0d3d6"
+      "sha256": "310610e45023c366fa5633e0980702b3d2e2d9bcb12ad3939edf33f3cc9f2777"
     },
     {
       "path": "src/sticker-controls.js",
-      "sha256": "58a641dcf0ec0ddec057d3c672cfb687610af269ec86d5fff3d2bf11eab00dca"
+      "sha256": "404e119c8d61c8f181a2bb92f9def1be173404abd68067c36f1c6ed8dcc29de5"
     },
     {
       "path": "src/sticker-renderer.js",
-      "sha256": "530d69cc148bdcbbcd9121efa17ba8320b27ef97a5ecfadab55dc1d30688b7bb"
+      "sha256": "c7a0b8b28f6d540fc19a5532d151da2f77c2aa2ad95a3897108e560fc00ee76c"
     },
     {
       "path": "src/stickers.js",
@@ -131,19 +131,19 @@
     },
     {
       "path": "src/textile-materials.js",
-      "sha256": "deaf3685f8f1b4e4e84112db54230e2e63f179ba52856056266d6ee8cd517f70"
+      "sha256": "67b4f2a309efe7eaa905657c03ee42004b908c61e86a3454d654d720cad6e2ef"
     },
     {
       "path": "src/vector-controls.js",
-      "sha256": "fe38c838eedfc2c2c4664b9e8af2606c1ded2e22d62576565fe36e6e71dc2867"
+      "sha256": "331a5d345d298078c118eccf82df52617411af2a240eefd37244e004abfe6162"
     },
     {
       "path": "src/vector.js",
-      "sha256": "eba8c8afbcd9874061f98f13b586c2af5514a18c794bf05143ef2aef1f464daa"
+      "sha256": "0f5206435a04a5c72316491d790e5ff68c9676cdbf4163d65361564991192ca0"
     },
     {
       "path": "src/video-frames.js",
-      "sha256": "acc45bb8a06b5ba1e43642886765806ec3bff5074bde38d45189e51a3517d4aa"
+      "sha256": "421a799122230faafff9ca3857202e9833c8227cd05042af23b3b4f72830d9e4"
     },
     {
       "path": "src/zip-store.js",

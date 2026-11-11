@@ -1,0 +1,198 @@
+[
+  {
+    "name": "startup-repeats",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 133.75,
+    "log": "docs/evidence/cierre-b5/startup-repeats.log"
+  },
+  {
+    "name": "boot",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 53.78,
+    "log": "docs/evidence/cierre-b5/boot.log"
+  },
+  {
+    "name": "projects-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 30.59,
+    "log": "docs/evidence/cierre-b5/projects-browser.log"
+  },
+  {
+    "name": "project-safety-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 53.06,
+    "log": "docs/evidence/cierre-b5/project-safety-browser.log"
+  },
+  {
+    "name": "import-cancel-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 16.35,
+    "log": "docs/evidence/cierre-b5/import-cancel-browser.log"
+  },
+  {
+    "name": "free-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 94.34,
+    "log": "docs/evidence/cierre-b5/free-browser.log"
+  },
+  {
+    "name": "free-recovery-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 64.81,
+    "log": "docs/evidence/cierre-b5/free-recovery-browser.log"
+  },
+  {
+    "name": "free-limits-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 15.55,
+    "log": "docs/evidence/cierre-b5/free-limits-browser.log"
+  },
+  {
+    "name": "free-zone-recovery",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 45.38,
+    "log": "docs/evidence/cierre-b5/free-zone-recovery.log"
+  },
+  {
+    "name": "zones-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 362.88,
+    "log": "docs/evidence/cierre-b5/zones-browser.log"
+  },
+  {
+    "name": "zones-migration",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 49.13,
+    "log": "docs/evidence/cierre-b5/zones-migration.log"
+  },
+  {
+    "name": "zones-race",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 9.04,
+    "log": "docs/evidence/cierre-b5/zones-race.log"
+  },
+  {
+    "name": "accessories-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 150.46,
+    "log": "docs/evidence/cierre-b5/accessories-browser.log"
+  },
+  {
+    "name": "scenes-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 82.49,
+    "log": "docs/evidence/cierre-b5/scenes-browser.log"
+  },
+  {
+    "name": "stickers-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 88.51,
+    "log": "docs/evidence/cierre-b5/stickers-browser.log"
+  },
+  {
+    "name": "glitter-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 68.07,
+    "log": "docs/evidence/cierre-b5/glitter-browser.log"
+  },
+  {
+    "name": "print-files",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 10.62,
+    "log": "docs/evidence/cierre-b5/print-files.log"
+  },
+  {
+    "name": "vector-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 50.88,
+    "log": "docs/evidence/cierre-b5/vector-browser.log"
+  },
+  {
+    "name": "profiles-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 37.37,
+    "log": "docs/evidence/cierre-b5/profiles-browser.log"
+  },
+  {
+    "name": "creative-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 35.7,
+    "log": "docs/evidence/cierre-b5/creative-browser.log"
+  },
+  {
+    "name": "mockup-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 155.2,
+    "log": "docs/evidence/cierre-b5/mockup-browser.log"
+  },
+  {
+    "name": "print-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 30.35,
+    "log": "docs/evidence/cierre-b5/print-browser.log"
+  },
+  {
+    "name": "regressions",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 9.98,
+    "log": "docs/evidence/cierre-b5/regressions.log"
+  },
+  {
+    "name": "consolidation-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 14.31,
+    "log": "docs/evidence/cierre-b5/consolidation-browser.log"
+  },
+  {
+    "name": "interface-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 59.24,
+    "log": "docs/evidence/cierre-b5/interface-browser.log"
+  },
+  {
+    "name": "performance-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 81.75,
+    "log": "docs/evidence/cierre-b5/performance-browser.log"
+  },
+  {
+    "name": "acceptance-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 55.23,
+    "log": "docs/evidence/cierre-b5/acceptance-browser.log"
+  },
+  {
+    "name": "offline-browser",
+    "passed": true,
+    "exitCode": 0,
+    "seconds": 102.2,
+    "log": "docs/evidence/cierre-b5/offline-browser.log"
+  }
+]

@@ -1,7 +1,7 @@
 """Open actual browser downloads with Inkscape 1.4; assert physical geometry and mirror."""
 from pathlib import Path
-import subprocess,os,json,hashlib,xml.etree.ElementTree as ET
-root=Path('docs/evidence/cierre-a');env={**os.environ,'INKSCAPE_PROFILE_DIR':'/tmp/fep-inkscape','XDG_CACHE_HOME':'/tmp/fep-inkscape-cache'}
+import subprocess,os,json,hashlib,re,xml.etree.ElementTree as ET
+root=Path('docs/evidence')/re.search(r"release:'([^']+)'",Path('src/bootstrap.js').read_text())[1];env={**os.environ,'INKSCAPE_PROFILE_DIR':'/tmp/fep-inkscape','XDG_CACHE_HOME':'/tmp/fep-inkscape-cache'}
 Path(env['INKSCAPE_PROFILE_DIR']).mkdir(exist_ok=True);Path(env['XDG_CACHE_HOME']).mkdir(exist_ok=True)
 logs=[];boxes=[]
 for name in ['cut.svg','cut-mirror.svg','print.svg']:

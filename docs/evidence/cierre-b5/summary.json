@@ -1,0 +1,28 @@
+{
+  "phase": "cierre-b5",
+  "base": "2947356",
+  "unitTests": 113,
+  "unitFailures": 0,
+  "mainSuites": 28,
+  "mainSuiteFailures": 0,
+  "supplementalSuites": {
+    "backup-census-browser.json": 44,
+    "no-webgl-browser.json": 2,
+    "conflict-browser.json": 2,
+    "activation-failure-browser.json": 2,
+    "soak-browser.json": 2,
+    "compat/reliability.json": 16,
+    "svg-validation.json": 5,
+    "svg-roundtrip-validation.json": 5
+  },
+  "totalSuiteScripts": 36,
+  "packagedRuntimeChecks": 32,
+  "pagesSha256": "4a0fb109eef6f73b45d53e00f97546d7064633c22b062e0d8084167d7bca37cf",
+  "deployed": false,
+  "nativeBuildsProduced": false,
+  "physicalDevicesTested": false,
+  "physicalPrintingTested": false,
+  "physicalPlotterTested": false,
+  "initialFailuresRetained": true,
+  "B4IsolatedStorageInitializationFailureReproduced": false
+}

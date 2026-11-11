@@ -1,0 +1,232 @@
+[
+  {
+    "mode": "desktop",
+    "passed": true,
+    "durationMs": 306643,
+    "iterations": 31,
+    "samples": [
+      {
+        "iteration": 0,
+        "product": "mug",
+        "elapsedMs": 4445,
+        "textures": 8,
+        "geometries": 5,
+        "programs": 3,
+        "maps": 6,
+        "history": 14,
+        "heap": 18474404,
+        "heapUsed": 14258616
+      },
+      {
+        "iteration": 5,
+        "product": "cushion",
+        "elapsedMs": 48636,
+        "textures": 11,
+        "geometries": 18,
+        "programs": 9,
+        "maps": 6,
+        "history": 24,
+        "heap": 19439201,
+        "heapUsed": 14965040
+      },
+      {
+        "iteration": 10,
+        "product": "shirt",
+        "elapsedMs": 85053,
+        "textures": 11,
+        "geometries": 23,
+        "programs": 11,
+        "maps": 6,
+        "history": 30,
+        "heap": 19828235,
+        "heapUsed": 15378940
+      },
+      {
+        "iteration": 15,
+        "product": "mug",
+        "elapsedMs": 127815,
+        "textures": 11,
+        "geometries": 17,
+        "programs": 13,
+        "maps": 6,
+        "history": 34,
+        "heap": 19693031,
+        "heapUsed": 15434000
+      },
+      {
+        "iteration": 20,
+        "product": "cushion",
+        "elapsedMs": 176944,
+        "textures": 11,
+        "geometries": 18,
+        "programs": 9,
+        "maps": 6,
+        "history": 50,
+        "heap": 19966375,
+        "heapUsed": 15491892
+      },
+      {
+        "iteration": 25,
+        "product": "shirt",
+        "elapsedMs": 243653,
+        "textures": 11,
+        "geometries": 23,
+        "programs": 11,
+        "maps": 6,
+        "history": 8,
+        "heap": 19315700,
+        "heapUsed": 14860748
+      },
+      {
+        "iteration": 30,
+        "product": "mug",
+        "elapsedMs": 305508,
+        "textures": 11,
+        "geometries": 17,
+        "programs": 13,
+        "maps": 6,
+        "history": 14,
+        "heap": 19267232,
+        "heapUsed": 15004328
+      }
+    ],
+    "last": {
+      "textures": 11,
+      "geometries": 17,
+      "programs": 13,
+      "maps": 6,
+      "history": 14,
+      "heap": 19268168,
+      "heapUsed": 15005348
+    },
+    "heapThreshold": 39151000,
+    "physicalDevice": false
+  },
+  {
+    "mode": "mobile",
+    "passed": true,
+    "durationMs": 300847,
+    "iterations": 43,
+    "samples": [
+      {
+        "iteration": 0,
+        "product": "mug",
+        "elapsedMs": 3382,
+        "textures": 8,
+        "geometries": 5,
+        "programs": 3,
+        "maps": 6,
+        "history": 14,
+        "heap": 18528265,
+        "heapUsed": 14312464
+      },
+      {
+        "iteration": 5,
+        "product": "cushion",
+        "elapsedMs": 43229,
+        "textures": 11,
+        "geometries": 18,
+        "programs": 9,
+        "maps": 6,
+        "history": 24,
+        "heap": 19514661,
+        "heapUsed": 15040096
+      },
+      {
+        "iteration": 10,
+        "product": "shirt",
+        "elapsedMs": 83860,
+        "textures": 11,
+        "geometries": 23,
+        "programs": 11,
+        "maps": 6,
+        "history": 30,
+        "heap": 19871627,
+        "heapUsed": 15422320
+      },
+      {
+        "iteration": 15,
+        "product": "mug",
+        "elapsedMs": 133287,
+        "textures": 11,
+        "geometries": 17,
+        "programs": 13,
+        "maps": 6,
+        "history": 34,
+        "heap": 19744087,
+        "heapUsed": 15485048
+      },
+      {
+        "iteration": 20,
+        "product": "cushion",
+        "elapsedMs": 169467,
+        "textures": 11,
+        "geometries": 18,
+        "programs": 9,
+        "maps": 6,
+        "history": 50,
+        "heap": 20009766,
+        "heapUsed": 15535468
+      },
+      {
+        "iteration": 25,
+        "product": "shirt",
+        "elapsedMs": 211953,
+        "textures": 11,
+        "geometries": 23,
+        "programs": 12,
+        "maps": 6,
+        "history": 8,
+        "heap": 19429855,
+        "heapUsed": 14973036
+      },
+      {
+        "iteration": 30,
+        "product": "mug",
+        "elapsedMs": 238698,
+        "textures": 11,
+        "geometries": 17,
+        "programs": 14,
+        "maps": 6,
+        "history": 14,
+        "heap": 19371755,
+        "heapUsed": 15108636
+      },
+      {
+        "iteration": 35,
+        "product": "cushion",
+        "elapsedMs": 260736,
+        "textures": 11,
+        "geometries": 18,
+        "programs": 10,
+        "maps": 6,
+        "history": 26,
+        "heap": 19774011,
+        "heapUsed": 15294864
+      },
+      {
+        "iteration": 40,
+        "product": "shirt",
+        "elapsedMs": 280386,
+        "textures": 11,
+        "geometries": 23,
+        "programs": 12,
+        "maps": 6,
+        "history": 30,
+        "heap": 19952339,
+        "heapUsed": 15497340
+      }
+    ],
+    "last": {
+      "textures": 11,
+      "geometries": 17,
+      "programs": 13,
+      "maps": 6,
+      "history": 4,
+      "heap": 18855149,
+      "heapUsed": 14588480
+    },
+    "heapThreshold": 39303202,
+    "physicalDevice": false
+  }
+]
