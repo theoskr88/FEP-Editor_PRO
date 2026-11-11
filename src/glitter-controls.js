@@ -1,4 +1,4 @@
-import {glitterSettings,palettes,glitterPresets,applyGlitterPreset} from './glitter.js?v=fep-1a3de09befbf814e';
+import {glitterSettings,palettes,glitterPresets,applyGlitterPreset} from './glitter.js?v=fep-ebe0075ca6a5038c';
 export function createGlitterControls({get=id=>document.getElementById(id),preview,onMaterialChange=()=>{},onDraftChange=()=>{}}={}){
  let material=glitterSettings(),draft=glitterSettings(),mode='print';
  const ids=[['glitterPalette','palette'],['glitterColor','color'],['glitterSize','size'],['glitterIntensity','intensity'],['glitterFinish','finish']];

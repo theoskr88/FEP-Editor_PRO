@@ -1,0 +1,20 @@
+{
+  "phase": "cierre-b4",
+  "base": "9f2d41d",
+  "gate": "passed locally",
+  "reports": {
+    "performance-browser.json": 8,
+    "import-cancel-browser.json": 2,
+    "free-recovery.json": 4,
+    "projects-browser.json": 10,
+    "safety-browser.json": 10,
+    "acceptance.json": 20
+  },
+  "unitTests": 107,
+  "staticPackageChecks": 32,
+  "testedRuntimeSha256": "3588ea08a4f49dda15499522e83a1a4ff3972070872c99cf160843a0d879cf89",
+  "deployed": false,
+  "physicalDevicesTested": false,
+  "physicalPrintingTested": false,
+  "hardwarePlotterTested": false
+}

@@ -1,0 +1,47 @@
+PASS safety desktop quota preserves durable version and truthful error
+PASS safety desktop interrupt preserves durable version and truthful error
+PASS safety desktop restart restores last completed transaction and bounded history
+PASS safety desktop corrupt digest blocks autosave and user restores a validated backup
+PASS safety desktop legacy migration is idempotent and leaves original store intact
+PASS safety mobile quota preserves durable version and truthful error
+PASS safety mobile interrupt preserves durable version and truthful error
+PASS safety mobile restart restores last completed transaction and bounded history
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('#restorePrevious')[22m
+[2m    - locator resolved to <button type="button" id="restorePrevious">Restaurar versión anterior</button>[22m
+[2m  - attempting click action[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <button id="addText">Añadir texto</button> from <main class="editor-workspace">…</main> subtree intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <button id="addText">Añadir texto</button> from <main class="editor-workspace">…</main> subtree intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 100ms[22m
+[2m    53 × waiting for element to be visible, enabled and stable[22m
+[2m       - element is visible, enabled and stable[22m
+[2m       - scrolling into view if needed[22m
+[2m       - done scrolling[22m
+[2m       - <button id="addText">Añadir texto</button> from <main class="editor-workspace">…</main> subtree intercepts pointer events[22m
+[2m     - retrying click action[22m
+[2m       - waiting 500ms[22m
+
+    at Proxy.<anonymous> (/workspace/FEP-Editor_PRO/tests/navigation.mjs:11:264)
+    at async file:///workspace/FEP-Editor_PRO/tests/project-safety-browser.mjs:7:880
+    at async check (/workspace/FEP-Editor_PRO/tests/project-safety-browser.mjs:3:128)
+    at async file:///workspace/FEP-Editor_PRO/tests/project-safety-browser.mjs:7:2 {
+  name: 'TimeoutError'
+}
+
+Node.js v24.22.1

@@ -1,5 +1,5 @@
 /* Atomic, verified application cache. Projects live only in IndexedDB. */
-const BUILD='fep-1a3de09befbf814e',PREFIX='fep-editor-app-',CACHE=PREFIX+BUILD;
+const BUILD='fep-ebe0075ca6a5038c',PREFIX='fep-editor-app-',CACHE=PREFIX+BUILD;
 const root=new URL('./',self.location.href),url=file=>new URL(file,root).href;
 self.addEventListener('install',event=>event.waitUntil((async()=>{
  if(await(await caches.open(CACHE)).match(url('__complete__')))return;

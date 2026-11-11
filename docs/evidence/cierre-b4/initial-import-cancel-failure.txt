@@ -1,0 +1,14 @@
+PASS desktop cancelled multi-image import preserves active project and library
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.evaluate: TypeError: Cannot read properties of undefined (reading 'flush')
+    at Object.flush (http://127.0.0.1:38361/app.js?v=fep-9f183425d6b4ab0c:795:2940)
+    at eval (eval at evaluate (:290:30), <anonymous>:1:20)
+    at UtilityScript.evaluate (<anonymous>:292:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at Proxy.<anonymous> (/workspace/FEP-Editor_PRO/tests/navigation.mjs:12:272)
+    at /workspace/FEP-Editor_PRO/tests/import-cancel-browser.mjs:3:256
+
+Node.js v24.22.1
