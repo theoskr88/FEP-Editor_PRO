@@ -1,0 +1,27 @@
+PASS stickers desktop all 80 local vector definitions actually render nonempty pixels
+PASS stickers desktop search, filtered categories and insertion produce independent layers
+PASS stickers desktop resize, rotate, flip, fill, outline, shadow and associated text persist
+PASS stickers desktop layers duplicate, order, block, hide, opacity, delete and undo do not mutate originals
+PASS stickers desktop stickers move on canvas, update actual 3D pixels, and export PNG/JPEG/PDF
+PASS stickers desktop final mirror reflects all pixels of transformed sticker plus contained HOLA
+PASS stickers desktop JSON, automatic recovery and rejected unknown sticker remain atomic
+PASS stickers desktop stickers join print sheet at original cm and 360 video remains usable
+PASS stickers desktop physical glitter never enters sticker artwork; printable glitter stays below every sticker
+PASS stickers mobile all 80 local vector definitions actually render nonempty pixels
+PASS stickers mobile search, filtered categories and insertion produce independent layers
+PASS stickers mobile resize, rotate, flip, fill, outline, shadow and associated text persist
+PASS stickers mobile layers duplicate, order, block, hide, opacity, delete and undo do not mutate originals
+PASS stickers mobile stickers move on canvas, update actual 3D pixels, and export PNG/JPEG/PDF
+PASS stickers mobile final mirror reflects all pixels of transformed sticker plus contained HOLA
+PASS stickers mobile JSON, automatic recovery and rejected unknown sticker remain atomic
+PASS stickers mobile stickers join print sheet at original cm and 360 video remains usable
+PASS stickers mobile physical glitter never enters sticker artwork; printable glitter stays below every sticker
+PASS stickers noWebGL all 80 local vector definitions actually render nonempty pixels
+PASS stickers noWebGL search, filtered categories and insertion produce independent layers
+PASS stickers noWebGL resize, rotate, flip, fill, outline, shadow and associated text persist
+PASS stickers noWebGL layers duplicate, order, block, hide, opacity, delete and undo do not mutate originals
+PASS stickers noWebGL stickers move on canvas, update actual 3D pixels, and export PNG/JPEG/PDF
+PASS stickers noWebGL final mirror reflects all pixels of transformed sticker plus contained HOLA
+PASS stickers noWebGL JSON, automatic recovery and rejected unknown sticker remain atomic
+PASS stickers noWebGL stickers join print sheet at original cm and 360 video remains usable
+PASS stickers noWebGL physical glitter never enters sticker artwork; printable glitter stays below every sticker

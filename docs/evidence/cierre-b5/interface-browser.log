@@ -1,0 +1,24 @@
+PASS desktop six real tabs, one tool panel, keyboard navigation and responsive workspaces
+PASS desktop text and image tools use accordions and update document without duplicate controls
+PASS desktop layer thumbnails, selection, ordering, visibility, lock and history work through the new panel
+PASS desktop four presets separate printable drafts from physical material and iridescence
+PASS desktop JSON and local recovery retain layers and recipes across the reorganized controls
+PASS desktop print sheet is docked, keeps desktop previews visible and exports a real file
+PASS desktop mobile drawer closes with Escape and 360 controls or fallback remain reachable
+PASS desktop no JavaScript, shader errors or remote service dependencies
+PASS mobile six real tabs, one tool panel, keyboard navigation and responsive workspaces
+PASS mobile text and image tools use accordions and update document without duplicate controls
+PASS mobile layer thumbnails, selection, ordering, visibility, lock and history work through the new panel
+PASS mobile four presets separate printable drafts from physical material and iridescence
+PASS mobile JSON and local recovery retain layers and recipes across the reorganized controls
+PASS mobile print sheet is docked, keeps desktop previews visible and exports a real file
+PASS mobile mobile drawer closes with Escape and 360 controls or fallback remain reachable
+PASS mobile no JavaScript, shader errors or remote service dependencies
+PASS noWebGL six real tabs, one tool panel, keyboard navigation and responsive workspaces
+PASS noWebGL text and image tools use accordions and update document without duplicate controls
+PASS noWebGL layer thumbnails, selection, ordering, visibility, lock and history work through the new panel
+PASS noWebGL four presets separate printable drafts from physical material and iridescence
+PASS noWebGL JSON and local recovery retain layers and recipes across the reorganized controls
+PASS noWebGL print sheet is docked, keeps desktop previews visible and exports a real file
+PASS noWebGL mobile drawer closes with Escape and 360 controls or fallback remain reachable
+PASS noWebGL no JavaScript, shader errors or remote service dependencies
