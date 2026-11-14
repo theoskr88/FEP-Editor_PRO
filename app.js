@@ -23,6 +23,7 @@ import {createGlitterCache} from './src/glitter-cache.js?v=fep-6a4c2734f7b31778'
 import {createGlitterControls} from './src/glitter-controls.js?v=fep-6a4c2734f7b31778';
 import {prepareProject} from './src/imports.js?v=fep-6a4c2734f7b31778';
 import {prepareImageFile,enforceDocumentBudget as enforceLayerBudget,ASSET_LIMITS} from './src/assets.js?v=fep-6a4c2734f7b31778';
+import {removeUniformBackground,drawWatermark} from './src/photo-tools.js';
 import {openDocumentStore,createAutosave} from './src/persistence.js?v=fep-6a4c2734f7b31778';
 let sceneSettings=normalizeMockup(),sceneController,photoBusy=false;
 let materialVariant='original';
@@ -82,6 +83,7 @@ function updateImageControls(){
   const cm=imageCm(e);
   $('imageWidthCm').value=cm.w.toFixed(2);
   $('imageHeightCm').value=cm.h.toFixed(2);
+  if($('imageOpacity')){$('imageOpacity').value=String(Math.round((e.opacity??1)*100));$('imageOpacityValue').textContent=$('imageOpacity').value+'%'}
   $('imageSelectedStatus').textContent='Imagen seleccionada · ajusta las medidas en centímetros'+(cm.w>(Number($('widthCm').value)||20)||cm.h>(Number($('heightCm').value)||8.5)?' · aviso: excede el lienzo y se recortará al exportar':'');
 }
 function canResizeLayer(e,fw,fh){try{validatePatternBudget(elements.map(item=>item===e?{...item,widthFrac:fw,heightFrac:fh}:item),documentWidth,documentHeight);return true}catch(error){notify(error.message);return false}}
@@ -103,6 +105,37 @@ $('imageHeightCm').addEventListener('change',()=>{
   const h=Number($('imageHeightCm').value),old=imageCm(e);
   setImageSize($('keepImageRatio').checked?h*old.w/old.h:Number($('imageWidthCm').value),h);
 });
+
+/* Edición fotográfica local: el recorte cambia únicamente la capa elegida y es reversible. */
+{
+ const panel=$('imageSizePanel'),group=document.createElement('div');group.className='control-card';
+ group.innerHTML='<label>Opacidad de la fotografía <input id="imageOpacity" type="range" min="0" max="100" value="100" step="1"></label><span id="imageOpacityValue" class="hint">100%</span><label>Sensibilidad del fondo uniforme <input id="bgTolerance" type="range" min="18" max="95" step="1" value="42"></label><button id="removeUniformBg" type="button">Quitar fondo uniforme</button><p class="hint">Para imágenes con un fondo de color parecido en los bordes. No es recorte con IA; conserva la fotografía original en Deshacer.</p>';
+ panel.append(group);
+ $('imageOpacity').oninput=event=>{$('imageOpacityValue').textContent=event.target.value+'%'};
+ $('imageOpacity').onchange=event=>{const e=elements[selected];if(e?.type!=='image'||e.locked)return;addHistory();e.opacity=Number(event.target.value)/100;draw();updateImageControls()};
+ $('removeUniformBg').onclick=async()=>{
+  const e=elements[selected];if(e?.type!=='image'||e.locked){notify('Selecciona una imagen desbloqueada');return}
+  const button=$('removeUniformBg');button.disabled=true;
+  try{
+   const im=getImage(e);if(!im?.complete||!im.naturalWidth)throw Error('La imagen aún no está lista');
+   const w=im.naturalWidth,h=im.naturalHeight;
+   if(w*h>6000000)throw Error('Para esta herramienta usa una imagen de hasta 6 megapíxeles');
+   const c=document.createElement('canvas');c.width=w;c.height=h;
+   const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(im,0,0);
+   const pixels=cx.getImageData(0,0,w,h);
+   const result=removeUniformBackground(pixels.data,w,h,{tolerance:Number($('bgTolerance').value)});
+   if(result.removed<100)throw Error('No se detectó un fondo uniforme en los bordes');
+   cx.putImageData(pixels,0,0);
+   const blob=await new Promise((resolve,reject)=>c.toBlob(value=>value?resolve(value):reject(Error('No se pudo crear PNG')),'image/png'));
+   c.width=c.height=1;
+   const replacement=await prepareImageFile(new File([blob],'recorte.png',{type:'image/png'}));
+   const candidate={...e,data:replacement.data,img:replacement.img};
+   enforceLayerBudget(elements.map((item,i)=>i===selected?candidate:item));
+   addHistory();elements[selected]=candidate;draw();updateImageControls();notify('Fondo uniforme eliminado; puedes usar Deshacer');
+  }catch(error){notify('No se pudo quitar el fondo: '+error.message)}
+  finally{button.disabled=false}
+ };
+}
 
 function paintDesign(target,width,height,{transparent=!!zoneProduct||(editorMode==='free'&&freeDesign.background==='transparent'),onlyLayer=null,source=elements,pageWidth=documentWidth,pageHeight=documentHeight,referenceWidth=canvas.width}={}){
   target.clearRect(0,0,width,height);
@@ -627,9 +660,29 @@ $('viewEnd').onclick=()=>focusPrintEdge('end');
 $('resetCam').onclick=focusDesignFront;
 $('viewDesign').onclick=focusDesignFront;
 async function waitForProduct(){const start=performance.now();while($('profileStatus').dataset.state==='loading'){if(performance.now()-start>32000)throw Error('No terminó la carga del producto');await new Promise(requestAnimationFrame)}if($('profileStatus').dataset.state==='failed')throw Error('Modelo no disponible')}
+/* Marca de agua SOLO para el PNG de presentación, nunca para las impresiones. */
+const watermark={enabled:false,text:'Mi marca',opacity:.3,position:'bottom-right',logo:null};
+{
+ const anchor=$('scenePhotoWidth')?.closest('label');
+ if(anchor){
+  const group=document.createElement('div');group.className='control-card';
+  group.innerHTML='<h3>Marca de agua del mockup</h3><label class="check-line"><input id="wmEnabled" type="checkbox"> Activar marca de agua</label><label>Texto de la marca<input id="wmText" maxlength="90" placeholder="Nombre o marca" value="Mi marca"></label><label>Ubicación<select id="wmPosition"><option value="bottom-right">Esquina inferior derecha</option><option value="center">Centro</option><option value="repeat">Repetida</option></select></label><label>Opacidad de marca<input id="wmOpacity" type="range" min="5" max="100" value="30"></label><label>Logotipo PNG (opcional)<input type="file" accept="image/png,image/jpeg,image/webp" id="wmLogo"></label><button id="wmClearLogo" type="button">Usar solo texto</button><p class="hint">Aparece solo en el mockup PNG. El diseño para impresión sigue limpio.</p>';
+  anchor.after(group);
+  $('wmEnabled').onchange=e=>watermark.enabled=e.target.checked;
+  $('wmText').oninput=e=>watermark.text=e.target.value;
+  $('wmPosition').onchange=e=>watermark.position=e.target.value;
+  $('wmOpacity').oninput=e=>watermark.opacity=Number(e.target.value)/100;
+  $('wmLogo').onchange=async e=>{
+   const file=e.target.files?.[0];e.target.value='';if(!file)return;
+   try{watermark.logo=(await prepareImageFile(file)).img;notify('Logotipo de marca cargado')}
+   catch(error){notify('No se pudo abrir logotipo: '+error.message)}
+  };
+  $('wmClearLogo').onclick=()=>{watermark.logo=null;notify('Marca de agua en modo texto')};
+ }
+}
 $('exportMockup').onclick=async()=>{
  if(!renderer||recording||photoBusy||editorMode==='free')return;photoBusy=true;update3DControls();const size=renderer.getSize(new THREE.Vector2()),ratio=renderer.getPixelRatio(),aspect=camera.aspect,show=$('showGuides').checked,enabled=controls.enabled;
- try{controls.enabled=false;if(show){$('showGuides').checked=false;buildModel()}await sceneController.ready();await waitForProduct();sceneController.refresh();const width=sceneSettings.photoWidth,height=Math.round(width*9/16);renderer.setPixelRatio(1);renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();renderer.render(scene,camera);const blob=await canvasBlob(renderer.domElement,'image/png');const saved=await saveBlob(blob,`mockup-HD-${width}x${height}.png`);if(saved)notify('Mockup PNG guardado. El arte de impresión se conserva')}
+ try{controls.enabled=false;if(show){$('showGuides').checked=false;buildModel()}await sceneController.ready();await waitForProduct();sceneController.refresh();const width=sceneSettings.photoWidth,height=Math.round(width*9/16);renderer.setPixelRatio(1);renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();renderer.render(scene,camera);const exportCanvas=document.createElement('canvas');exportCanvas.width=width;exportCanvas.height=height;const ex=exportCanvas.getContext('2d');ex.drawImage(renderer.domElement,0,0,width,height);drawWatermark(ex,width,height,watermark);const blob=await canvasBlob(exportCanvas,'image/png');exportCanvas.width=exportCanvas.height=1;const saved=await saveBlob(blob,`mockup-HD-${width}x${height}.png`);if(saved)notify('Mockup PNG guardado. El arte de impresión se conserva')}
  catch(error){notify('No se pudo exportar el mockup: '+error.message)}
  finally{renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);camera.aspect=aspect;camera.updateProjectionMatrix();controls.enabled=enabled;if(show){$('showGuides').checked=true;buildModel()}photoBusy=false;resizeViewer();update3DControls();requestAnimationFrame(()=>resync3D({silent:true}))}
 };
