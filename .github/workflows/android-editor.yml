@@ -1,4 +1,7 @@
 name: FEP Editor PRO Android (experimental)
+concurrency:
+  group: fep-editor-android-c11
+  cancel-in-progress: true
 on:
   workflow_dispatch:
   push:
