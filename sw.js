@@ -9,12 +9,12 @@ async function inspect(cache,files){const bad=[];for(const file of files){try{if
 async function recoverLegacy(data){for(const name of await caches.keys()){if(!name.startsWith(PREFIX)||name===CACHE||name.endsWith('-pending'))continue;const build=name.slice(PREFIX.length),cache=await caches.open(name);let old=data.legacy?.[build];if(!old){const marker=await cache.match(url('__complete__')),hash=marker?.headers.get('X-FEP-Manifest-SHA256');if(!hash)continue;const response=await cache.match(url('__manifest__'));if(!await matches(response,hash)){await self.skipWaiting();return}old=await response.json();if(old.build!==build){await self.skipWaiting();return}}if((await inspect(cache,old.files)).length){await self.skipWaiting();return}}}
 self.addEventListener('install',event=>event.waitUntil((async()=>{
  const pending=CACHE+'-pending';let published=false;
- try{const data=await manifest(),existing=await caches.open(CACHE);if(await existing.match(url('__complete__'))&&!(await inspect(existing,data.files)).length){await recoverLegacy(data);return}
+ try{const data=await manifest(),existing=await caches.open(CACHE);if(await existing.match(url('__complete__'))&&!(await inspect(existing,data.files)).length){await recoverLegacy(data);await self.skipWaiting();return}
  const stage=await caches.open(pending);for(const file of data.files){const response=await fetch(url(file.path),{cache:'no-store'});if(!await matches(response,file.sha256,file.path))throw Error('Recurso ausente o de otra versión: '+file.path);await stage.put(url(file.path),response)}
  for(const file of data.files)await existing.put(url(file.path),await stage.match(url(file.path)));await existing.put(url('__complete__'),new Response(BUILD,{headers:{'X-FEP-Manifest-SHA256':MANIFEST_DIGEST}}));published=true;
  // A broken legacy installation must not trap a verified repair behind its disabled UI.
  // Activation never navigates live tabs; their pinned resources remain available.
- await recoverLegacy(data)
+ await recoverLegacy(data);await self.skipWaiting()
  }catch(error){if(!published)await caches.delete(CACHE);throw error}finally{await caches.delete(pending)}
 })()));
 self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
@@ -27,7 +27,14 @@ function unavailable(message,html=false){if(!html)return new Response(message,{s
 async function resource(build,path){const data=await manifest(),cacheForBuild=await caches.open(PREFIX+build);let files=build===BUILD?data.files:data.legacy?.[build]?.files;if(!files){const marker=await cacheForBuild.match(url('__complete__')),oldManifest=await cacheForBuild.match(url('__manifest__')),hash=marker?.headers.get('X-FEP-Manifest-SHA256');if(hash&&await matches(oldManifest,hash)){const old=await oldManifest.json();if(old.build===build)files=old.files}}const expected=files?.find(f=>f.path===path);if(!expected)throw Error('Versión del recurso no verificable. Guarda el proyecto y recarga.');const cache=await caches.open(PREFIX+build);let cached;try{cached=await cache.match(url(path))}catch{}if(await matches(cached,expected.sha256,path))return cached;
  const online=await fetch(url(path)+'?v='+build,{cache:'no-store'});if(!await matches(online,expected.sha256,path))throw Error('Recurso ausente o corrupto; no se mezclaron versiones. Conéctate y reintenta.');try{await cache.put(url(path),online.clone())}catch{}return online}
 self.addEventListener('fetch',event=>{const request=event.request,target=new URL(request.url);self.__fetchLog.push({path:target.pathname,mode:request.mode,build:BUILD});if(self.__fetchLog.length>8)self.__fetchLog.shift();if(request.method!=='GET'||target.origin!==root.origin||!target.pathname.startsWith(root.pathname))return;
- if(request.mode==='navigate'){event.respondWith(resource(BUILD,'index.html').catch(error=>unavailable(error.message,true)));return}
+ if(request.mode==='navigate'){
+ // Navegacion con redirect:'manual': no devolver directamente una respuesta previamente redirigida.
+ // Construir una respuesta HTML 200 nueva, conservando los proyectos locales sin alteraciones.
+ event.respondWith(resource(BUILD,'index.html').then(async verified=>new Response(await verified.blob(),{
+   status:200,
+   headers:{'Content-Type':'text/html;charset=utf-8','Cache-Control':'no-store'}
+ })).catch(error=>unavailable(error.message,true)));return
+ }
  if(!/\.(?:js|css|glb|gltf)$/.test(target.pathname)||target.pathname.endsWith('/sw.js'))return;
  event.respondWith((async()=>{let build=target.searchParams.get('v');const ref=new URL(request.referrer||root),reference=ref.searchParams.get('v')||ref.searchParams.get('fep-build');if(!/^fep-[a-f0-9]{16}$/.test(build||''))build=reference;if(!/^fep-[a-f0-9]{16}$/.test(build||'')){const client=event.clientId?await self.clients.get(event.clientId):null;build=client?new URL(client.url).searchParams.get('fep-build'):BUILD}if(!/^fep-[a-f0-9]{16}$/.test(build||''))throw Error('No se pudo identificar la versión del recurso');return resource(build,target.pathname.slice(root.pathname.length))})().catch(error=>unavailable(error.message)));
 });
