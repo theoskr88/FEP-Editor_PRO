@@ -27,7 +27,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - uses: android-actions/setup-android@v3
+      - name: Use preinstalled Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d "${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          test -x "${ANDROID_HOME:-/usr/local/lib/android/sdk}/platform-tools/adb"
+          echo "Android SDK: ${ANDROID_HOME}"
       - name: Prepare bundled offline web assets
         shell: bash
         run: |
