@@ -225,10 +225,23 @@ $('applyText').onclick=()=>{
   draw(); refreshSelectedLabel();
   notify('Cambios aplicados únicamente al texto seleccionado.');
 };
-$('imageFile').onchange=async ev=>{
- const file=ev.target.files?.[0];ev.target.value='';if(!file)return;const generation=++importGeneration;
+async function importImageToDesign(file){
+ if(!file)return;const generation=++importGeneration;
  try{const asset=await prepareImageFile(file);if(generation!==importGeneration)return;const e={type:'image',data:asset.data,img:asset.img,scale:.38,x:.5,y:.5};if(elements.length>=500)throw Error('Máximo 500 capas');enforceDocumentBudget([...elements,e]);addHistory();elements.push(e);selected=elements.length-1;refreshSelectedLabel();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Imagen añadida.')}catch(error){notify('No se pudo abrir la imagen: '+error.message)}
-};
+}
+$('imageFile').onchange=async ev=>{const file=ev.target.files?.[0];ev.target.value='';await importImageToDesign(file)};
+// Native Android camera/gallery; web keeps regular file input and adds camera capture fallback.
+{
+ const row=document.createElement('div');row.className='button-grid two';
+ const cameraButton=document.createElement('button');cameraButton.type='button';cameraButton.textContent='Tomar fotografía';
+ const galleryButton=document.createElement('button');galleryButton.type='button';galleryButton.textContent='Elegir de galería';
+ row.append(cameraButton,galleryButton);$('imageFile').closest('label')?.after(row);
+ const nativePhoto=async source=>{try{const file=await window.FEP_NATIVE.photo(source);await importImageToDesign(file)}catch(error){if(!/cancel/i.test(String(error.message)))notify('Cámara o galería: '+error.message)}};
+ const cameraFallback=document.createElement('input');cameraFallback.type='file';cameraFallback.accept='image/*';cameraFallback.capture='environment';cameraFallback.hidden=true;row.append(cameraFallback);
+ cameraFallback.onchange=async()=>{const f=cameraFallback.files?.[0];cameraFallback.value='';await importImageToDesign(f)};
+ cameraButton.onclick=()=>window.FEP_NATIVE?.isNative?nativePhoto('camera'):cameraFallback.click();
+ galleryButton.onclick=()=>window.FEP_NATIVE?.isNative?nativePhoto('gallery'):$('imageFile').click();
+}
 $('delete').onclick=()=>{if(selected>=0){addHistory();elements.splice(selected,1);selected=-1;refreshSelectedLabel();updateImageControls();draw()}};
 $('clear').onclick=()=>{addHistory();elements=[];selected=-1;refreshSelectedLabel();updateImageControls();draw()};$('undo').onclick=undo;$('redo').onclick=redo;
 $('rotationDeg').addEventListener('input',e=>setPrintRotation(e.target.value));
@@ -277,7 +290,10 @@ $('projectFile').onchange=async ev=>{
  if(f.size>ASSET_LIMITS.projectBytes&&raw.zoneSchema!==1)throw Error('Proyecto de una zona demasiado grande (máximo 30 MB)');const prepared=await prepareProject(raw);if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(generation!==importGeneration)return;if(JSON.stringify(projectSnapshot())!==before)throw Error('El documento cambió durante la importación; vuelve a abrir el archivo');applyPreparedProject(prepared)
  }catch(error){notify('No se pudo abrir el proyecto: '+error.message)}
 };
-function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+function saveBlob(blob,name){
+ if(window.FEP_NATIVE?.isNative){return window.FEP_NATIVE.saveBlob(blob,name).then(()=>true).catch(error=>{if(!/cancel/i.test(String(error.message)))notify('No se pudo guardar '+name+': '+error.message);return false})}
+ const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);return Promise.resolve(true)
+}
 // Reflejo REAL: toda la imagen ya rasterizada, no invierte el orden del texto.
 function mirrorFinishedImage(source){
   const output=document.createElement('canvas');
@@ -613,7 +629,7 @@ $('viewDesign').onclick=focusDesignFront;
 async function waitForProduct(){const start=performance.now();while($('profileStatus').dataset.state==='loading'){if(performance.now()-start>32000)throw Error('No terminó la carga del producto');await new Promise(requestAnimationFrame)}if($('profileStatus').dataset.state==='failed')throw Error('Modelo no disponible')}
 $('exportMockup').onclick=async()=>{
  if(!renderer||recording||photoBusy||editorMode==='free')return;photoBusy=true;update3DControls();const size=renderer.getSize(new THREE.Vector2()),ratio=renderer.getPixelRatio(),aspect=camera.aspect,show=$('showGuides').checked,enabled=controls.enabled;
- try{controls.enabled=false;if(show){$('showGuides').checked=false;buildModel()}await sceneController.ready();await waitForProduct();sceneController.refresh();const width=sceneSettings.photoWidth,height=Math.round(width*9/16);renderer.setPixelRatio(1);renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();renderer.render(scene,camera);const blob=await canvasBlob(renderer.domElement,'image/png');saveBlob(blob,`mockup-HD-${width}x${height}.png`);notify('Fotografía HD generada; el arte de impresión se conserva')}
+ try{controls.enabled=false;if(show){$('showGuides').checked=false;buildModel()}await sceneController.ready();await waitForProduct();sceneController.refresh();const width=sceneSettings.photoWidth,height=Math.round(width*9/16);renderer.setPixelRatio(1);renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();renderer.render(scene,camera);const blob=await canvasBlob(renderer.domElement,'image/png');const saved=await saveBlob(blob,`mockup-HD-${width}x${height}.png`);if(saved)notify('Mockup PNG guardado. El arte de impresión se conserva')}
  catch(error){notify('No se pudo exportar el mockup: '+error.message)}
  finally{renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);camera.aspect=aspect;camera.updateProjectionMatrix();controls.enabled=enabled;if(show){$('showGuides').checked=true;buildModel()}photoBusy=false;resizeViewer();update3DControls();requestAnimationFrame(()=>resync3D({silent:true}))}
 };
@@ -640,9 +656,10 @@ let recording=false,recordingAbort;const cancelVideo=document.createElement('but
 $('exportVideo').addEventListener('click',async()=>{
   if(recording||photoBusy)return;
   const surface=renderer?.domElement;
-  if(!surface?.captureStream || !window.MediaRecorder){notify('Este navegador no admite grabación de video del lienzo 3D.');return}
-  const type=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
-  if(!type){notify('El navegador no soporta WebM. Prueba Chrome o Edge en computador.');return}
+  const nativeVideo=window.FEP_NATIVE?.isNative?window.FEP_NATIVE.video:null;
+  if(!renderer||(!nativeVideo&&(!surface?.captureStream||!window.MediaRecorder))){notify('Este dispositivo no dispone de grabación 360°.');return}
+  const type=nativeVideo?null:['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
+  if(!nativeVideo&&!type){notify('Este navegador no admite grabación WebM.');return}
   recordingAbort=new AbortController();const recordingSignal=recordingAbort.signal;cancelVideo.hidden=false;recording=true;controls.enabled=false;controls.enableDamping=false;
   const button=$('exportVideo');button.disabled=true;button.textContent='Grabando giro…';
   const show=$('showGuides').checked;
@@ -652,8 +669,25 @@ $('exportVideo').addEventListener('click',async()=>{
   const previousSize=renderer.getSize(new THREE.Vector2()),previousRatio=renderer.getPixelRatio(),previousAspect=camera.aspect,previousShadowAuto=renderer.shadowMap.autoUpdate;
   let stream,recorder,frames=[],started=0,lastFrame=-Infinity,track;
   try{
-    await sceneController.ready();await waitForProduct();const maxHeight=sceneSettings.videoHeight,maxWidth=Math.round(maxHeight*16/9),factor=Math.min(1,maxWidth/surface.width,maxHeight/surface.height),vw=Math.max(1,Math.round(surface.width*factor)),vh=Math.max(1,Math.round(surface.height*factor));renderer.setPixelRatio(1);renderer.setSize(vw,vh,false);camera.aspect=vw/vh;camera.updateProjectionMatrix();
+    await sceneController.ready();await waitForProduct();const maxHeight=nativeVideo?Math.min(720,sceneSettings.videoHeight):sceneSettings.videoHeight,maxWidth=nativeVideo?Math.min(1280,Math.round(maxHeight*16/9)):Math.round(maxHeight*16/9),factor=Math.min(1,maxWidth/surface.width,maxHeight/surface.height),vw=Math.max(2,Math.floor(surface.width*factor/2)*2),vh=Math.max(2,Math.floor(surface.height*factor/2)*2);renderer.setPixelRatio(1);renderer.setSize(vw,vh,false);camera.aspect=vw/vh;camera.updateProjectionMatrix();
     renderer.shadowMap.needsUpdate=true;renderer.render(scene,camera);renderer.shadowMap.autoUpdate=false;
+    if(nativeVideo){
+      await nativeVideo.start({width:vw,height:vh,fps});
+      try{
+        const count=Math.round(fps*seconds);
+        for(let i=0;i<count;i++){
+          if(recordingSignal.aborted)throw new DOMException('Video cancelado','AbortError');
+          const p=count===1?0:i/(count-1),angle=angle0+Math.PI*2*p;
+          camera.position.set(target.x+radius*Math.sin(angle),start.y,target.z+radius*Math.cos(angle));camera.lookAt(target);
+          renderer.shadowMap.needsUpdate=true;renderer.render(scene,camera);
+          await nativeVideo.frame({data:surface.toDataURL('image/jpeg',.83).split(',')[1]});
+          if(i%2===0)button.textContent='Generando MP4 · '+Math.round((i+1)/count*100)+' %';
+          await new Promise(requestAnimationFrame);
+        }
+        if(recordingSignal.aborted)throw new DOMException('Video cancelado','AbortError');
+        await nativeVideo.finish();notify('Video 360° MP4 preparado para guardar o compartir');return;
+      }catch(e){await nativeVideo.cancel().catch(()=>{});throw e}
+    }
     let offline;try{offline=await encodeVideoFrames({canvas:surface,fps,seconds,signal:recordingSignal,render:p=>{const angle=angle0+Math.PI*2*p;camera.position.set(target.x+radius*Math.sin(angle),start.y,target.z+radius*Math.cos(angle));camera.lookAt(target);renderer.render(scene,camera)},progress:percent=>{button.textContent='Generando video · '+percent+' %'}})}catch(error){if(error.name==='AbortError')throw error;camera.position.copy(start);camera.lookAt(target);notify('Se utilizará la grabación compatible en tiempo real')}
     if(offline){saveBlob(offline,'mockup-giro-360.webm');notify('Video 360° generado con fotogramas completos');return}
     button.textContent='Grabando en tiempo real…';stream=surface.captureStream(fps);track=stream.getVideoTracks()[0];
