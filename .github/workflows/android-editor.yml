@@ -1,0 +1,73 @@
+name: FEP Editor PRO Android (experimental)
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - desarrollo/android-cierre-c
+    paths:
+      - 'capacitor.config.json'
+      - 'scripts/build-mobile-web.py'
+      - '.github/workflows/android-editor.yml'
+      - 'index.html'
+      - 'app.js'
+      - 'plancha.js'
+      - 'src/**'
+      - 'vendor/**'
+jobs:
+  android-debug:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - name: Prepare bundled offline web assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/build-mobile-web.py
+      - name: Install Capacitor 8 (CI only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8
+          npx cap --version
+      - name: Create Android project from bundled assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx cap add android
+          npx cap sync android
+      - name: Compile Android debug APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd android
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug 2>&1 | tee ../android-build.log
+      - name: Verify APK and checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=android/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$apk"
+          unzip -l "$apk" | grep -q 'classes.dex'
+          unzip -l "$apk" | grep -q 'AndroidManifest.xml'
+          sha256sum "$apk" > app-debug.apk.sha256
+      - name: Upload debug APK and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fep-editor-pro-android-debug
+          if-no-files-found: warn
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            app-debug.apk.sha256
+            android-build.log
