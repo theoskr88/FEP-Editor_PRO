@@ -13,6 +13,8 @@ on:
       - 'plancha.js'
       - 'src/**'
       - 'vendor/**'
+      - 'scripts/native-bridge-entry.js'
+      - 'scripts/android-native/**'
 jobs:
   android-debug:
     runs-on: ubuntu-24.04
@@ -43,13 +45,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --no-save @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8
+          npm install --no-save @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8 @capacitor/camera@8 @capacitor/filesystem@8 @capacitor/share@8 esbuild@0.25.12
+          ./node_modules/.bin/esbuild scripts/native-bridge-entry.js --bundle --platform=browser --format=iife --outfile=mobile-www/fep-native.js
           npx cap --version
       - name: Create Android project from bundled assets
         shell: bash
         run: |
           set -euo pipefail
           npx cap add android
+          cp scripts/android-native/*.java android/app/src/main/java/com/fep/editorpro/
           npx cap sync android
       - name: Compile Android debug APK
         shell: bash
