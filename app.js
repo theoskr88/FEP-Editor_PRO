@@ -685,11 +685,11 @@ async function waitForProduct(){const start=performance.now();while($('profileSt
 /* Marca de agua SOLO para el PNG de presentación, nunca para las impresiones. */
 const watermark={enabled:false,text:'Mi marca',opacity:.3,position:'bottom-right',logo:null};
 {
- const anchor=$('scenePhotoWidth')?.closest('label');
+ const anchor=$('exportMockup');
  if(anchor){
   const group=document.createElement('div');group.className='control-card';
   group.innerHTML='<h3>Marca de agua del mockup</h3><label class="check-line"><input id="wmEnabled" type="checkbox"> Activar marca de agua</label><label>Texto de la marca<input id="wmText" maxlength="90" placeholder="Nombre o marca" value="Mi marca"></label><label>Ubicación<select id="wmPosition"><option value="bottom-right">Esquina inferior derecha</option><option value="center">Centro</option><option value="repeat">Repetida</option></select></label><label>Opacidad de marca<input id="wmOpacity" type="range" min="5" max="100" value="30"></label><label>Logotipo PNG (opcional)<input type="file" accept="image/png,image/jpeg,image/webp" id="wmLogo"></label><button id="wmClearLogo" type="button">Usar solo texto</button><p class="hint">Aparece solo en el mockup PNG. El diseño para impresión sigue limpio.</p>';
-  anchor.after(group);
+  anchor.after(group); // Marca de agua visible junto a «Descargar mockup PNG», no escondida en ajustes.
   $('wmEnabled').onchange=e=>watermark.enabled=e.target.checked;
   $('wmText').oninput=e=>watermark.text=e.target.value;
   $('wmPosition').onchange=e=>watermark.position=e.target.value;
