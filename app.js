@@ -269,11 +269,33 @@ $('imageFile').onchange=async ev=>{const file=ev.target.files?.[0];ev.target.val
  const cameraButton=document.createElement('button');cameraButton.type='button';cameraButton.textContent='Tomar fotografía';
  const galleryButton=document.createElement('button');galleryButton.type='button';galleryButton.textContent='Elegir de galería';
  row.append(cameraButton,galleryButton);$('imageFile').closest('label')?.after(row);
- const nativePhoto=async source=>{try{const file=await window.FEP_NATIVE.photo(source);await importImageToDesign(file)}catch(error){if(!/cancel/i.test(String(error.message)))notify('Cámara o galería: '+error.message)}};
  const cameraFallback=document.createElement('input');cameraFallback.type='file';cameraFallback.accept='image/*';cameraFallback.capture='environment';cameraFallback.hidden=true;row.append(cameraFallback);
  cameraFallback.onchange=async()=>{const f=cameraFallback.files?.[0];cameraFallback.value='';await importImageToDesign(f)};
- cameraButton.onclick=()=>window.FEP_NATIVE?.isNative?nativePhoto('camera'):cameraFallback.click();
- galleryButton.onclick=()=>window.FEP_NATIVE?.isNative?nativePhoto('gallery'):$('imageFile').click();
+ const fallbackButton=document.createElement('button');fallbackButton.type='button';fallbackButton.textContent='Cámara alternativa';fallbackButton.title='Abre la cámara del sistema mediante el selector de Android';fallbackButton.hidden=!window.FEP_NATIVE?.isNative;row.append(fallbackButton);
+ fallbackButton.onclick=()=>cameraFallback.click();
+ const photoStatus=document.createElement('p');photoStatus.className='hint';photoStatus.setAttribute('role','status');photoStatus.setAttribute('aria-live','polite');row.after(photoStatus);
+ let photoInProgress=false;
+ const nativePhoto=async source=>{
+   if(photoInProgress)return;
+   photoInProgress=true;const button=source==='camera'?cameraButton:galleryButton;
+   button.disabled=true;photoStatus.textContent=source==='camera'?'Abriendo cámara Android…':'Abriendo galería Android…';
+   try{
+     if(!window.FEP_NATIVE?.isNative||typeof window.FEP_NATIVE.photo!=='function'){
+       photoStatus.textContent='Usando selector de archivos del dispositivo';
+       if(source==='camera')cameraFallback.click();else $('imageFile').click();return;
+     }
+     const file=await window.FEP_NATIVE.photo(source);
+     photoStatus.textContent='Fotografía recibida · '+Math.round(file.size/1024)+' KB. Añadiendo capa…';
+     await importImageToDesign(file);
+     photoStatus.textContent='Fotografía procesada. Verifica la nueva capa en el diseño.';
+   }catch(error){
+     const details=String(error?.message||error||'Error no identificado');
+     photoStatus.textContent='No se abrió la cámara: '+details.slice(0,160)+'. Pulsa Cámara alternativa.';
+     notify('Cámara Android: '+details.slice(0,125));
+   }finally{photoInProgress=false;button.disabled=false}
+ };
+ cameraButton.onclick=()=>nativePhoto('camera');
+ galleryButton.onclick=()=>nativePhoto('gallery');
 }
 $('delete').onclick=()=>{if(selected>=0){addHistory();elements.splice(selected,1);selected=-1;refreshSelectedLabel();updateImageControls();draw()}};
 $('clear').onclick=()=>{addHistory();elements=[];selected=-1;refreshSelectedLabel();updateImageControls();draw()};$('undo').onclick=undo;$('redo').onclick=redo;
