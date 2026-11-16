@@ -35,16 +35,22 @@ window.FEP_NATIVE={
   },
   async photo(source='camera'){
     if(!isNative)throw Error('Solo Android');
-    const result=await Camera.getPhoto({source:source==='camera'?CameraSource.Camera:CameraSource.Photos,
-      resultType:CameraResultType.DataUrl,quality:95,allowEditing:false,correctOrientation:true});
-    if(!result.dataUrl)throw Error('No se recibió una imagen');
-    const response=await fetch(result.dataUrl);
-    return new File([await response.blob()],source==='camera'?'fotografia.jpg':'galeria.jpg',{type:response.headers.get('content-type')||'image/jpeg'});
+    const result=await Camera.getPhoto({
+      source:source==='camera'?CameraSource.Camera:CameraSource.Photos,
+      resultType:CameraResultType.Uri,quality:85,allowEditing:false,
+      width:2048,height:2048,correctOrientation:true
+    });
+    if(!result.webPath)throw Error('La cámara no devolvió un archivo legible');
+    const response=await fetch(result.webPath);
+    if(!response.ok)throw Error('No se puede leer la fotografía capturada');
+    const blob=await response.blob();
+    if(!blob.size)throw Error('La cámara devolvió una imagen vacía');
+    return new File([blob],source==='camera'?'fotografia.jpg':'galeria.jpg',{type:blob.type||'image/jpeg'});
   },
   video:{
     start:opts=>Video.start(opts),
     frame:opts=>Video.frame(opts),
-    finish:async()=>{const result=await Video.finish();await Share.share({title:'Video 360° FEP',url:result.uri,dialogTitle:'Guardar o compartir MP4'});return result},
+    finish:()=>Video.finish(),
     cancel:()=>Video.cancel()
   }
 };
