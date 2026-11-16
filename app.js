@@ -23,6 +23,7 @@ import {createGlitterCache} from './src/glitter-cache.js?v=fep-6a4c2734f7b31778'
 import {createGlitterControls} from './src/glitter-controls.js?v=fep-6a4c2734f7b31778';
 import {prepareProject} from './src/imports.js?v=fep-6a4c2734f7b31778';
 import {prepareImageFile,enforceDocumentBudget as enforceLayerBudget,ASSET_LIMITS} from './src/assets.js?v=fep-6a4c2734f7b31778';
+import {normalizePhoto} from './src/photo-import-mobile.js';
 import {removeUniformBackground,drawWatermark} from './src/photo-tools.js';
 import {openDocumentStore,createAutosave} from './src/persistence.js?v=fep-6a4c2734f7b31778';
 let sceneSettings=normalizeMockup(),sceneController,photoBusy=false;
@@ -259,10 +260,22 @@ $('applyText').onclick=()=>{
   notify('Cambios aplicados únicamente al texto seleccionado.');
 };
 async function importImageToDesign(file){
- if(!file)return;const generation=++importGeneration;
- try{const asset=await prepareImageFile(file);if(generation!==importGeneration)return;const e={type:'image',data:asset.data,img:asset.img,scale:.38,x:.5,y:.5};if(elements.length>=500)throw Error('Máximo 500 capas');enforceDocumentBudget([...elements,e]);addHistory();elements.push(e);selected=elements.length-1;refreshSelectedLabel();updateImageControls();draw();requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));notify('Imagen añadida.')}catch(error){notify('No se pudo abrir la imagen: '+error.message)}
+ if(!file)return false;
+ const generation=++importGeneration;
+ try{
+  // Las fotos de cámara modernas son mayores que los límites del proyecto; normalizar primero.
+  const normalized=await normalizePhoto(file);
+  const asset=await prepareImageFile(normalized);
+  if(generation!==importGeneration)throw Error('Se cambió de proyecto durante la importación');
+  const e={type:'image',data:asset.data,img:asset.img,scale:.38,x:.5,y:.5};
+  if(elements.length>=500)throw Error('Máximo 500 capas');
+  enforceDocumentBudget([...elements,e]);addHistory();elements.push(e);selected=elements.length-1;
+  refreshSelectedLabel();updateImageControls();draw();
+  requestAnimationFrame(()=>resync3D({resetView:true,selectedObject:true}));
+  notify('Fotografía añadida como nueva capa');return true;
+ }catch(error){notify('No se pudo añadir imagen: '+error.message);throw error}
 }
-$('imageFile').onchange=async ev=>{const file=ev.target.files?.[0];ev.target.value='';await importImageToDesign(file)};
+$('imageFile').onchange=async ev=>{const file=ev.target.files?.[0];ev.target.value='';if(!file)return;try{await importImageToDesign(file)}catch(error){notify('Imagen no incorporada: '+error.message)}};
 // Native Android camera/gallery; web keeps regular file input and adds camera capture fallback.
 {
  const row=document.createElement('div');row.className='button-grid two';
@@ -270,7 +283,7 @@ $('imageFile').onchange=async ev=>{const file=ev.target.files?.[0];ev.target.val
  const galleryButton=document.createElement('button');galleryButton.type='button';galleryButton.textContent='Elegir de galería';
  row.append(cameraButton,galleryButton);$('imageFile').closest('label')?.after(row);
  const cameraFallback=document.createElement('input');cameraFallback.type='file';cameraFallback.accept='image/*';cameraFallback.capture='environment';cameraFallback.hidden=true;row.append(cameraFallback);
- cameraFallback.onchange=async()=>{const f=cameraFallback.files?.[0];cameraFallback.value='';await importImageToDesign(f)};
+ cameraFallback.onchange=async()=>{const f=cameraFallback.files?.[0];cameraFallback.value='';if(!f)return;photoStatus.textContent='Procesando fotografía de cámara alternativa…';try{await importImageToDesign(f);photoStatus.textContent='Fotografía añadida al diseño y a Capas'}catch(error){photoStatus.textContent='Error al añadir fotografía: '+error.message}};
  const fallbackButton=document.createElement('button');fallbackButton.type='button';fallbackButton.textContent='Cámara alternativa';fallbackButton.title='Abre la cámara del sistema mediante el selector de Android';fallbackButton.hidden=!window.FEP_NATIVE?.isNative;row.append(fallbackButton);
  fallbackButton.onclick=()=>cameraFallback.click();
  const photoStatus=document.createElement('p');photoStatus.className='hint';photoStatus.setAttribute('role','status');photoStatus.setAttribute('aria-live','polite');row.after(photoStatus);
