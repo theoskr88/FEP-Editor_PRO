@@ -6,6 +6,14 @@ import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.media.Image;
+import androidx.activity.result.ActivityResult;
+import com.getcapacitor.annotation.ActivityCallback;
+import java.io.FileInputStream;
+import java.io.OutputStream;
 import android.util.Base64;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -39,6 +47,7 @@ public class FepVideoPlugin extends Plugin {
       colorFormat=0;
       for(int value:formats)if(value==MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar)colorFormat=value;
       if(colorFormat==0)for(int value:formats)if(value==MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar)colorFormat=value;
+      if(colorFormat==0)for(int value:formats)if(value==MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible)colorFormat=value;
       if(colorFormat==0)throw new IllegalStateException("Sin codificador YUV420 compatible");
       format.setInteger(MediaFormat.KEY_COLOR_FORMAT,colorFormat);
       format.setInteger(MediaFormat.KEY_BIT_RATE,2500000);
@@ -63,11 +72,18 @@ public class FepVideoPlugin extends Plugin {
       int[] pixels=new int[width*height];bitmap.getPixels(pixels,0,width,0,0,width,height);
       if(bitmap!=decoded)bitmap.recycle();decoded.recycle();
       int index=codec.dequeueInputBuffer(TIMEOUT);if(index<0)throw new IllegalStateException("Codificador sin entrada disponible");
-      ByteBuffer buffer=codec.getInputBuffer(index);
-      if(buffer==null)throw new IllegalStateException("Buffer de vídeo no disponible");
-      byte[] yuv=toYuv(pixels,width,height,colorFormat==MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
-      buffer.clear();buffer.put(yuv);
-      codec.queueInputBuffer(index,0,yuv.length,frames*1000000L/fps,0);
+      if(colorFormat==MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible){
+        Image image=codec.getInputImage(index);
+        if(image==null)throw new IllegalStateException("El codificador no admite entrada flexible");
+        try{writeFlexible(image,pixels,width,height);}finally{image.close();}
+        codec.queueInputBuffer(index,0,width*height*3/2,frames*1000000L/fps,0);
+      }else{
+        ByteBuffer buffer=codec.getInputBuffer(index);
+        if(buffer==null)throw new IllegalStateException("Buffer de vídeo no disponible");
+        byte[] yuv=toYuv(pixels,width,height,colorFormat==MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+        buffer.clear();buffer.put(yuv);
+        codec.queueInputBuffer(index,0,yuv.length,frames*1000000L/fps,0);
+      }
       frames++;drain(false);
       JSObject ret=new JSObject();ret.put("frames",frames);call.resolve(ret);
     }catch(Exception e){dispose(true);call.reject("No se pudo codificar fotograma: "+e.getMessage(),e);}
@@ -83,14 +99,45 @@ public class FepVideoPlugin extends Plugin {
       drain(true);
       File file=output;dispose(false);
       if(!file.isFile()||file.length()<1024)throw new IllegalStateException("El video generado está vacío");
-      JSObject ret=new JSObject();
-      // Android Share plugin can share app-owned cache files.
-      ret.put("uri","file://"+file.getAbsolutePath());
-      ret.put("bytes",file.length());
-      call.resolve(ret);
+      Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);
+      intent.addCategory(Intent.CATEGORY_OPENABLE);
+      intent.setType("video/mp4");
+      intent.putExtra(Intent.EXTRA_TITLE,"FEP-mockup-360.mp4");
+      startActivityForResult(call,intent,"onVideoSave");
     }catch(Exception e){dispose(true);call.reject("No se pudo finalizar MP4: "+e.getMessage(),e);}
   }
 
+  @ActivityCallback private void onVideoSave(PluginCall call,ActivityResult result){
+    if(result.getResultCode()!=Activity.RESULT_OK||result.getData()==null||result.getData().getData()==null){
+      call.reject("Se canceló el guardado del video");return;
+    }
+    if(output==null||!output.isFile()||output.length()<1024){call.reject("No existe un MP4 válido");return;}
+    Uri uri=result.getData().getData();
+    try(FileInputStream in=new FileInputStream(output);OutputStream out=getContext().getContentResolver().openOutputStream(uri,"w")){
+      if(out==null)throw new java.io.IOException("Sin acceso al destino");
+      byte[] buffer=new byte[32768];int count;long saved=0;
+      while((count=in.read(buffer))!=-1){out.write(buffer,0,count);saved+=count;}
+      out.flush();
+      if(saved!=output.length())throw new java.io.IOException("Copia incompleta");
+      JSObject response=new JSObject();response.put("uri",uri.toString());response.put("bytes",saved);call.resolve(response);
+      output.delete();output=null;
+    }catch(Exception e){call.reject("No se pudo guardar el MP4: "+e.getMessage(),e);}
+  }
+  private static void writeFlexible(Image image,int[] px,int w,int h){
+    Image.Plane[] planes=image.getPlanes();
+    if(planes.length<3)throw new IllegalStateException("Planos YUV no disponibles");
+    for(int y=0;y<h;y++)for(int x=0;x<w;x++){
+      int p=px[y*w+x],r=(p>>16)&255,g=(p>>8)&255,b=p&255;
+      Image.Plane yp=planes[0];yp.getBuffer().put(y*yp.getRowStride()+x*yp.getPixelStride(),
+        (byte)bound(((66*r+129*g+25*b+128)>>8)+16));
+      if((x&1)==0&&(y&1)==0){
+        Image.Plane up=planes[1],vp=planes[2];int ix=(y/2)*up.getRowStride()+(x/2)*up.getPixelStride();
+        int vx=(y/2)*vp.getRowStride()+(x/2)*vp.getPixelStride();
+        up.getBuffer().put(ix,(byte)bound(((-38*r-74*g+112*b+128)>>8)+128));
+        vp.getBuffer().put(vx,(byte)bound(((112*r-94*g-18*b+128)>>8)+128));
+      }
+    }
+  }
   @PluginMethod public synchronized void cancel(PluginCall call){dispose(true);call.resolve();}
 
   private void drain(boolean end){
