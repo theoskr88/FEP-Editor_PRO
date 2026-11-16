@@ -37,11 +37,29 @@ public class FepFilesPlugin extends Plugin {
     Uri uri=result.getData().getData();
     try {
       byte[] data=Base64.decode(call.getString("data"),Base64.DEFAULT);
+      if(data.length<8)throw new java.io.IOException("Archivo sin contenido válido");
+      String mime=call.getString("mime","application/octet-stream");
+      if("image/png".equals(mime)&&!(data[0]==(byte)137&&data[1]==80&&data[2]==78&&data[3]==71&&data[4]==13&&data[5]==10&&data[6]==26&&data[7]==10))
+        throw new java.io.IOException("PNG inválido antes de guardar");
+      if("image/jpeg".equals(mime)&&!(data[0]==(byte)255&&data[1]==(byte)216&&data[data.length-2]==(byte)255&&data[data.length-1]==(byte)217))
+        throw new java.io.IOException("JPEG inválido antes de guardar");
       try(OutputStream out=getContext().getContentResolver().openOutputStream(uri,"w")){
         if(out==null)throw new java.io.IOException("Sin acceso al archivo");
         out.write(data);out.flush();
       }
-      JSObject response=new JSObject();response.put("uri",uri.toString());response.put("bytes",data.length);
+      // Reabrir y validar byte por byte: evitar reportar éxito para archivos truncados.
+      int pos=0;
+      try(InputStream in=getContext().getContentResolver().openInputStream(uri)){
+        if(in==null)throw new java.io.IOException("No se puede reabrir el archivo guardado");
+        byte[] check=new byte[32768];int n;
+        while((n=in.read(check))!=-1){
+          if(pos+n>data.length)throw new java.io.IOException("El archivo guardado tiene bytes adicionales");
+          for(int i=0;i<n;i++)if(check[i]!=data[pos+i])throw new java.io.IOException("El archivo se alteró al guardarlo");
+          pos+=n;
+        }
+      }
+      if(pos!=data.length)throw new java.io.IOException("Guardado incompleto: "+pos+"/"+data.length);
+      JSObject response=new JSObject();response.put("uri",uri.toString());response.put("bytes",pos);
       call.resolve(response);
     }catch(Exception e){call.reject("No se pudo escribir el archivo",e);}
   }
