@@ -45,7 +45,8 @@ jobs:
           set -euo pipefail
           node --check app.js
           node --check src/photo-tools.js
-          node --test tests/photo-tools.test.mjs
+          node --check src/photo-import-mobile.js
+          node --test tests/photo-tools.test.mjs tests/photo-import-mobile.test.mjs
       - name: Prepare bundled offline web assets
         shell: bash
         run: |
