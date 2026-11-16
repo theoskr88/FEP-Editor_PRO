@@ -33,7 +33,7 @@ from pathlib import Path
 import struct
 import zlib
 image=Path('emulator-evidence/screenshot-start.png').read_bytes()
-if not image.startswith(b'\\x89PNG\\r\\n\\x1a\\n'):
+if not image.startswith(bytes([137,80,78,71,13,10,26,10])):
     raise SystemExit('FAIL: captura no es PNG')
 position=8
 parts=[]
