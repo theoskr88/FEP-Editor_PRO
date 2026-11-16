@@ -1,0 +1,80 @@
+name: FEP Editor PRO — Android emulator diagnostic
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - desarrollo/android-cierre-c
+    paths:
+      - '.github/workflows/android-emulator-diagnostic.yml'
+      - 'scripts/android-emulator-smoke.sh'
+concurrency:
+  group: fep-editor-emulator
+  cancel-in-progress: true
+jobs:
+  emulator-diagnostic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Prepare offline application
+        run: |
+          set -euo pipefail
+          python3 scripts/build-mobile-web.py
+      - name: Install Capacitor and Android plugins
+        run: |
+          set -euo pipefail
+          npm install --save @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8 @capacitor/camera@8 @capacitor/filesystem@8 @capacitor/share@8 esbuild@0.25.12
+          ./node_modules/.bin/esbuild scripts/native-bridge-entry.js --bundle --platform=browser --format=iife --outfile=mobile-www/fep-native.js
+          npx cap add android
+          cp scripts/android-native/*.java android/app/src/main/java/com/fep/editorpro/
+          npx cap sync android
+          python3 scripts/android-native/patch-manifest.py
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          plugins=json.loads(Path('android/app/src/main/assets/capacitor.plugins.json').read_text())
+          installed={p.get('pkg') for p in plugins}
+          required={'@capacitor/camera','@capacitor/filesystem','@capacitor/share'}
+          assert required.issubset(installed),(installed,required)
+          print('Native Capacitor plugins confirmed:',sorted(installed))
+          PY
+      - name: Compile debug APK
+        run: |
+          set -euo pipefail
+          cd android
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug
+          test -s app/build/outputs/apk/debug/app-debug.apk
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install, open, and diagnose on Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated -camera-front emulated
+          script: bash scripts/android-emulator-smoke.sh
+      - name: Upload screenshot and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fep-editor-emulator-diagnostics
+          if-no-files-found: warn
+          path: |
+            emulator-evidence/**
+            android/app/build/outputs/apk/debug/app-debug.apk
