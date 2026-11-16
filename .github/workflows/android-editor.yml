@@ -56,7 +56,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --no-save @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8 @capacitor/camera@8 @capacitor/filesystem@8 @capacitor/share@8 esbuild@0.25.12
+          npm install --save @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8 @capacitor/camera@8 @capacitor/filesystem@8 @capacitor/share@8 esbuild@0.25.12
           ./node_modules/.bin/esbuild scripts/native-bridge-entry.js --bundle --platform=browser --format=iife --outfile=mobile-www/fep-native.js
           npx cap --version
       - name: Create Android project from bundled assets
@@ -66,6 +66,19 @@ jobs:
           npx cap add android
           cp scripts/android-native/*.java android/app/src/main/java/com/fep/editorpro/
           npx cap sync android
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          path=Path('android/app/src/main/assets/capacitor.plugins.json')
+          if not path.is_file():
+              raise SystemExit('Plugin manifest missing: Capacitor plugins not installed')
+          plugins=json.loads(path.read_text())
+          registered={item.get('pkg') for item in plugins}
+          expected={'@capacitor/camera','@capacitor/filesystem','@capacitor/share'}
+          print('Registered plugins:', sorted(registered))
+          if not expected.issubset(registered):
+              raise SystemExit('Missing native plugins: '+', '.join(sorted(expected-registered)))
+          PY
           python3 scripts/android-native/patch-manifest.py
           grep -q 'android.media.action.IMAGE_CAPTURE' android/app/src/main/AndroidManifest.xml
           grep -q 'android.intent.action.GET_CONTENT' android/app/src/main/AndroidManifest.xml
