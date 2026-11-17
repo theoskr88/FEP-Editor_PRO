@@ -9,6 +9,10 @@ on:
       - 'scripts/android-emulator-smoke.sh'
       - 'scripts/android-emulator-functional.mjs'
       - 'scripts/android-cdp-functional.mjs'
+      - 'app.js'
+      - 'src/**'
+      - 'scripts/native-bridge-entry.js'
+      - 'scripts/android-native/**'
 concurrency:
   group: fep-editor-emulator
   cancel-in-progress: true
