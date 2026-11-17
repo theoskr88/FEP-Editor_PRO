@@ -275,7 +275,17 @@ async function importImageToDesign(file){
   notify('Fotografía añadida como nueva capa');return true;
  }catch(error){notify('No se pudo añadir imagen: '+error.message);throw error}
 }
-$('imageFile').onchange=async ev=>{const file=ev.target.files?.[0];ev.target.value='';if(!file)return;try{await importImageToDesign(file)}catch(error){notify('Imagen no incorporada: '+error.message)}};
+$('imageFile').multiple=true;
+$('imageFile').onchange=async ev=>{
+ const files=[...(ev.target.files||[])];ev.target.value='';
+ if(!files.length)return;
+ let added=0,failed=0;
+ for(const file of files){
+  try{await importImageToDesign(file);added++}
+  catch(error){failed++;notify('No se incorporó '+file.name+': '+error.message)}
+ }
+ notify('Importación finalizada: '+added+' añadidas, '+failed+' rechazadas.');
+};
 // Native Android camera/gallery; web keeps regular file input and adds camera capture fallback.
 {
  const row=document.createElement('div');row.className='button-grid two';
@@ -308,7 +318,11 @@ $('imageFile').onchange=async ev=>{const file=ev.target.files?.[0];ev.target.val
    }finally{photoInProgress=false;button.disabled=false}
  };
  cameraButton.onclick=()=>nativePhoto('camera');
- galleryButton.onclick=()=>nativePhoto('gallery');
+ galleryButton.onclick=()=>{
+  // For batch imports the system file picker supports multiple images on Android.
+  // Cámara nativa sigue disponible en su botón propio.
+  $('imageFile').click();
+ };
 }
 $('delete').onclick=()=>{if(selected>=0){addHistory();elements.splice(selected,1);selected=-1;refreshSelectedLabel();updateImageControls();draw()}};
 $('clear').onclick=()=>{addHistory();elements=[];selected=-1;refreshSelectedLabel();updateImageControls();draw()};$('undo').onclick=undo;$('redo').onclick=redo;
@@ -358,9 +372,28 @@ $('projectFile').onchange=async ev=>{
  if(f.size>ASSET_LIMITS.projectBytes&&raw.zoneSchema!==1)throw Error('Proyecto de una zona demasiado grande (máximo 30 MB)');const prepared=await prepareProject(raw);if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(generation!==importGeneration)return;if(JSON.stringify(projectSnapshot())!==before)throw Error('El documento cambió durante la importación; vuelve a abrir el archivo');applyPreparedProject(prepared)
  }catch(error){notify('No se pudo abrir el proyecto: '+error.message)}
 };
-function saveBlob(blob,name){
- if(window.FEP_NATIVE?.isNative){return window.FEP_NATIVE.saveBlob(blob,name).then(()=>true).catch(error=>{if(!/cancel/i.test(String(error.message)))notify('No se pudo guardar '+name+': '+error.message);return false})}
- const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);return Promise.resolve(true)
+async function saveBlob(blob,name){
+ if(!(blob instanceof Blob)||!blob.size)throw Error('No se puede guardar un archivo vacío');
+ const lower=String(name).toLowerCase();
+ if(lower.endsWith('.png')){
+  const header=new Uint8Array(await blob.slice(0,24).arrayBuffer());
+  if(![137,80,78,71,13,10,26,10].every((b,i)=>header[i]===b))throw Error('El PNG generado tiene una cabecera inválida');
+  const view=new DataView(header.buffer);
+  const w=view.getUint32(16),h=view.getUint32(20);
+  if(!w||!h)throw Error('El PNG generado no tiene dimensiones válidas');
+ }
+ if(window.FEP_NATIVE?.isNative){
+  try{
+   const outcome=await window.FEP_NATIVE.saveBlob(blob,name);
+   if(outcome?.bytes && outcome.bytes!==blob.size)throw Error('La cantidad de bytes guardados no coincide');
+   notify('Guardado verificado: '+name+' ('+Math.round(blob.size/1024)+' KB)');
+   return true;
+  }catch(error){
+   if(!/cancel/i.test(String(error.message)))notify('Guardado fallido: '+name+' · '+error.message);
+   return false;
+  }
+ }
+ const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);return true;
 }
 // Reflejo REAL: toda la imagen ya rasterizada, no invierte el orden del texto.
 function mirrorFinishedImage(source){
@@ -773,7 +806,9 @@ $('exportVideo').addEventListener('click',async()=>{
           await new Promise(requestAnimationFrame);
         }
         if(recordingSignal.aborted)throw new DOMException('Video cancelado','AbortError');
-        await nativeVideo.finish();notify('Video 360° MP4 preparado para guardar o compartir');return;
+        const videoSaved=await nativeVideo.finish();
+        if(!videoSaved?.bytes || videoSaved.bytes<1024)throw Error('No se confirmó el archivo MP4');
+        notify('MP4 360° guardado ('+Math.round(videoSaved.bytes/1024)+' KB)');return;
       }catch(e){await nativeVideo.cancel().catch(()=>{});throw e}
     }
     let offline;try{offline=await encodeVideoFrames({canvas:surface,fps,seconds,signal:recordingSignal,render:p=>{const angle=angle0+Math.PI*2*p;camera.position.set(target.x+radius*Math.sin(angle),start.y,target.z+radius*Math.cos(angle));camera.lookAt(target);renderer.render(scene,camera)},progress:percent=>{button.textContent='Generando video · '+percent+' %'}})}catch(error){if(error.name==='AbortError')throw error;camera.position.copy(start);camera.lookAt(target);notify('Se utilizará la grabación compatible en tiempo real')}
