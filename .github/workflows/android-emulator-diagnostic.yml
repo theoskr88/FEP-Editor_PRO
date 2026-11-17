@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/android-emulator-diagnostic.yml'
       - 'scripts/android-emulator-smoke.sh'
+      - 'scripts/android-emulator-functional.mjs'
 concurrency:
   group: fep-editor-emulator
   cancel-in-progress: true
@@ -89,7 +90,7 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 360
           emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -noaudio -no-boot-anim -partition-size 2048 -camera-back emulated -camera-front emulated
-          script: bash scripts/android-emulator-smoke.sh
+          script: bash scripts/android-emulator-smoke.sh && node scripts/android-emulator-functional.mjs
       - name: Upload screenshot and diagnostics
         if: always()
         uses: actions/upload-artifact@v4
