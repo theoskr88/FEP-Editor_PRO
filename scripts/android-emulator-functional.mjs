@@ -56,7 +56,7 @@ try{
     input.files=change.files;
     input.dispatchEvent(new Event('change',{bubbles:true}));
   });
-  await page.waitForFunction(()=>/\b1\s+capa/.test(document.getElementById('layerCount')?.textContent||''),{timeout:20000});
+  await page.waitForFunction(()=>/\b1\s+capa/.test(document.getElementById('layerCount')?.textContent||''),null,{timeout:20000});
   const result=await page.evaluate(()=>({
     label:document.getElementById('layerCount')?.textContent,
     layerItems:document.querySelectorAll('#layerList > *').length,
