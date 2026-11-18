@@ -31,6 +31,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - name: Validate emulator diagnostic JavaScript
+        run: |
+          set -euo pipefail
+          node --check scripts/android-cdp-functional.mjs
+          node --check app.js
       - name: Prepare offline application
         run: |
           set -euo pipefail
