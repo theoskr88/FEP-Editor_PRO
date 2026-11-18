@@ -1,15 +1,16 @@
-name: FEP Editor PRO — Android emulator diagnostic
+name: FEP Premium 3D — Emulator diagnostic
 on:
   workflow_dispatch:
   push:
     branches:
-      - desarrollo/android-cierre-c
+      - desarrollo/estudio3d-premium-p1
     paths:
       - '.github/workflows/android-emulator-diagnostic.yml'
       - 'scripts/android-emulator-smoke.sh'
       - 'scripts/android-emulator-functional.mjs'
       - 'scripts/android-cdp-functional.mjs'
       - 'app.js'
+      - 'tests/premium-3d.test.mjs'
       - 'src/**'
       - 'scripts/native-bridge-entry.js'
       - 'scripts/android-native/**'
