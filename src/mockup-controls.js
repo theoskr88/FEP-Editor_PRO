@@ -1,4 +1,5 @@
 import {createSceneLibrary} from './mockup-scenes.js?v=fep-6a4c2734f7b31778';
+import {imageInfo} from './assets.js?v=fep-6a4c2734f7b31778';
 import {normalizeMockup,MOCKUP_PRESETS,CAMERA_PRESETS,LIGHT_STYLES,PREMIUM_FINISHES} from './mockup-settings.js?v=fep-6a4c2734f7b31778';
 export function createMockupControls({state,context,patch,notify}){
  const get=id=>document.getElementById(id);let library,environment,pending,owner;const normalMaps=new Map(),floorMaps=new Map();let photoTexture=null,photoKey=null,photoRequest=0,photoPending=Promise.resolve();
@@ -58,6 +59,8 @@ export function createMockupControls({state,context,patch,notify}){
   const file=photoInput.files?.[0];photoInput.value='';if(!file)return;
   try{
    if(file.size>12*1024*1024)throw Error('Imagen demasiado grande (máximo 12 MB)');
+   const info=imageInfo(new Uint8Array(await file.arrayBuffer()));
+   if(info.pixels>12_000_000)throw Error('Foto demasiado grande para fondo 3D: máximo 12 megapíxeles');
    const url=URL.createObjectURL(file);
    let img;
    try{img=new Image();img.src=url;await img.decode()}
