@@ -84,8 +84,20 @@ try{
  })).then(x=>x?.count!==previous&&x.rows>0?x:null));
  record('import_png_as_layer','PASS',imported);
  // Persist and verify the imported layer, close the Android process, and reopen.
- const saved=await evalFn(async()=>typeof window.__fepSaveAndVerify==='function'&&await window.__fepSaveAndVerify());
- if(saved!==true)throw Error('La importación no quedó guardada y verificada en la base local');
+ // Imported layers can render before IndexedDB/autosave has finished scheduling.
+ // Wait until storage boot is complete; do not equate "UI rendered" with "ready to persist".
+ const saveReady=await until(()=>evalFn(()=>({
+  available:typeof window.__fepSaveAndVerify==='function',
+  status:document.getElementById('autosaveStatus')?.textContent,
+  buttonDisabled:document.getElementById('saveProjectNow')?.disabled
+ })).then(x=>x?.available&&!x.buttonDisabled&&!/Recuperando|Guardando/.test(x.status||'')?x:null)),30000);
+ record('project_save_ready','PASS',saveReady);
+ const saved=await evalFn(async()=>({
+  saved:await window.__fepSaveAndVerify(),
+  status:document.getElementById('autosaveStatus')?.textContent,
+  title:document.getElementById('autosaveStatus')?.title
+ }));
+ if(saved?.saved!==true)throw Error('No se verificó guardado de proyecto: '+JSON.stringify(saved));
  record('project_saved_and_verified','PASS',{count:imported.count});
  socket.close();
  await sleep(500);
