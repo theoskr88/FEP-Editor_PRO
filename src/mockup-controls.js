@@ -45,14 +45,14 @@ export function createMockupControls({state,context,patch,notify}){
  const photoTitle=document.createElement('h3');photoTitle.textContent='Fondo fotográfico local';
  const photoFit=document.createElement('select');photoFit.id='scenePhotoFit';photoFit.setAttribute('aria-label','Ajuste de la fotografía de fondo');
  photoFit.append(new Option('Rellenar fondo · recortar','cover'),new Option('Mostrar fotografía completa','contain'));
- const photoFitLabel=document.createElement('label');photoFitLabel.textContent='Encuadre de la fotografía';photoFitLabel.append(photoFit);
+ const photoFitLabel=document.createElement('label');photoFitLabel.textContent='Encuadre al importar (vuelve a cargar la foto para cambiarlo)';photoFitLabel.append(photoFit);
  const photoInput=document.createElement('input');photoInput.type='file';photoInput.accept='image/png,image/jpeg,image/webp';photoInput.id='sceneBackgroundPhoto';
  const photoLabel=document.createElement('label');photoLabel.textContent='Elegir fotografía del teléfono';photoLabel.append(photoInput);
  const photoEnabled=document.createElement('input');photoEnabled.type='checkbox';photoEnabled.id='scenePhotoEnabled';
  const photoEnabledLabel=document.createElement('label');photoEnabledLabel.className='check-line';photoEnabledLabel.append(photoEnabled,document.createTextNode(' Mostrar fotografía como fondo'));
  const photoClear=document.createElement('button');photoClear.type='button';photoClear.textContent='Quitar fotografía';photoClear.id='scenePhotoClear';
  const photoHint=document.createElement('p');photoHint.className='hint';
- photoHint.textContent='Se ajusta a 1280 × 720 y se guarda localmente con el proyecto. Solo afecta al mockup, nunca a la impresión.';
+ photoHint.textContent='Se prepara a 1280 × 720, con recorte o imagen completa. Para cambiar el encuadre, vuelve a cargar la foto. Se guarda con el proyecto y no afecta la impresión.';
  photoWrap.append(photoTitle,photoFitLabel,photoLabel,photoEnabledLabel,photoClear,photoHint);
  const backdropAnchor=get('sceneBackground').closest('label');
  if(backdropAnchor)backdropAnchor.after(photoWrap);
