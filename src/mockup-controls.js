@@ -43,6 +43,9 @@ export function createMockupControls({state,context,patch,notify}){
  get('scenePreset').onchange=()=>run(()=>{const id=get('scenePreset').value,p=MOCKUP_PRESETS[id];patch({preset:id,lightStyle:'custom',background:p.background,floor:p.floor,key:p.key,fill:p.fill,ambient:p.ambient,exposure:1,shadows:id!=='original'})});
  const photoWrap=document.createElement('div');photoWrap.className='control-card';
  const photoTitle=document.createElement('h3');photoTitle.textContent='Fondo fotográfico local';
+ const photoFit=document.createElement('select');photoFit.id='scenePhotoFit';photoFit.setAttribute('aria-label','Ajuste de la fotografía de fondo');
+ photoFit.append(new Option('Rellenar fondo · recortar','cover'),new Option('Mostrar fotografía completa','contain'));
+ const photoFitLabel=document.createElement('label');photoFitLabel.textContent='Encuadre de la fotografía';photoFitLabel.append(photoFit);
  const photoInput=document.createElement('input');photoInput.type='file';photoInput.accept='image/png,image/jpeg,image/webp';photoInput.id='sceneBackgroundPhoto';
  const photoLabel=document.createElement('label');photoLabel.textContent='Elegir fotografía del teléfono';photoLabel.append(photoInput);
  const photoEnabled=document.createElement('input');photoEnabled.type='checkbox';photoEnabled.id='scenePhotoEnabled';
@@ -50,9 +53,10 @@ export function createMockupControls({state,context,patch,notify}){
  const photoClear=document.createElement('button');photoClear.type='button';photoClear.textContent='Quitar fotografía';photoClear.id='scenePhotoClear';
  const photoHint=document.createElement('p');photoHint.className='hint';
  photoHint.textContent='Se ajusta a 1280 × 720 y se guarda localmente con el proyecto. Solo afecta al mockup, nunca a la impresión.';
- photoWrap.append(photoTitle,photoLabel,photoEnabledLabel,photoClear,photoHint);
+ photoWrap.append(photoTitle,photoFitLabel,photoLabel,photoEnabledLabel,photoClear,photoHint);
  const backdropAnchor=get('sceneBackground').closest('label');
  if(backdropAnchor)backdropAnchor.after(photoWrap);
+ photoFit.onchange=()=>run(()=>patch({backgroundPhotoFit:photoFit.value}));
  photoEnabled.onchange=()=>run(()=>patch({backgroundPhotoEnabled:photoEnabled.checked}));
  photoClear.onclick=()=>run(()=>{photoInput.value='';patch({backgroundPhoto:null,backgroundPhotoEnabled:false})});
  photoInput.onchange=async()=>{
@@ -67,11 +71,14 @@ export function createMockupControls({state,context,patch,notify}){
    finally{URL.revokeObjectURL(url)}
    const width=1280,height=720,canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
    const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo preparar el fondo');
-   const crop=Math.max(width/img.naturalWidth,height/img.naturalHeight),w=img.naturalWidth*crop,h=img.naturalHeight*crop;
+   const fit=photoFit.value==='contain'?'contain':'cover';
+   const scale=(fit==='contain'?Math.min:Math.max)(width/img.naturalWidth,height/img.naturalHeight);
+   const w=img.naturalWidth*scale,h=img.naturalHeight*scale;
+   if(fit==='contain'){ctx.fillStyle=state().background;ctx.fillRect(0,0,width,height)}
    ctx.drawImage(img,(width-w)/2,(height-h)/2,w,h);
    const jpeg=canvas.toDataURL('image/jpeg',.77);canvas.width=canvas.height=1;img.src='';
    if(jpeg.length>2_500_000)throw Error('El fondo excede el límite de tamaño');
-   patch({backgroundPhoto:jpeg,backgroundPhotoEnabled:true});
+   patch({backgroundPhoto:jpeg,backgroundPhotoEnabled:true,backgroundPhotoFit:fit});
    notify('Fotografía preparada y guardada localmente en el proyecto');
   }catch(error){notify('No se pudo usar el fondo: '+error.message)}
  };
@@ -104,11 +111,11 @@ export function createMockupControls({state,context,patch,notify}){
    resolve();
   }));
  }
- function sync(){const s=state();photoEnabled.checked=s.backgroundPhotoEnabled;photoEnabled.disabled=!s.backgroundPhoto;photoClear.disabled=!s.backgroundPhoto;finishSelector.value=s.premiumFinish;
+ function sync(){const s=state();photoFit.value=s.backgroundPhotoFit;photoEnabled.checked=s.backgroundPhotoEnabled;photoEnabled.disabled=!s.backgroundPhoto;photoClear.disabled=!s.backgroundPhoto;finishSelector.value=s.premiumFinish;
  pieceToggle.checked=s.pieceColorsEnabled;
  for(const [key,input] of Object.entries(pieceInputs)){input.value=s.pieceColors[key];input.disabled=!s.pieceColorsEnabled}
  const product=document.getElementById('product')?.value;
- pieces.hidden=!['mug','mug_enamel','mug_heart'].includes(product);
+ pieces.hidden=!['mug','mug_enamel'].includes(product);
 const values={scenePreset:s.preset,sceneLighting:s.lightStyle,sceneShadowStrength:s.shadowStrength,sceneShadowSoftness:s.shadowSoftness,sceneBackground:s.background,sceneFloor:s.floor,sceneKey:s.key,sceneFill:s.fill,sceneAmbient:s.ambient,sceneExposure:s.exposure,sceneTexture:s.bodyTexture,sceneCamera:s.camera,scenePhotoWidth:s.photoWidth,sceneVideoFps:s.videoFps,sceneVideoSeconds:s.videoSeconds,sceneVideoHeight:s.videoHeight,sceneRoughness:s.roughness??.5};for(const[id,value]of Object.entries(values))if(document.activeElement!==get(id))get(id).value=value;get('sceneShadows').checked=s.shadows;get('sceneCustomSurface').checked=s.roughness!==null;get('sceneRoughness').disabled=s.roughness===null;
   const selector=get('viewerBackground');if(![...selector.options].some(o=>o.value===s.background)){let option=selector.querySelector('[data-custom]');if(!option){option=document.createElement('option');option.dataset.custom='true';option.textContent='Personalizado';selector.append(option)}option.value=s.background}selector.value=s.background;
  }
