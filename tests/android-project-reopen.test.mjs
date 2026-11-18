@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { indexedDB } from 'fake-indexeddb';
+import { openProjectLibrary,createProjectSession,documentDigest } from '../src/projects.js';
+import { createAutosave } from '../src/persistence.js';
+
+test('El proyecto se guarda y se recupera tras cerrar y volver a abrir la biblioteca',async()=>{
+ const validate=async doc=>{if(!Array.isArray(doc.elements))throw Error('capas inválidas')};
+ let library=await openProjectLibrary(indexedDB,{validate});
+ let document={version:2,mode:'product',product:'taza',elements:[]};
+ const id=await library.create(document,'Prueba persistencia');
+ const session=createProjectSession(library,{thumbnail:()=>''});
+ await session.activate(id);
+ let status='none';
+ const autosave=createAutosave({store:session,snapshot:()=>document,status:s=>{status=s},delay:20});
+ document={...document,elements:[{type:'text',text:'PERSISTE AL REABRIR',x:.3,y:.4}]};
+ autosave.schedule();
+ assert.equal(await autosave.flush(),true);
+ assert.equal(status,'saved');
+ const digest=await documentDigest(document);
+ const before=await library.get(id);
+ assert.equal(before.digest,digest);
+ library.close();
+ library=await openProjectLibrary(indexedDB,{validate});
+ assert.equal(await library.active(),id);
+ const after=await library.get(id);
+ assert.equal(after.digest,digest);
+ assert.equal(after.document.elements[0].text,'PERSISTE AL REABRIR');
+ library.close();
+});
