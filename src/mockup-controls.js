@@ -1,7 +1,7 @@
 import {createSceneLibrary} from './mockup-scenes.js?v=fep-6a4c2734f7b31778';
 import {normalizeMockup,MOCKUP_PRESETS,CAMERA_PRESETS,LIGHT_STYLES,PREMIUM_FINISHES} from './mockup-settings.js?v=fep-6a4c2734f7b31778';
 export function createMockupControls({state,context,patch,notify}){
- const get=id=>document.getElementById(id);let library,environment,pending,owner;const normalMaps=new Map(),floorMaps=new Map();
+ const get=id=>document.getElementById(id);let library,environment,pending,owner;const normalMaps=new Map(),floorMaps=new Map();let photoTexture=null,photoKey=null,photoRequest=0;
  for(const[id,preset]of Object.entries(MOCKUP_PRESETS)){const old=[...get('scenePreset').options].find(o=>o.value===id);if(old)old.textContent=preset.name;else get('scenePreset').append(new Option(preset.name,id))}
  if(![...get('sceneCamera').options].some(o=>o.value==='print'))get('sceneCamera').append(new Option('Zona impresa','print'));
  for(const [id,label] of [['right','Lateral derecho'],['back','Posterior']]){
@@ -78,6 +78,27 @@ export function createMockupControls({state,context,patch,notify}){
  get('viewerBackground').addEventListener('change',()=>patch({background:get('viewerBackground').value}));
  function texture(THREE,key,normal){const cache=normal?normalMaps:floorMaps;if(cache.has(key))return cache.get(key);const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),image=x.createImageData(128,128);for(let y=0;y<128;y++)for(let px=0;px<128;px++){const i=(y*128+px)*4,n=Math.sin(px*12.9898+y*78.233)*43758.5453,noise=(n-Math.floor(n)-.5);if(normal){const weave=key==='fabric'?Math.sin(px*Math.PI/4)*15:noise*12;image.data[i]=128+weave;image.data[i+1]=128+(key==='fabric'?Math.sin(y*Math.PI/4)*15:noise*9);image.data[i+2]=255}else{const wood=key==='table'?Math.sin(y*.4+px*.03)*12+noise*4:(px%32<2||y%32<2?-25:noise*5);image.data[i]=170+wood;image.data[i+1]=145+wood;image.data[i+2]=115+wood}image.data[i+3]=255}x.putImageData(image,0,0);const t=new THREE.CanvasTexture(c);if(!normal)t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(normal?4:3,normal?4:3);cache.set(key,t);return t}
  async function ensureEnvironment(){const c=context();if(environment||pending||!c.renderer)return pending;pending=(async()=>{try{get('sceneStatus').dataset.state='loading';get('sceneStatus').textContent='Preparando iluminación de estudio…';const {RoomEnvironment}=await import('../vendor/RoomEnvironment.js?v=fep-6a4c2734f7b31778');const generator=new c.THREE.PMREMGenerator(c.renderer),source=new RoomEnvironment();environment=generator.fromScene(source,.04).texture;source.dispose();generator.dispose();if(state().preset!=='original')c.scene.environment=environment;c.renderer.render(c.scene,c.camera);get('sceneStatus').dataset.state='ready';get('sceneStatus').textContent=state().preset==='original'?'Presentación original':'Escenario listo · materiales y sombras en vivo'}catch(error){get('sceneStatus').dataset.state='fallback';get('sceneStatus').textContent='Iluminación directa disponible; entorno de estudio no disponible'}finally{pending=null}})();return pending}
+ function applyPhotoBackground(c,s,THREE){
+  if(!s.backgroundPhotoEnabled||!s.backgroundPhoto)return;
+  if(photoKey===s.backgroundPhoto&&photoTexture){
+   c.scene.background=photoTexture;return;
+  }
+  if(photoKey===s.backgroundPhoto)return; // photo is loading
+  const id=++photoRequest,url=s.backgroundPhoto;
+  photoKey=url;
+  const previous=photoTexture;photoTexture=null;
+  if(previous)previous.dispose();
+  const textureLoader=new THREE.TextureLoader();
+  textureLoader.load(url,loaded=>{
+   if(id!==photoRequest||!state().backgroundPhotoEnabled||state().backgroundPhoto!==url){loaded.dispose();return}
+   loaded.colorSpace=THREE.SRGBColorSpace;
+   photoTexture=loaded;
+   if(c.scene===owner)c.scene.background=loaded;
+   c.renderer.render(c.scene,c.camera);
+  },undefined,()=>{
+   if(id===photoRequest){photoKey=null;notify('No se pudo cargar el fondo fotográfico; se conserva el color original')}
+  });
+ }
  function sync(){const s=state();photoEnabled.checked=s.backgroundPhotoEnabled;photoEnabled.disabled=!s.backgroundPhoto;photoClear.disabled=!s.backgroundPhoto;finishSelector.value=s.premiumFinish;
  pieceToggle.checked=s.pieceColorsEnabled;
  for(const [key,input] of Object.entries(pieceInputs)){input.value=s.pieceColors[key];input.disabled=!s.pieceColorsEnabled}
@@ -89,7 +110,7 @@ const values={scenePreset:s.preset,sceneLighting:s.lightStyle,sceneShadowStrengt
  function refresh({camera=false}={}){
   sync();const c=context(),s=state(),THREE=c.THREE;if(!THREE||!c.scene||!c.renderer)return;
   if(owner!==c.scene){library?.dispose();owner=c.scene;library=createSceneLibrary(THREE);c.scene.add(library.root)}library.apply(s,c.modelRoot);
-  const lights=c.scene.children.filter(o=>o.isLight),directional=lights.filter(o=>o.isDirectionalLight),ambient=lights.find(o=>o.isHemisphereLight);if(ambient)ambient.intensity=s.ambient;directional.forEach((light,i)=>{light.intensity=i?s.fill:s.key;light.castShadow=s.shadows&&i===0;light.shadow.mapSize.set(navigator.maxTouchPoints?1024:2048,navigator.maxTouchPoints?1024:2048);light.shadow.bias=-.00015;light.shadow.normalBias=.008;light.shadow.radius=s.shadowSoftness;light.shadow.camera.near=.1;light.shadow.camera.far=25;light.shadow.camera.updateProjectionMatrix()});c.renderer.shadowMap.enabled=s.shadows;c.renderer.shadowMap.type=THREE.PCFShadowMap;c.renderer.toneMapping=s.preset==='original'?(s.exposure===1?THREE.NoToneMapping:THREE.LinearToneMapping):THREE.ACESFilmicToneMapping;c.renderer.toneMappingExposure=s.exposure;c.scene.background=new THREE.Color(s.background);c.scene.environment=s.preset==='original'?null:environment||null;c.scene.environmentIntensity=.55;if(s.preset!=='original'){if(environment){get('sceneStatus').dataset.state='ready';get('sceneStatus').textContent='Escenario listo · materiales y sombras en vivo'}else ensureEnvironment()}else{get('sceneStatus').dataset.state='ready';get('sceneStatus').textContent='Presentación original'}
+  const lights=c.scene.children.filter(o=>o.isLight),directional=lights.filter(o=>o.isDirectionalLight),ambient=lights.find(o=>o.isHemisphereLight);if(ambient)ambient.intensity=s.ambient;directional.forEach((light,i)=>{light.intensity=i?s.fill:s.key;light.castShadow=s.shadows&&i===0;light.shadow.mapSize.set(navigator.maxTouchPoints?1024:2048,navigator.maxTouchPoints?1024:2048);light.shadow.bias=-.00015;light.shadow.normalBias=.008;light.shadow.radius=s.shadowSoftness;light.shadow.camera.near=.1;light.shadow.camera.far=25;light.shadow.camera.updateProjectionMatrix()});c.renderer.shadowMap.enabled=s.shadows;c.renderer.shadowMap.type=THREE.PCFShadowMap;c.renderer.toneMapping=s.preset==='original'?(s.exposure===1?THREE.NoToneMapping:THREE.LinearToneMapping):THREE.ACESFilmicToneMapping;c.renderer.toneMappingExposure=s.exposure;c.scene.background=new THREE.Color(s.background);applyPhotoBackground(c,s,THREE);c.scene.environment=s.preset==='original'?null:environment||null;c.scene.environmentIntensity=.55;if(s.preset!=='original'){if(environment){get('sceneStatus').dataset.state='ready';get('sceneStatus').textContent='Escenario listo · materiales y sombras en vivo'}else ensureEnvironment()}else{get('sceneStatus').dataset.state='ready';get('sceneStatus').textContent='Presentación original'}
   c.modelRoot?.traverse(mesh=>{if(!mesh.isMesh)return;mesh.castShadow=s.shadows;mesh.receiveShadow=s.shadows;for(const m of(Array.isArray(mesh.material)?mesh.material:[mesh.material])){if(!m.isMeshStandardMaterial||m.userData.glitterSurface||m.map===c.texture||m.map===c.physicalArtTexture)continue;if(!m.userData.fepBase)m.userData.fepBase={roughness:m.roughness,metalness:m.metalness,normalMap:m.normalMap,normalScale:m.normalScale.clone()};const base=m.userData.fepBase,next=s.bodyTexture==='none'?base.normalMap:texture(THREE,s.bodyTexture,true);if(!!next!==!!m.normalMap)m.needsUpdate=true;m.normalMap=next;const finish=PREMIUM_FINISHES[s.premiumFinish]||PREMIUM_FINISHES.original;m.roughness=s.roughness??finish.roughness??base.roughness;m.metalness=finish.metalness??base.metalness;m.normalScale.copy(base.normalScale);if(s.bodyTexture!=='none')m.normalScale.setScalar(.12)}});
   if(camera){if(s.camera==='print'&&c.focusPrint)c.focusPrint();else c.camera.position.set(...CAMERA_PRESETS[s.camera]);c.controls.target.set(0,0,0);c.controls.update();c.fitView?.()}c.renderer.render(c.scene,c.camera);
  }
