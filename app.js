@@ -118,7 +118,6 @@ $('imageHeightCm').addEventListener('change',()=>{
  panel.append(group);
  $('imageOpacity').oninput=event=>{$('imageOpacityValue').textContent=event.target.value+'%'};
  $('imageOpacity').onchange=event=>{const e=elements[selected];if(e?.type!=='image'||e.locked)return;addHistory();e.opacity=Number(event.target.value)/100;draw();updateImageControls()};
- };
 }
 
 function paintDesign(target,width,height,{transparent=!!zoneProduct||(editorMode==='free'&&freeDesign.background==='transparent'),onlyLayer=null,source=elements,pageWidth=documentWidth,pageHeight=documentHeight,referenceWidth=canvas.width}={}){
