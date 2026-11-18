@@ -99,7 +99,7 @@ try{
   count:document.getElementById('layerCount')?.textContent,
   status:document.getElementById('autosaveStatus')?.textContent,
   native:window.FEP_NATIVE?.isNative===true
- })).then(x=>x?.native&&x?.count===imported.count&&/Guardado/.test(x?.status||'')?x:null)),35000);
+ })).then(x=>x?.native&&x?.count===imported.count&&/Guardado/.test(x?.status||'')?x:null),35000);
  record('project_survives_android_force_stop_and_reopen','PASS',restored);
  const png=await evalFn(async()=>{
   const c=document.getElementById('designCanvas');
