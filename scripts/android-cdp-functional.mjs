@@ -90,7 +90,7 @@ try{
   available:typeof window.__fepSaveAndVerify==='function',
   status:document.getElementById('autosaveStatus')?.textContent,
   buttonDisabled:document.getElementById('saveProjectNow')?.disabled
- })).then(x=>x?.available&&!x.buttonDisabled&&!/Recuperando|Guardando/.test(x.status||'')?x:null)),30000);
+ })).then(x=>x?.available&&!x.buttonDisabled&&!/Recuperando|Guardando/.test(x.status||'')?x:null),30000);
  record('project_save_ready','PASS',saveReady);
  const saved=await evalFn(async()=>({
   saved:await window.__fepSaveAndVerify(),
