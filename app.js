@@ -365,7 +365,14 @@ function applyPreparedProject({data,warnings}){
  $('rotationDeg').value=String(printRotationDeg);$('rotationValue').textContent=`${Math.round(printRotationDeg)}°`;$('rotationNumber').value=String(Math.round(printRotationDeg));
  updateDimensions();refreshSelectedLabel();if(editorMode==='product'){buildModel();focusDesignFront()}else $('profileStatus').dataset.state='ready';updateRotationToolbar();queueAutosave();sceneController?.refresh({camera:true});if(zoneProduct)focusZone();notify(warnings.length?'Proyecto cargado. '+warnings.join(' '):'Proyecto cargado');
 }
-$('save').onclick=()=>saveBlob(new Blob([JSON.stringify(projectSnapshot())],{type:'application/json'}),'proyecto-estudio3d.json');
+$('save').onclick=async()=>{
+ try{
+  const json=JSON.stringify(projectSnapshot());
+  if(json.length>35*1024*1024)throw Error('El respaldo supera 35 MB. Reduce imágenes o exporta desde Mis proyectos.');
+  const saved=await saveBlob(new Blob([json],{type:'application/json'}),'proyecto-estudio3d.json');
+  if(saved)notify('Respaldo JSON guardado y verificado');
+ }catch(error){notify('No se pudo guardar JSON: '+error.message)}
+};
 $('load').onclick=()=>$('projectFile').click();
 $('projectFile').onchange=async ev=>{
  const f=ev.target.files?.[0];ev.target.value='';if(!f)return;if(projectManager){notify('Abriendo proyecto…');try{await projectManager.importProject(f)}catch(error){notify('No se pudo abrir el proyecto: '+error.message)}return;}const generation=++importGeneration,before=JSON.stringify(projectSnapshot());
@@ -405,13 +412,26 @@ function mirrorFinishedImage(source){
 }
 function zoneSuffix(){return zoneProduct?'-'+zoneProduct+'-'+productZones[zoneProduct].active:''}
 function getMirrorMode(){return $('mirrorModeIndividual').checked ? 'espejo' : 'normal'}
+function printDpi(){
+ const width=Number($('widthCm').value)||20,height=Number($('heightCm').value)||8.5;
+ const pixels=width*height/(2.54*2.54)*300*300;
+ const limit=window.FEP_NATIVE?.isNative?4000000:40000000;
+ const dpi=Math.min(300,Math.floor(300*Math.sqrt(limit/pixels)));
+ if(dpi<90)throw Error('Diseño demasiado grande para exportar en este dispositivo; divide el trabajo en zonas');
+ return dpi;
+}
 function renderToExportCanvas(mode='normal'){
-  const source=document.createElement('canvas');
-  const w=Math.round(+$('widthCm').value/2.54*300),h=Math.round(+$('heightCm').value/2.54*300);
-  if(w*h>40e6)throw Error('Área demasiado grande para este dispositivo');
+  const source=document.createElement('canvas'),dpi=printDpi();
+  const w=Math.round(+$('widthCm').value/2.54*dpi),h=Math.round(+$('heightCm').value/2.54*dpi);
+  if(w*h>(window.FEP_NATIVE?.isNative?4000000:40000000))throw Error('Área demasiado grande para este dispositivo');
   source.width=w;source.height=h;
-  paintDesign(source.getContext('2d',{willReadFrequently:true}),w,h);
-  return mode==='espejo' ? mirrorFinishedImage(source) : source;
+  const context=source.getContext('2d',{willReadFrequently:false});
+  if(!context)throw Error('No se pudo preparar el lienzo de exportación');
+  paintDesign(context,w,h);
+  const completed=mode==='espejo'?mirrorFinishedImage(source):source;
+  if(completed!==source)source.width=source.height=1;
+  if(dpi<300)notify('Para evitar cierres, Android exportará a '+dpi+' ppp. El tamaño físico se conserva.');
+  return completed;
 }
 function refreshIndividualPreview(){
   const preview=$('mirrorPreview');if(!preview)return;
@@ -484,7 +504,8 @@ async async function pdfAtPhysicalSize(canvas,wCm,hCm){
 }
 $('exportPrint').onclick=async()=>{
   try{const {w,h}=cmPrint(),zoneTag=zoneSuffix();const canvas=renderToExportCanvas(getMirrorMode());const blob=await canvasBlob(canvas,'image/png');
-    if(await saveBlob(pngWithDpi(await blob.arrayBuffer()),`impresion_${w}x${h}cm_${getMirrorMode()}${zoneTag}_300ppp.png`)) notify(`PNG guardado: ${w} × ${h} cm a 300 ppp (${canvas.width} × ${canvas.height} píxeles).`);
+    const dpi=printDpi();
+    if(await saveBlob(pngWithDpi(await blob.arrayBuffer(),dpi),`impresion_${w}x${h}cm_${getMirrorMode()}${zoneTag}_${dpi}ppp.png`)) notify(`PNG guardado: ${w} × ${h} cm a ${dpi} ppp (${canvas.width} × ${canvas.height} píxeles).`);
   }catch(e){notify('Error PNG: '+e.message)}
 };
 let baseMat,modelRoot,modelUVs=[];
@@ -779,7 +800,8 @@ $('viewerBackground').addEventListener('change',e=>{if(scene)scene.background=ne
 $('showGuides').addEventListener('change',()=>{preferredGuides=$('showGuides').checked;buildModel()});
 $('exportJpg').addEventListener('click',async()=>{
   try{const {w,h}=cmPrint(),c=renderToExportCanvas(getMirrorMode()),zoneTag=zoneSuffix(),output=zoneProduct?whiteCanvas(c):c,raw=await canvasBlob(output,'image/jpeg',.97);if(output!==c)output.width=output.height=1;
-    if(await saveBlob(jpegWithDpi(await raw.arrayBuffer()),`impresion_${w}x${h}cm_${getMirrorMode()}${zoneTag}_300ppp.jpg`)) notify(`JPEG guardado: ${w} × ${h} cm a 300 ppp (${c.width} × ${c.height} píxeles).`);
+    const dpi=printDpi();
+    if(await saveBlob(jpegWithDpi(await raw.arrayBuffer(),dpi),`impresion_${w}x${h}cm_${getMirrorMode()}${zoneTag}_${dpi}ppp.jpg`)) notify(`JPEG guardado: ${w} × ${h} cm a ${dpi} ppp (${c.width} × ${c.height} píxeles).`);
   }catch(e){notify('Error JPEG: '+e.message)}
 });
 $('exportPDF').addEventListener('click',async()=>{
