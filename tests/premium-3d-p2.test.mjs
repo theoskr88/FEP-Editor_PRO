@@ -20,14 +20,17 @@ test('P2 exige colores hexadecimales y rechaza datos corruptos',()=>{
  assert.throws(()=>normalizeMockup({pieceColors:{handle:'red'}}),/Color de pieza/);
  assert.throws(()=>normalizeMockup({pieceColorsEnabled:'true'}),/Personalización/);
 });
-test('P2 registra dos modelos originales como tazas con el mismo ancho imprimible base',()=>{
- for(const id of ['mug_enamel','mug_heart']){
+test('P3 conserva taza clásica y esmaltada sin reintroducir asa corazón',()=>{
+ for(const id of ['mug','mug_enamel']){
   assert.ok(profileById(id));
   assert.ok(isMugProduct(id));
   assert.ok(isWrappedProduct(id));
   assert.deepEqual(profileById(id).printCm,[20,8.5]);
-  assert.equal(profileById(id).calibration,'visual; confirmar dimensiones del producto físico');
  }
+ assert.equal(profileById('mug_enamel').calibration,'visual; confirmar dimensiones del producto físico');
+ assert.equal(profileById('mug_heart'),undefined);
+ assert.equal(isMugProduct('mug_heart'),false);
+ assert.equal(isWrappedProduct('mug_heart'),false);
  assert.equal(isWrappedProduct('tumbler'),true);
  assert.equal(isMugProduct('tumbler'),false);
 });
