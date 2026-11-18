@@ -6,6 +6,7 @@ Rama de trabajo: `desarrollo/estudio3d-premium-p2`
 - Taza esmaltada con borde coloreado: geometría procedural ORIGINAL. Borde azul de fábrica en previsualización; control configurable al activar colores por pieza.
 - Taza con asa corazón: nueva geometría procedural ORIGINAL del asa. Se mantienen superficie y rotación imprimible heredadas de la taza 11 oz.
 - Personalización visual por partes: interruptor específico; color hexadecimal del asa, borde e interior. Viene DESACTIVADA para no alterar proyectos P1 existentes.
+- Fondo fotográfico propio desde galería, limitado a JPG 1280 × 720; se guarda offline en el proyecto. No aparece en los archivos de impresión.
 - Guardado offline de parámetros en los ajustes del mockup y recuperación al abrir JSON/proyecto.
 - No se modifican los píxeles del arte de impresión ni el PNG/PDF imprimible.
 - Nuevos tests de regresión para valores por defecto, persistencia de colores, rechazo de datos inválidos y perfiles.
@@ -21,6 +22,8 @@ Los dos perfiles son **prototipos visuales**: dimensiones de impresión 20 × 8,
 - [ ] Activar colores independientes y elegir tres colores diferentes.
 - [ ] Desactivar colores independientes: recupera la apariencia original.
 - [ ] Cambiar material Premium P1: porcelana, satinado, mate y metal.
+- [ ] Cargar una fotografía como fondo desde el teléfono y comprobar que aparece detrás del producto.
+- [ ] Guardar el proyecto y reabrirlo: la fotografía se mantiene; quitarla permite volver al fondo de color.
 - [ ] Guardar proyecto, cerrar completamente y abrir: modelo y tres colores persisten.
 - [ ] Exportar mockup PNG: muestra los cambios visuales.
 - [ ] Exportar PNG/PDF de impresión: no incorpora borde, asa ni fondo.
@@ -30,7 +33,7 @@ Los dos perfiles son **prototipos visuales**: dimensiones de impresión 20 × 8,
 
 ## Pendiente en P2
 - Calibración física de ambos productos.
-- Nuevos modelos GLB originales y biblioteca de fondos fotográficos originales.
+- Nuevos modelos GLB originales y biblioteca adicional de fondos fotográficos preinstalados (la carga de fotos propias ya está integrada).
 - Inspección visual completa de nuevo asa, rim e interior en Android.
 - Regresión física de la versión candidata antes de integrar a P1.
 
