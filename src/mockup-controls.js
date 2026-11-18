@@ -19,6 +19,24 @@ export function createMockupControls({state,context,patch,notify}){
  hint.textContent='Solo cambia la apariencia del modelo 3D; no modifica los colores del diseño ni los archivos de impresión.';
  finishLabel.after(hint);
  finishSelector.onchange=()=>run(()=>patch({premiumFinish:finishSelector.value}));
+ const pieces=document.createElement('div');pieces.className='control-card';
+ const pieceTitle=document.createElement('h3');pieceTitle.textContent='Personalización por pieza · tazas';
+ const pieceToggleLabel=document.createElement('label');pieceToggleLabel.className='check-line';
+ const pieceToggle=document.createElement('input');pieceToggle.type='checkbox';pieceToggle.id='pieceColorsEnabled';
+ pieceToggleLabel.append(pieceToggle,document.createTextNode(' Activar colores independientes'));
+ const pieceInputs={};pieces.append(pieceTitle,pieceToggleLabel);
+ for(const [key,label] of [['handle','Asa'],['rim','Borde'],['interior','Interior']]){
+  const line=document.createElement('label');line.textContent=label;
+  const input=document.createElement('input');input.type='color';input.id='pieceColor_'+key;
+  pieceInputs[key]=input;line.append(input);pieces.append(line);
+  input.oninput=()=>run(()=>patch({pieceColors:{...state().pieceColors,[key]:input.value}}));
+ }
+ const pieceHint=document.createElement('p');pieceHint.className='hint';
+ pieceHint.textContent='Se aplica al modelo de taza, no a la imagen ni al archivo para impresión.';
+ pieces.append(pieceHint);
+ if(materialBody)materialBody.append(pieces);
+ pieceToggle.onchange=()=>run(()=>patch({pieceColorsEnabled:pieceToggle.checked}));
+
  get('sceneLighting').onchange=()=>run(()=>{const style=get('sceneLighting').value;if(style==='custom')patch({lightStyle:style});else patch({...LIGHT_STYLES[style],lightStyle:style})});
  const run=fn=>{try{fn()}catch(error){notify(error.message)}};
  get('scenePreset').onchange=()=>run(()=>{const id=get('scenePreset').value,p=MOCKUP_PRESETS[id];patch({preset:id,lightStyle:'custom',background:p.background,floor:p.floor,key:p.key,fill:p.fill,ambient:p.ambient,exposure:1,shadows:id!=='original'})});
@@ -27,7 +45,12 @@ export function createMockupControls({state,context,patch,notify}){
  get('viewerBackground').addEventListener('change',()=>patch({background:get('viewerBackground').value}));
  function texture(THREE,key,normal){const cache=normal?normalMaps:floorMaps;if(cache.has(key))return cache.get(key);const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),image=x.createImageData(128,128);for(let y=0;y<128;y++)for(let px=0;px<128;px++){const i=(y*128+px)*4,n=Math.sin(px*12.9898+y*78.233)*43758.5453,noise=(n-Math.floor(n)-.5);if(normal){const weave=key==='fabric'?Math.sin(px*Math.PI/4)*15:noise*12;image.data[i]=128+weave;image.data[i+1]=128+(key==='fabric'?Math.sin(y*Math.PI/4)*15:noise*9);image.data[i+2]=255}else{const wood=key==='table'?Math.sin(y*.4+px*.03)*12+noise*4:(px%32<2||y%32<2?-25:noise*5);image.data[i]=170+wood;image.data[i+1]=145+wood;image.data[i+2]=115+wood}image.data[i+3]=255}x.putImageData(image,0,0);const t=new THREE.CanvasTexture(c);if(!normal)t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(normal?4:3,normal?4:3);cache.set(key,t);return t}
  async function ensureEnvironment(){const c=context();if(environment||pending||!c.renderer)return pending;pending=(async()=>{try{get('sceneStatus').dataset.state='loading';get('sceneStatus').textContent='Preparando iluminación de estudio…';const {RoomEnvironment}=await import('../vendor/RoomEnvironment.js?v=fep-6a4c2734f7b31778');const generator=new c.THREE.PMREMGenerator(c.renderer),source=new RoomEnvironment();environment=generator.fromScene(source,.04).texture;source.dispose();generator.dispose();if(state().preset!=='original')c.scene.environment=environment;c.renderer.render(c.scene,c.camera);get('sceneStatus').dataset.state='ready';get('sceneStatus').textContent=state().preset==='original'?'Presentación original':'Escenario listo · materiales y sombras en vivo'}catch(error){get('sceneStatus').dataset.state='fallback';get('sceneStatus').textContent='Iluminación directa disponible; entorno de estudio no disponible'}finally{pending=null}})();return pending}
- function sync(){const s=state();finishSelector.value=s.premiumFinish;const values={scenePreset:s.preset,sceneLighting:s.lightStyle,sceneShadowStrength:s.shadowStrength,sceneShadowSoftness:s.shadowSoftness,sceneBackground:s.background,sceneFloor:s.floor,sceneKey:s.key,sceneFill:s.fill,sceneAmbient:s.ambient,sceneExposure:s.exposure,sceneTexture:s.bodyTexture,sceneCamera:s.camera,scenePhotoWidth:s.photoWidth,sceneVideoFps:s.videoFps,sceneVideoSeconds:s.videoSeconds,sceneVideoHeight:s.videoHeight,sceneRoughness:s.roughness??.5};for(const[id,value]of Object.entries(values))if(document.activeElement!==get(id))get(id).value=value;get('sceneShadows').checked=s.shadows;get('sceneCustomSurface').checked=s.roughness!==null;get('sceneRoughness').disabled=s.roughness===null;
+ function sync(){const s=state();finishSelector.value=s.premiumFinish;
+ pieceToggle.checked=s.pieceColorsEnabled;
+ for(const [key,input] of Object.entries(pieceInputs)){input.value=s.pieceColors[key];input.disabled=!s.pieceColorsEnabled}
+ const product=document.getElementById('product')?.value;
+ pieces.hidden=!['mug','mug_enamel','mug_heart'].includes(product);
+const values={scenePreset:s.preset,sceneLighting:s.lightStyle,sceneShadowStrength:s.shadowStrength,sceneShadowSoftness:s.shadowSoftness,sceneBackground:s.background,sceneFloor:s.floor,sceneKey:s.key,sceneFill:s.fill,sceneAmbient:s.ambient,sceneExposure:s.exposure,sceneTexture:s.bodyTexture,sceneCamera:s.camera,scenePhotoWidth:s.photoWidth,sceneVideoFps:s.videoFps,sceneVideoSeconds:s.videoSeconds,sceneVideoHeight:s.videoHeight,sceneRoughness:s.roughness??.5};for(const[id,value]of Object.entries(values))if(document.activeElement!==get(id))get(id).value=value;get('sceneShadows').checked=s.shadows;get('sceneCustomSurface').checked=s.roughness!==null;get('sceneRoughness').disabled=s.roughness===null;
   const selector=get('viewerBackground');if(![...selector.options].some(o=>o.value===s.background)){let option=selector.querySelector('[data-custom]');if(!option){option=document.createElement('option');option.dataset.custom='true';option.textContent='Personalizado';selector.append(option)}option.value=s.background}selector.value=s.background;
  }
  function refresh({camera=false}={}){
