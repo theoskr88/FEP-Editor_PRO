@@ -1,9 +1,9 @@
-name: FEP Premium 3D — Emulator diagnostic
+name: FEP Premium P2 — Emulator diagnostic
 on:
   workflow_dispatch:
   push:
     branches:
-      - desarrollo/estudio3d-premium-p1
+      - desarrollo/estudio3d-premium-p2
     paths:
       - '.github/workflows/android-emulator-diagnostic.yml'
       - 'scripts/android-emulator-smoke.sh'
