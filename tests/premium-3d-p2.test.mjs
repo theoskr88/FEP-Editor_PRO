@@ -31,3 +31,13 @@ test('P2 registra dos modelos originales como tazas con el mismo ancho imprimibl
  assert.equal(isWrappedProduct('tumbler'),true);
  assert.equal(isMugProduct('tumbler'),false);
 });
+
+test('Fondo fotográfico es offline, compacto y persistente',()=>{
+ const mockJpeg='data:image/jpeg;base64,'+Buffer.from([255,216,255,217]).toString('base64');
+ const settings=normalizeMockup({backgroundPhoto:mockJpeg,backgroundPhotoEnabled:true,pieceColorsEnabled:true});
+ const restored=normalizeMockup(JSON.parse(JSON.stringify(settings)));
+ assert.equal(restored.backgroundPhoto,mockJpeg);
+ assert.equal(restored.backgroundPhotoEnabled,true);
+ assert.throws(()=>normalizeMockup({backgroundPhoto:'https://example.com/photo.jpg',backgroundPhotoEnabled:true}),/Fondo fotográfico/);
+ assert.equal(normalizeMockup().backgroundPhotoEnabled,false);
+});
