@@ -40,12 +40,45 @@ export function createMockupControls({state,context,patch,notify}){
  get('sceneLighting').onchange=()=>run(()=>{const style=get('sceneLighting').value;if(style==='custom')patch({lightStyle:style});else patch({...LIGHT_STYLES[style],lightStyle:style})});
  const run=fn=>{try{fn()}catch(error){notify(error.message)}};
  get('scenePreset').onchange=()=>run(()=>{const id=get('scenePreset').value,p=MOCKUP_PRESETS[id];patch({preset:id,lightStyle:'custom',background:p.background,floor:p.floor,key:p.key,fill:p.fill,ambient:p.ambient,exposure:1,shadows:id!=='original'})});
+ const photoWrap=document.createElement('div');photoWrap.className='control-card';
+ const photoTitle=document.createElement('h3');photoTitle.textContent='Fondo fotográfico local';
+ const photoInput=document.createElement('input');photoInput.type='file';photoInput.accept='image/png,image/jpeg,image/webp';photoInput.id='sceneBackgroundPhoto';
+ const photoLabel=document.createElement('label');photoLabel.textContent='Elegir fotografía del teléfono';photoLabel.append(photoInput);
+ const photoEnabled=document.createElement('input');photoEnabled.type='checkbox';photoEnabled.id='scenePhotoEnabled';
+ const photoEnabledLabel=document.createElement('label');photoEnabledLabel.className='check-line';photoEnabledLabel.append(photoEnabled,document.createTextNode(' Mostrar fotografía como fondo'));
+ const photoClear=document.createElement('button');photoClear.type='button';photoClear.textContent='Quitar fotografía';photoClear.id='scenePhotoClear';
+ const photoHint=document.createElement('p');photoHint.className='hint';
+ photoHint.textContent='Se ajusta a 1280 × 720 y se guarda localmente con el proyecto. Solo afecta al mockup, nunca a la impresión.';
+ photoWrap.append(photoTitle,photoLabel,photoEnabledLabel,photoClear,photoHint);
+ const backdropAnchor=get('sceneBackground').closest('label');
+ if(backdropAnchor)backdropAnchor.after(photoWrap);
+ photoEnabled.onchange=()=>run(()=>patch({backgroundPhotoEnabled:photoEnabled.checked}));
+ photoClear.onclick=()=>run(()=>{photoInput.value='';patch({backgroundPhoto:null,backgroundPhotoEnabled:false})});
+ photoInput.onchange=async()=>{
+  const file=photoInput.files?.[0];photoInput.value='';if(!file)return;
+  try{
+   if(file.size>12*1024*1024)throw Error('Imagen demasiado grande (máximo 12 MB)');
+   const url=URL.createObjectURL(file);
+   let img;
+   try{img=new Image();img.src=url;await img.decode()}
+   finally{URL.revokeObjectURL(url)}
+   const width=1280,height=720,canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+   const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo preparar el fondo');
+   const crop=Math.max(width/img.naturalWidth,height/img.naturalHeight),w=img.naturalWidth*crop,h=img.naturalHeight*crop;
+   ctx.drawImage(img,(width-w)/2,(height-h)/2,w,h);
+   const jpeg=canvas.toDataURL('image/jpeg',.77);canvas.width=canvas.height=1;img.src='';
+   if(jpeg.length>2_500_000)throw Error('El fondo excede el límite de tamaño');
+   patch({backgroundPhoto:jpeg,backgroundPhotoEnabled:true});
+   notify('Fotografía preparada y guardada localmente en el proyecto');
+  }catch(error){notify('No se pudo usar el fondo: '+error.message)}
+ };
+
  for(const[id,key]of [['sceneBackground','background'],['sceneFloor','floor'],['sceneKey','key'],['sceneFill','fill'],['sceneAmbient','ambient'],['sceneExposure','exposure'],['sceneShadowStrength','shadowStrength'],['sceneShadowSoftness','shadowSoftness'],['sceneTexture','bodyTexture'],['sceneCamera','camera'],['scenePhotoWidth','photoWidth'],['sceneVideoFps','videoFps'],['sceneVideoSeconds','videoSeconds'],['sceneVideoHeight','videoHeight']])get(id).onchange=()=>run(()=>patch({...(['key','fill','ambient'].includes(key)?{lightStyle:'custom'}:{}),[key]:get(id).type==='range'||get(id).type==='number'||['photoWidth','videoFps','videoHeight'].includes(key)?Number(get(id).value):get(id).value},{camera:key==='camera'}));
  get('sceneShadows').onchange=()=>patch({shadows:get('sceneShadows').checked});get('sceneCustomSurface').onchange=()=>patch({roughness:get('sceneCustomSurface').checked?Number(get('sceneRoughness').value):null});get('sceneRoughness').onchange=()=>patch({roughness:Number(get('sceneRoughness').value)});
  get('viewerBackground').addEventListener('change',()=>patch({background:get('viewerBackground').value}));
  function texture(THREE,key,normal){const cache=normal?normalMaps:floorMaps;if(cache.has(key))return cache.get(key);const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),image=x.createImageData(128,128);for(let y=0;y<128;y++)for(let px=0;px<128;px++){const i=(y*128+px)*4,n=Math.sin(px*12.9898+y*78.233)*43758.5453,noise=(n-Math.floor(n)-.5);if(normal){const weave=key==='fabric'?Math.sin(px*Math.PI/4)*15:noise*12;image.data[i]=128+weave;image.data[i+1]=128+(key==='fabric'?Math.sin(y*Math.PI/4)*15:noise*9);image.data[i+2]=255}else{const wood=key==='table'?Math.sin(y*.4+px*.03)*12+noise*4:(px%32<2||y%32<2?-25:noise*5);image.data[i]=170+wood;image.data[i+1]=145+wood;image.data[i+2]=115+wood}image.data[i+3]=255}x.putImageData(image,0,0);const t=new THREE.CanvasTexture(c);if(!normal)t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(normal?4:3,normal?4:3);cache.set(key,t);return t}
  async function ensureEnvironment(){const c=context();if(environment||pending||!c.renderer)return pending;pending=(async()=>{try{get('sceneStatus').dataset.state='loading';get('sceneStatus').textContent='Preparando iluminación de estudio…';const {RoomEnvironment}=await import('../vendor/RoomEnvironment.js?v=fep-6a4c2734f7b31778');const generator=new c.THREE.PMREMGenerator(c.renderer),source=new RoomEnvironment();environment=generator.fromScene(source,.04).texture;source.dispose();generator.dispose();if(state().preset!=='original')c.scene.environment=environment;c.renderer.render(c.scene,c.camera);get('sceneStatus').dataset.state='ready';get('sceneStatus').textContent=state().preset==='original'?'Presentación original':'Escenario listo · materiales y sombras en vivo'}catch(error){get('sceneStatus').dataset.state='fallback';get('sceneStatus').textContent='Iluminación directa disponible; entorno de estudio no disponible'}finally{pending=null}})();return pending}
- function sync(){const s=state();finishSelector.value=s.premiumFinish;
+ function sync(){const s=state();photoEnabled.checked=s.backgroundPhotoEnabled;photoEnabled.disabled=!s.backgroundPhoto;photoClear.disabled=!s.backgroundPhoto;finishSelector.value=s.premiumFinish;
  pieceToggle.checked=s.pieceColorsEnabled;
  for(const [key,input] of Object.entries(pieceInputs)){input.value=s.pieceColors[key];input.disabled=!s.pieceColorsEnabled}
  const product=document.getElementById('product')?.value;
