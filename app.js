@@ -24,7 +24,7 @@ import {createGlitterControls} from './src/glitter-controls.js?v=fep-6a4c2734f7b
 import {prepareProject} from './src/imports.js?v=fep-6a4c2734f7b31778';
 import {prepareImageFile,enforceDocumentBudget as enforceLayerBudget,ASSET_LIMITS} from './src/assets.js?v=fep-6a4c2734f7b31778';
 import {normalizePhoto} from './src/photo-import-mobile.js';
-import {removeUniformBackground,drawWatermark} from './src/photo-tools.js';
+import {drawWatermark} from './src/photo-tools.js';
 import {validatePngBytes,validatePdfBytes} from './src/export-integrity.js';
 import {openDocumentStore,createAutosave} from './src/persistence.js?v=fep-6a4c2734f7b31778';
 let sceneSettings=normalizeMockup(),sceneController,photoBusy=false;
@@ -36,6 +36,7 @@ const ui=window.__fepUI||{refresh(){}};
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
 const {snapCoordinate,moveLayerPrecisely,printPreflight}=await import('./src/premium-p4.js');
 let dragStart=null,gestureHistory=false,importGeneration=0;
+const canvasPointers=new Map();let pinchGesture=null;
 let precisionSnapEnabled=false;
 let documentWidth=20,documentHeight=8.5,editorMode='product',freeDesign=normalizeFreeDesign(),freeController,vectorController,creativeController;
 let projectManager,projectLibrary,projectSession,projectSwitchBusy=false,projectRecoveryError=false,resetSaveFingerprint=()=>{};
@@ -113,31 +114,10 @@ $('imageHeightCm').addEventListener('change',()=>{
 /* Edición fotográfica local: el recorte cambia únicamente la capa elegida y es reversible. */
 {
  const panel=$('imageSizePanel'),group=document.createElement('div');group.className='control-card';
- group.innerHTML='<label>Opacidad de la fotografía <input id="imageOpacity" type="range" min="0" max="100" value="100" step="1"></label><span id="imageOpacityValue" class="hint">100%</span><label>Sensibilidad del fondo uniforme <input id="bgTolerance" type="range" min="18" max="95" step="1" value="42"></label><button id="removeUniformBg" type="button">Quitar fondo uniforme</button><p class="hint">Para imágenes con un fondo de color parecido en los bordes. No es recorte con IA; conserva la fotografía original en Deshacer.</p>';
+ group.innerHTML='<label>Opacidad de la fotografía <input id="imageOpacity" type="range" min="0" max="100" value="100" step="1"></label><span id="imageOpacityValue" class="hint">100%</span><p class="hint">Puedes ampliar o reducir imágenes con dos dedos. Los fondos del mockup se gestionan por separado.</p>';
  panel.append(group);
  $('imageOpacity').oninput=event=>{$('imageOpacityValue').textContent=event.target.value+'%'};
  $('imageOpacity').onchange=event=>{const e=elements[selected];if(e?.type!=='image'||e.locked)return;addHistory();e.opacity=Number(event.target.value)/100;draw();updateImageControls()};
- $('removeUniformBg').onclick=async()=>{
-  const e=elements[selected];if(e?.type!=='image'||e.locked){notify('Selecciona una imagen desbloqueada');return}
-  const button=$('removeUniformBg');button.disabled=true;
-  try{
-   const im=getImage(e);if(!im?.complete||!im.naturalWidth)throw Error('La imagen aún no está lista');
-   const w=im.naturalWidth,h=im.naturalHeight;
-   if(w*h>6000000)throw Error('Para esta herramienta usa una imagen de hasta 6 megapíxeles');
-   const c=document.createElement('canvas');c.width=w;c.height=h;
-   const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(im,0,0);
-   const pixels=cx.getImageData(0,0,w,h);
-   const result=removeUniformBackground(pixels.data,w,h,{tolerance:Number($('bgTolerance').value)});
-   if(result.removed<100)throw Error('No se detectó un fondo uniforme en los bordes');
-   cx.putImageData(pixels,0,0);
-   const blob=await new Promise((resolve,reject)=>c.toBlob(value=>value?resolve(value):reject(Error('No se pudo crear PNG')),'image/png'));
-   c.width=c.height=1;
-   const replacement=await prepareImageFile(new File([blob],'recorte.png',{type:'image/png'}));
-   const candidate={...e,data:replacement.data,img:replacement.img};
-   enforceLayerBudget(elements.map((item,i)=>i===selected?candidate:item));
-   addHistory();elements[selected]=candidate;draw();updateImageControls();notify('Fondo uniforme eliminado; puedes usar Deshacer');
-  }catch(error){notify('No se pudo quitar el fondo: '+error.message)}
-  finally{button.disabled=false}
  };
 }
 
@@ -191,6 +171,17 @@ function draw(){
 function bounds(e){if(e?.type==='text'&&(e.typography||e.gradient))return creativeTextBounds(ctx,e,canvas.width,canvas.height);if(e?.type==='vector')return vectorBounds(e,canvas.width,canvas.height);if(e?.type==='shape')return shapeBounds(e,canvas.width,canvas.height);if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
 function pos(ev){const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/canvas.width,r.height/canvas.height),w=canvas.width*scale,h=canvas.height*scale;return{x:(ev.clientX-r.left-(r.width-w)/2)/scale,y:(ev.clientY-r.top-(r.height-h)/2)/scale}}
 canvas.addEventListener('pointerdown',ev=>{
+  if(ev.pointerType==='touch')canvasPointers.set(ev.pointerId,pos(ev));
+  if(canvasPointers.size===2){
+    const e=elements[selected];
+    if(e?.type==='image'&&!e.locked&&e.visible!==false){
+      const points=[...canvasPointers.values()],f=imageFractions(e);
+      pinchGesture={ids:[...canvasPointers.keys()],distance:Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y),fw:f.fw,fh:f.fh,layer:e};
+      dragging=false;resizing=false;dragStart=null;resizeStart=null;
+      for(const id of pinchGesture.ids)try{canvas.setPointerCapture(id)}catch{}
+      ev.preventDefault();return;
+    }
+  }
   if(dragging||resizing)return;const p=pos(ev);resizing=false;resizeStart=null;gestureHistory=false;
   // El cuadro inferior derecho cambia el tamaño de una imagen seleccionada.
   if(selected>=0&&['image','sticker','shape','vector'].includes(elements[selected]?.type)&&!elements[selected].locked){
@@ -209,6 +200,19 @@ canvas.addEventListener('pointerdown',ev=>{
 });
 canvas.addEventListener('pointermove',ev=>{
   const p=pos(ev);
+  if(canvasPointers.has(ev.pointerId))canvasPointers.set(ev.pointerId,p);
+  if(pinchGesture){
+    if(!pinchGesture.ids.includes(ev.pointerId)||pinchGesture.ids.some(id=>!canvasPointers.has(id)))return;
+    const [a,b]=pinchGesture.ids.map(id=>canvasPointers.get(id));
+    const distance=Math.hypot(a.x-b.x,a.y-b.y);
+    if(pinchGesture.distance<2||distance<2)return;
+    const factor=Math.max(.005/Math.max(pinchGesture.fw,pinchGesture.fh),Math.min(3/pinchGesture.fw,3/pinchGesture.fh,distance/pinchGesture.distance));
+    const fw=pinchGesture.fw*factor,fh=pinchGesture.fh*factor;
+    if(!canResizeLayer(pinchGesture.layer,fw,fh))return;
+    if(!gestureHistory){addHistory();gestureHistory=true}
+    pinchGesture.layer.widthFrac=fw;pinchGesture.layer.heightFrac=fh;delete pinchGesture.layer.scale;
+    draw();updateImageControls();ev.preventDefault();return;
+  }
   if(!dragging&&!resizing)return;
   if(dragging&&ev.pointerId!==dragStart.pointerId)return;
   if(!gestureHistory){addHistory();gestureHistory=true;}
@@ -225,7 +229,15 @@ canvas.addEventListener('pointermove',ev=>{
   elements[selected].x=precisionSnapEnabled?snapCoordinate(candidateX):candidateX;
   elements[selected].y=precisionSnapEnabled?snapCoordinate(candidateY):candidateY;draw();
 });
-function stopCanvasInteraction(){dragging=false;resizing=false;resizeStart=null;updateImageControls()}
+function stopCanvasInteraction(ev){
+  if(ev&&canvasPointers.has(ev.pointerId))canvasPointers.delete(ev.pointerId);
+  if(pinchGesture){
+    if(!ev||pinchGesture.ids.includes(ev.pointerId)){pinchGesture=null;dragging=false;resizing=false;dragStart=null;resizeStart=null;updateImageControls()}
+    return;
+  }
+  if(dragStart&&ev&&dragStart.pointerId!==ev.pointerId)return;
+  dragging=false;resizing=false;resizeStart=null;updateImageControls();
+}
 canvas.addEventListener('pointerup',stopCanvasInteraction);
 canvas.addEventListener('pointercancel',stopCanvasInteraction);
 canvas.addEventListener('wheel',ev=>{
