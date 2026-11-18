@@ -25,6 +25,7 @@ import {prepareProject} from './src/imports.js?v=fep-6a4c2734f7b31778';
 import {prepareImageFile,enforceDocumentBudget as enforceLayerBudget,ASSET_LIMITS} from './src/assets.js?v=fep-6a4c2734f7b31778';
 import {normalizePhoto} from './src/photo-import-mobile.js';
 import {removeUniformBackground,drawWatermark} from './src/photo-tools.js';
+import {validatePngBytes,validatePdfBytes} from './src/export-integrity.js';
 import {openDocumentStore,createAutosave} from './src/persistence.js?v=fep-6a4c2734f7b31778';
 let sceneSettings=normalizeMockup(),sceneController,photoBusy=false;
 let materialVariant='original';
@@ -375,13 +376,8 @@ $('projectFile').onchange=async ev=>{
 async async function saveBlob(blob,name){
  if(!(blob instanceof Blob)||!blob.size)throw Error('No se puede guardar un archivo vacío');
  const lower=String(name).toLowerCase();
- if(lower.endsWith('.png')){
-  const header=new Uint8Array(await blob.slice(0,24).arrayBuffer());
-  if(![137,80,78,71,13,10,26,10].every((b,i)=>header[i]===b))throw Error('El PNG generado tiene una cabecera inválida');
-  const view=new DataView(header.buffer);
-  const w=view.getUint32(16),h=view.getUint32(20);
-  if(!w||!h)throw Error('El PNG generado no tiene dimensiones válidas');
- }
+ if(lower.endsWith('.png'))validatePngBytes(await blob.arrayBuffer());
+ if(lower.endsWith('.pdf'))validatePdfBytes(await blob.arrayBuffer());
  if(window.FEP_NATIVE?.isNative){
   try{
    const outcome=await window.FEP_NATIVE.saveBlob(blob,name);
@@ -733,8 +729,8 @@ const watermark={enabled:false,text:'Mi marca',opacity:.3,position:'bottom-right
  const anchor=$('exportMockup');
  if(anchor){
   const group=document.createElement('div');group.className='control-card';
-  group.innerHTML='<h3>Marca de agua del mockup</h3><label class="check-line"><input id="wmEnabled" type="checkbox"> Activar marca de agua</label><label>Texto de la marca<input id="wmText" maxlength="90" placeholder="Nombre o marca" value="Mi marca"></label><label>Ubicación<select id="wmPosition"><option value="bottom-right">Esquina inferior derecha</option><option value="center">Centro</option><option value="repeat">Repetida</option></select></label><label>Opacidad de marca<input id="wmOpacity" type="range" min="5" max="100" value="30"></label><label>Logotipo PNG (opcional)<input type="file" accept="image/png,image/jpeg,image/webp" id="wmLogo"></label><button id="wmClearLogo" type="button">Usar solo texto</button><p class="hint">Aparece solo en el mockup PNG. El diseño para impresión sigue limpio.</p>';
-  anchor.after(group); // Marca de agua visible junto a «Descargar mockup PNG», no escondida en ajustes.
+  group.innerHTML='<h3>Marca de agua del mockup (opcional)</h3><label class="check-line"><input id="wmEnabled" type="checkbox"> Activar marca de agua</label><label>Texto de la marca<input id="wmText" maxlength="90" placeholder="Nombre o marca" value="Mi marca"></label><label>Ubicación<select id="wmPosition"><option value="bottom-right">Esquina inferior derecha</option><option value="center">Centro</option><option value="repeat">Repetida</option></select></label><label>Opacidad de marca<input id="wmOpacity" type="range" min="5" max="100" value="30"></label><label>Logotipo PNG (opcional)<input type="file" accept="image/png,image/jpeg,image/webp" id="wmLogo"></label><button id="wmClearLogo" type="button">Usar solo texto</button><p class="hint">Aparece solo en el mockup PNG. El diseño para impresión sigue limpio.</p>';
+  anchor.before(group); // Marca de agua siempre visible antes del botón de exportación.
   $('wmEnabled').onchange=e=>watermark.enabled=e.target.checked;
   $('wmText').oninput=e=>watermark.text=e.target.value;
   $('wmPosition').onchange=e=>watermark.position=e.target.value;
@@ -749,7 +745,29 @@ const watermark={enabled:false,text:'Mi marca',opacity:.3,position:'bottom-right
 }
 $('exportMockup').onclick=async()=>{
  if(!renderer||recording||photoBusy||editorMode==='free')return;photoBusy=true;update3DControls();const size=renderer.getSize(new THREE.Vector2()),ratio=renderer.getPixelRatio(),aspect=camera.aspect,show=$('showGuides').checked,enabled=controls.enabled;
- try{controls.enabled=false;if(show){$('showGuides').checked=false;buildModel()}await sceneController.ready();await waitForProduct();sceneController.refresh();const width=sceneSettings.photoWidth,height=Math.round(width*9/16);renderer.setPixelRatio(1);renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();renderer.render(scene,camera);const exportCanvas=document.createElement('canvas');exportCanvas.width=width;exportCanvas.height=height;const ex=exportCanvas.getContext('2d');ex.drawImage(renderer.domElement,0,0,width,height);drawWatermark(ex,width,height,watermark);const blob=await canvasBlob(exportCanvas,'image/png');exportCanvas.width=exportCanvas.height=1;const saved=await saveBlob(blob,`mockup-HD-${width}x${height}.png`);if(saved)notify('Mockup PNG guardado. El arte de impresión se conserva')}
+ try{controls.enabled=false;if(show){$('showGuides').checked=false;buildModel()}await sceneController.ready();await waitForProduct();sceneController.refresh();const requestedWidth=sceneSettings.photoWidth;
+   // Limit memory on Android GPUs; warn rather than producing blank/invalid 4K files.
+   const width=window.FEP_NATIVE?.isNative?Math.min(1920,requestedWidth):requestedWidth;
+   const height=Math.round(width*9/16);
+   if(width!==requestedWidth)notify('Android: captura limitada a 1920 px para evitar archivos dañados');
+   renderer.setPixelRatio(1);renderer.setSize(width,height,false);
+   camera.aspect=width/height;camera.updateProjectionMatrix();
+   renderer.render(scene,camera);
+   const exportCanvas=document.createElement('canvas');
+   exportCanvas.width=width;exportCanvas.height=height;
+   const ex=exportCanvas.getContext('2d',{willReadFrequently:true});
+   if(!ex)throw Error('El dispositivo no puede preparar la fotografía PNG');
+   ex.drawImage(renderer.domElement,0,0,width,height);
+   // A fully transparent render indicates GPU/canvas capture failure.
+   const probes=[[.2,.2],[.5,.5],[.8,.8]];
+   if(probes.every(([x,y])=>ex.getImageData(Math.floor(width*x),Math.floor(height*y),1,1).data[3]===0))
+     throw Error('El motor 3D produjo un lienzo transparente, no se guardará un PNG vacío');
+   drawWatermark(ex,width,height,watermark);
+   const blob=await canvasBlob(exportCanvas,'image/png');
+   validatePngBytes(await blob.arrayBuffer());
+   exportCanvas.width=exportCanvas.height=1;
+   const saved=await saveBlob(blob,`mockup-HD-${width}x${height}.png`);
+   if(saved)notify('Mockup PNG guardado y verificado ('+width+' × '+height+'). El diseño para impresión no lleva marca')}
  catch(error){notify('No se pudo exportar el mockup: '+error.message)}
  finally{renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);camera.aspect=aspect;camera.updateProjectionMatrix();controls.enabled=enabled;if(show){$('showGuides').checked=true;buildModel()}photoBusy=false;resizeViewer();update3DControls();requestAnimationFrame(()=>resync3D({silent:true}))}
 };
