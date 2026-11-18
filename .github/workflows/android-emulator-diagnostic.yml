@@ -38,7 +38,7 @@ jobs:
       - name: Install Capacitor and Android plugins
         run: |
           set -euo pipefail
-          npm install --save @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8 @capacitor/camera@8 @capacitor/filesystem@8 @capacitor/share@8 esbuild@0.25.12
+          npm install --save @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8 @capacitor/camera@8 @capacitor/app@8 @capacitor/filesystem@8 @capacitor/share@8 esbuild@0.25.12
           ./node_modules/.bin/esbuild scripts/native-bridge-entry.js --bundle --platform=browser --format=iife --outfile=mobile-www/fep-native.js
           npx cap add android
           cp scripts/android-native/*.java android/app/src/main/java/com/fep/editorpro/
@@ -49,7 +49,7 @@ jobs:
           from pathlib import Path
           plugins=json.loads(Path('android/app/src/main/assets/capacitor.plugins.json').read_text())
           installed={p.get('pkg') for p in plugins}
-          required={'@capacitor/camera','@capacitor/filesystem','@capacitor/share'}
+          required={'@capacitor/camera','@capacitor/app','@capacitor/filesystem','@capacitor/share'}
           assert required.issubset(installed),(installed,required)
           print('Native Capacitor plugins confirmed:',sorted(installed))
           PY
