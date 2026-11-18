@@ -372,7 +372,7 @@ $('projectFile').onchange=async ev=>{
  if(f.size>ASSET_LIMITS.projectBytes&&raw.zoneSchema!==1)throw Error('Proyecto de una zona demasiado grande (máximo 30 MB)');const prepared=await prepareProject(raw);if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(generation!==importGeneration)return;if(JSON.stringify(projectSnapshot())!==before)throw Error('El documento cambió durante la importación; vuelve a abrir el archivo');applyPreparedProject(prepared)
  }catch(error){notify('No se pudo abrir el proyecto: '+error.message)}
 };
-async function saveBlob(blob,name){
+async async function saveBlob(blob,name){
  if(!(blob instanceof Blob)||!blob.size)throw Error('No se puede guardar un archivo vacío');
  const lower=String(name).toLowerCase();
  if(lower.endsWith('.png')){
@@ -467,7 +467,7 @@ function jpegWithDpi(buffer,dpi=300){
 }
 // PDF independiente del diálogo de impresión: tamaño de página = tamaño del lienzo.
 function whiteCanvas(source){const c=document.createElement('canvas');c.width=source.width;c.height=source.height;const x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);x.drawImage(source,0,0);return c}
-async function pdfAtPhysicalSize(canvas,wCm,hCm){
+async async function pdfAtPhysicalSize(canvas,wCm,hCm){
   const original=canvas;if(zoneProduct)canvas=whiteCanvas(canvas);
   const jpg=new Uint8Array(await (await canvasBlob(canvas,'image/jpeg',.98)).arrayBuffer());
   if(canvas!==original)canvas.width=canvas.height=1;
