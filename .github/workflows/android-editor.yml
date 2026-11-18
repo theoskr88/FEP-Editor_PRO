@@ -56,7 +56,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --save @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8 @capacitor/camera@8 @capacitor/filesystem@8 @capacitor/share@8 esbuild@0.25.12
+          npm install --save @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8 @capacitor/camera@8 @capacitor/app@8 @capacitor/filesystem@8 @capacitor/share@8 esbuild@0.25.12
           ./node_modules/.bin/esbuild scripts/native-bridge-entry.js --bundle --platform=browser --format=iife --outfile=mobile-www/fep-native.js
           npx cap --version
       - name: Create Android project from bundled assets
@@ -74,7 +74,7 @@ jobs:
               raise SystemExit('Plugin manifest missing: Capacitor plugins not installed')
           plugins=json.loads(path.read_text())
           registered={item.get('pkg') for item in plugins}
-          expected={'@capacitor/camera','@capacitor/filesystem','@capacitor/share'}
+          expected={'@capacitor/camera','@capacitor/app','@capacitor/filesystem','@capacitor/share'}
           print('Registered plugins:', sorted(registered))
           if not expected.issubset(registered):
               raise SystemExit('Missing native plugins: '+', '.join(sorted(expected-registered)))
