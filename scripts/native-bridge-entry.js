@@ -22,16 +22,29 @@ window.FEP_NATIVE={
   async saveBlob(blob,name){
     if(!isNative)throw Error('Solo Android');
     if(!(blob instanceof Blob)||!blob.size)throw Error('Archivo vacío');
+    if(blob.size>200*1024*1024)throw Error('Archivo superior a 200 MiB');
     name=safeName(name);
-    // ACTION_CREATE_DOCUMENT writes to user-selected storage; no broad storage permissions.
-    if(blob.size<=30*1024*1024){
-      return Files.saveFile({name,mime:mimeOf(name),data:await base64(blob)});
+    // Stream 256 KiB chunks to Android to avoid Base64 of the entire project,
+    // multi-megabyte JNI strings, and WebView OutOfMemoryError.
+    const sessionResult=await Files.beginStream({name,mime:mimeOf(name)});
+    if(!sessionResult?.session)throw Error('El sistema Android no devolvió sesión de guardado');
+    const session=sessionResult.session;
+    try{
+      const step=256*1024;
+      let written=0;
+      for(let offset=0;offset<blob.size;offset+=step){
+        const chunk=blob.slice(offset,Math.min(blob.size,offset+step));
+        const result=await Files.appendStream({session,data:await base64(chunk)});
+        written+=chunk.size;
+        if(result?.bytesWritten!==written)throw Error('Escritura de bloque incompleta');
+      }
+      const finished=await Files.finishStream({session});
+      if(finished?.bytes!==blob.size)throw Error('La verificación final no coincide');
+      return finished;
+    }catch(error){
+      await Files.cancelStream({session}).catch(()=>{});
+      throw error;
     }
-    // Larger documents: share through Android's Files app or Drive.
-    const path='fep-'+Date.now()+'-'+name;
-    await Filesystem.writeFile({path,data:await base64(blob),directory:Directory.Cache});
-    const uri=await Filesystem.getUri({path,directory:Directory.Cache});
-    return Share.share({title:'Guardar '+name,url:uri.uri,dialogTitle:'Guardar o compartir'});
   },
   async photo(source='camera'){
     if(!isNative)throw Error('Solo Android');
