@@ -10,7 +10,7 @@ import {normalizeMockup} from './src/mockup-settings.js?v=fep-6a4c2734f7b31778';
 import {createMockupControls} from './src/mockup-controls.js?v=fep-6a4c2734f7b31778';
 import {validateCreative,validatePatternBudget,paintCreativeText,creativeTextBounds,paintCreativeImage,CREATIVE_TEMPLATES} from './src/creative.js?v=fep-6a4c2734f7b31778';
 import {createCreativeControls} from './src/creative-controls.js?v=fep-6a4c2734f7b31778';
-import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById} from './src/product-profiles.js?v=fep-6a4c2734f7b31778';
+import {PRODUCT_PROFILES,PRODUCT_VARIANTS,profileById,isWrappedProduct,isMugProduct} from './src/product-profiles.js?v=fep-6a4c2734f7b31778';
 import {validateVector,shapePaths,physicalPaths,vectorFromPhysical,booleanPaths,offsetPaths,paintVector,vectorBounds,textToPaths,exportVectorSVG} from './src/vector.js?v=fep-6a4c2734f7b31778';
 import {createVectorControls} from './src/vector-controls.js?v=fep-6a4c2734f7b31778';
 import {getSticker} from './src/stickers.js?v=fep-6a4c2734f7b31778';
@@ -54,7 +54,7 @@ for(const[id,v]of Object.entries(PRODUCT_VARIANTS)){const option=document.create
 $('productColor').oninput=()=>{buildModel()};
 $('profileVariant').onchange=()=>{materialVariant=$('profileVariant').value;buildModel();queueAutosave()};
 function setDimForProduct(){++importGeneration;captureZone();let p=$('product').value, d=dimensions[p];if(!d)return;
-  if(editorMode==='product'&&zonesFor(p).length){openZoneProduct(p);return}else if(zoneProduct){elements=copyElements();history=[];redoStack=[];zoneProduct=null;syncZoneUI()}if(p==='mug'||p==='tumbler')setPrintRotation(DEFAULT_PRINT_ROTATION_DEG);$('widthCm').value=d[0];$('heightCm').value=d[1]; updateDimensions(); buildModel();focusDesignFront();sceneController?.refresh({camera:true})}
+  if(editorMode==='product'&&zonesFor(p).length){openZoneProduct(p);return}else if(zoneProduct){elements=copyElements();history=[];redoStack=[];zoneProduct=null;syncZoneUI()}if(isWrappedProduct(p))setPrintRotation(DEFAULT_PRINT_ROTATION_DEG);$('widthCm').value=d[0];$('heightCm').value=d[1]; updateDimensions(); buildModel();focusDesignFront();sceneController?.refresh({camera:true})}
 function updateDimensions(){let w=+($('widthCm').value)||20,h=+($('heightCm').value)||8.5;w=Math.max(1,Math.min(100,w));h=Math.max(1,Math.min(100,h));try{validatePatternBudget(elements,w,h)}catch(error){$('widthCm').value=documentWidth;$('heightCm').value=documentHeight;notify(error.message);return false}$('widthCm').value=w;$('heightCm').value=h;documentWidth=w;documentHeight=h;canvas.width=Math.min(1200,Math.round(4096*w/h));canvas.height=Math.round(canvas.width*h/w);
 textureCanvas.width=canvas.width;textureCanvas.height=canvas.height;
 $('canvasWrap').style.aspectRatio=`${w} / ${h}`;
@@ -182,7 +182,7 @@ function draw(){
     ctx.restore();
   }
   paintDesign(textureCtx,textureCanvas.width,textureCanvas.height);
-  if(editorMode==='product'){if(finishMode==='glitter'||['mug','tumbler'].includes($('product').value))updateGlitterArtwork();updateTexture()}
+  if(editorMode==='product'){if(finishMode==='glitter'||isWrappedProduct($('product').value))updateGlitterArtwork();updateTexture()}
   if($('mirrorPreview'))refreshIndividualPreview();
 }
 function bounds(e){if(e?.type==='text'&&(e.typography||e.gradient))return creativeTextBounds(ctx,e,canvas.width,canvas.height);if(e?.type==='vector')return vectorBounds(e,canvas.width,canvas.height);if(e?.type==='shape')return shapeBounds(e,canvas.width,canvas.height);if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
@@ -553,7 +553,7 @@ $('quickCenter').onclick=()=>quickFit('center');$('quickContain').onclick=()=>qu
 
 // Franja de impresión: su ancho ocupa una porción conocida del perímetro.
 // Son valores de geometría para el prototipo y deben calibrarse por modelo real.
-const circumferenceCm={mug:26,tumbler:25.5};
+const circumferenceCm={mug:26,mug_enamel:26,mug_heart:26,tumbler:25.5};
 let printArc=0;
 const DEFAULT_PRINT_ROTATION_DEG=270;
 let printRotationDeg=DEFAULT_PRINT_ROTATION_DEG;
@@ -562,14 +562,14 @@ function setPrintRotation(value){
   $('rotationDeg').value=String(Math.round(printRotationDeg));
   $('rotationValue').textContent=`${Math.round(printRotationDeg)}°`;
   if($('rotationNumber'))$('rotationNumber').value=String(Math.round(printRotationDeg));
-  if(modelRoot && ($('product').value==='mug'||$('product').value==='tumbler')) {
+  if(modelRoot && (isWrappedProduct($('product').value))) {
     buildModel();
     // El control gira el diseño sobre la taza; NO modifica la orientación de la cámara.
     // Así la vista conserva la posición original incluso con el arte en 270°.
   }
 }
 function updateRotationToolbar(){
-  const enabled=['mug','tumbler'].includes($('product').value);
+  const enabled=isWrappedProduct($('product').value);
   $('rotationToolbar').hidden=!enabled;
 }
 // Orienta la cámara hacia el CENTRO de la franja imprimible.
@@ -583,7 +583,7 @@ function focusDesignFront(){
   controls.update();
   renderer.render(scene,camera);
 }
-function focusPrintedSurface(){if(!camera||!controls)return;if(zoneProduct){focusZone();return}if(['mug','tumbler'].includes($('product').value)){const a=THREE.MathUtils.degToRad(printRotationDeg);camera.position.set(5.7*Math.sin(a),1,5.7*Math.cos(a));controls.target.set(0,0,0);controls.update();renderer.render(scene,camera)}else focusDesignFront()}
+function focusPrintedSurface(){if(!camera||!controls)return;if(zoneProduct){focusZone();return}if(isWrappedProduct($('product').value)){const a=THREE.MathUtils.degToRad(printRotationDeg);camera.position.set(5.7*Math.sin(a),1,5.7*Math.cos(a));controls.target.set(0,0,0);controls.update();renderer.render(scene,camera)}else focusDesignFront()}
 function focusPrintEdge(edge){
   if(!camera || !controls) return;
   const theta=(edge==='start' ? -printArc/2 : printArc/2)+THREE.MathUtils.degToRad(printRotationDeg);
@@ -604,9 +604,9 @@ async function loadProductGLB(profile,root,bodyMaterial,printMaterial){
 }
 function addGeo(geo,mat,x=0,y=0,z=0,rotateX=0){let o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);o.rotation.x=rotateX;modelRoot.add(o);return o}
 function disposeCurrentModel(){if(!modelRoot)return;scene?.remove(modelRoot);modelRoot.traverse(o=>{o.geometry?.dispose();for(const material of(o.material?(Array.isArray(o.material)?o.material:[o.material]):[])){if(material.userData.ownedMap){material.map?.dispose();const canvas=material.map?.image;if(canvas?.getContext)canvas.width=canvas.height=1}material.dispose()}});modelRoot=null}
-function buildModel(){if(!scene)return;const profile=profileById($('product').value);$('profileStatus').dataset.state=profile?.kind==='glb'?'loading':'ready';$('profileStatus').textContent=profile?.kind==='glb'?'Cargando modelo 3D…':'Perfil original · medidas configurables';update3DControls();disposeCurrentModel();modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&['mug','tumbler'].includes(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshPhysicalMaterial({color:c,roughness:p==='mug'?.24:p==='tumbler'?.32:.5,metalness:p==='tumbler'?.12:.015,clearcoat:['mug','tumbler'].includes(p)?.65:.1,clearcoatRoughness:.18,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';const wrapped=['mug','tumbler'].includes(p);let printMat=new THREE.MeshPhysicalMaterial({map:physical||wrapped?physicalArtTexture:texture,transparent:physical||wrapped,depthWrite:!(physical||wrapped),roughness:wrapped?.28:.65,clearcoat:wrapped?.65:0,clearcoatRoughness:.18,side:THREE.FrontSide});window.printMat=printMat;const variant=PRODUCT_VARIANTS[materialVariant];if(!physical&&variant.roughness!==null){plain.roughness=variant.roughness;plain.metalness=variant.metalness}if(profile?.multiZone){productZones[p]??=emptyZones(p);syncTextileMaps(p)}if(profile?.kind==='glb'){loadProductGLB(profile,modelRoot,plain,printMat);return;}
-if(p==='mug'||p==='tumbler'){let r=p==='mug'?.93:.66,h=p==='mug'?2.05:3;// Cuerpo completo sin arte: evita repetir el archivo en toda la taza.
-if(p==='mug'){
+function buildModel(){if(!scene)return;const profile=profileById($('product').value);$('profileStatus').dataset.state=profile?.kind==='glb'?'loading':'ready';$('profileStatus').textContent=profile?.kind==='glb'?'Cargando modelo 3D…':'Perfil original · medidas configurables';update3DControls();disposeCurrentModel();modelRoot=new THREE.Group();scene.add(modelRoot);let c=$('productColor').value,p=$('product').value;const physical=finishMode==='glitter'&&isWrappedProduct(p),settings=glitterControls.material(),props=glitterMaterialProperties(settings);let plain=physical?new THREE.MeshPhysicalMaterial({color:settings.color,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,side:THREE.DoubleSide}):new THREE.MeshPhysicalMaterial({color:c,roughness:isMugProduct(p)?.24:p==='tumbler'?.32:.5,metalness:p==='tumbler'?.12:.015,clearcoat:isWrappedProduct(p)?.65:.1,clearcoatRoughness:.18,side:THREE.DoubleSide});if(physical)plain.userData.glitterSurface='body';const wrapped=isWrappedProduct(p);let printMat=new THREE.MeshPhysicalMaterial({map:physical||wrapped?physicalArtTexture:texture,transparent:physical||wrapped,depthWrite:!(physical||wrapped),roughness:wrapped?.28:.65,clearcoat:wrapped?.65:0,clearcoatRoughness:.18,side:THREE.FrontSide});window.printMat=printMat;const variant=PRODUCT_VARIANTS[materialVariant];if(!physical&&variant.roughness!==null){plain.roughness=variant.roughness;plain.metalness=variant.metalness}if(profile?.multiZone){productZones[p]??=emptyZones(p);syncTextileMaps(p)}if(profile?.kind==='glb'){loadProductGLB(profile,modelRoot,plain,printMat);return;}
+if(isWrappedProduct(p)){let r=isMugProduct(p)?.93:.66,h=isMugProduct(p)?2.05:3;// Cuerpo completo sin arte: evita repetir el archivo en toda la taza.
+if(isMugProduct(p)){
   // Taza 11 oz de paredes lisas, base discreta y labio delgado (foto de referencia).
   // Perfil interior hueco, sin anillo superior grueso ni voladizos.
   const profile=[
@@ -647,7 +647,7 @@ if($('showGuides').checked) for (const theta of [-printArc/2+THREE.MathUtils.deg
   const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:0x21bad0}));
   modelRoot.add(line);
 }
-if(p==='mug'){
+if(isMugProduct(p)){
   // Asa clásica en forma de D suavemente ovalada, unida a la cara derecha.
   const handlePath=new THREE.CatmullRomCurve3([
     new THREE.Vector3(r-.015,h*.345,0),
@@ -726,7 +726,7 @@ function resync3D({resetView=false, selectedObject=false,silent=false}={}){
     for(const m of mats){if(m?.map===texture){m.map=texture;m.needsUpdate=true;}}
   });
   if(resetView){
-    if(selectedObject && elements[selected] && ['mug','tumbler'].includes($('product').value)){
+    if(selectedObject && elements[selected] && isWrappedProduct($('product').value)){
       const x=Math.max(0,Math.min(1,Number(elements[selected].x)||0.5));
       const angle=THREE.MathUtils.degToRad(printRotationDeg)+(x-0.5)*printArc;
       camera.position.set(5.7*Math.sin(angle),1,5.7*Math.cos(angle));
