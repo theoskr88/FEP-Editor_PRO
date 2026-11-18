@@ -39,6 +39,9 @@ jobs:
           test -d "${ANDROID_HOME:-/usr/local/lib/android/sdk}"
           test -x "${ANDROID_HOME:-/usr/local/lib/android/sdk}/platform-tools/adb"
           echo "Android SDK: ${ANDROID_HOME}"
+      - name: Install JavaScript test dependencies
+        shell: bash
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Check photo tools and editor JavaScript
         shell: bash
         run: |
