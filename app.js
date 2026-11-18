@@ -946,13 +946,47 @@ try{
  if(!await projectLibrary.setting('legacyMigrated')){const legacy=await openDocumentStore();try{const entries=[];for(const key of ['previous','current']){const old=await legacy.read(key);if(old){try{const prepared=await prepareProject(old.document);entries.push({document:prepared.data,name:'Recuperado · '+(key==='current'?'último proyecto':'versión anterior')})}catch(error){notify('Se conservó un guardado anterior que no se pudo migrar: '+error.message)}}}await projectLibrary.migrateLegacy(entries)}finally{legacy.close()}}
  let freshLibrary=false;let active=await projectLibrary.active();if(active&&!await projectLibrary.catalog(active))active=null;if(!active){const list=await projectLibrary.summaries();if(list.length)active=list[0].id;else{active=await projectLibrary.create(projectSnapshot(),'Sin título',thumbnail());freshLibrary=true}}await projectSession.activate(active);
  let current,currentError;try{current=freshLibrary?null:await deadline(documentStore.read(),6000,'La lectura del guardado local no respondió')}catch(error){currentError=error}
- if(current||currentError){try{if(currentError)throw currentError;const prepared=await deadline(prepareProject(current.document),10000,'No terminó la recuperación de imágenes');if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');applyPreparedProject(prepared);$('startScreen').close();showSaveStatus('saved')}catch(error){projectRecoveryError=true;window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);$('startScreen').close();notify('La copia actual no se pudo recuperar. Usa Restaurar versión anterior o abre un JSON; no se sobrescribió la copia.')}}
+ if(current||currentError){try{if(currentError)throw currentError;const prepared=await deadline(prepareProject(current.document),window.FEP_NATIVE?.isNative?45000:10000,'No terminó la recuperación de imágenes');if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');applyPreparedProject(prepared);$('startScreen').close();showSaveStatus('saved')}catch(error){projectRecoveryError=true;window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);$('startScreen').close();notify('La copia actual no se pudo recuperar. Usa Restaurar versión anterior o abre un JSON; no se sobrescribió la copia.')}}
  else autosaveStatus.textContent='Autoguardado local activo';
  autosave=createAutosave({store:documentStore,snapshot:projectSnapshot,status:showSaveStatus});
+  // Guardado comprobable: persiste y vuelve a leer la versión de IndexedDB.
+  const saveNow=document.createElement('button');
+  saveNow.id='saveProjectNow';saveNow.type='button';saveNow.textContent='Guardar proyecto';
+  saveNow.title='Guardar en este teléfono y verificar la recuperación local';
+  saveNow.className='text-action';
+  autosaveStatus.after(saveNow);
+  const saveAndVerify=async()=>{
+    if(!projectSession.id||projectRecoveryError||projectSwitchBusy)return false;
+    saveNow.disabled=true;saveNow.textContent='Guardando…';
+    try{
+      const expected=await documentDigest(cleanDocument(projectSnapshot()));
+      if(!await autosave.flush())throw Error('No se completó el autoguardado local');
+      const reread=await projectLibrary.get(projectSession.id);
+      if(!reread||reread.digest!==expected)throw Error('La lectura de recuperación no coincide con el proyecto editado');
+      showSaveStatus('saved');saveNow.textContent='Guardado ✓';
+      notify('Proyecto guardado y verificado en el teléfono');
+      return true;
+    }catch(error){
+      showSaveStatus('error',error);
+      saveNow.textContent='Reintentar guardado';
+      notify('No se pudo confirmar la recuperación del proyecto: '+error.message);
+      return false;
+    }finally{saveNow.disabled=false;setTimeout(()=>{if(saveNow.textContent==='Guardado ✓')saveNow.textContent='Guardar proyecto'},2400)}
+  };
+  saveNow.onclick=saveAndVerify;
+  window.__fepSaveAndVerify=saveAndVerify;
  if(window.__fepBoot?.stages.storage.state!=='failed')window.__fepBoot?.stage('storage','ready');
  const assetIDs=new WeakMap();let nextID=0;const fingerprint=()=>{const state=projectSnapshot();const light=list=>list.map(({img,data,...e})=>{if(img&&!assetIDs.has(img))assetIDs.set(img,++nextID);return {...e,asset:img?assetIDs.get(img):null}});state.elements=light(elements);if(state.freeDocument)state.freeDocument.elements=light(freeDocument.elements);if(state.productZones)for(const[p,g]of Object.entries(productZones))for(const[id,z]of Object.entries(g.zones))state.productZones[p].zones[id].elements=light(z.elements);return JSON.stringify(state)};let observed=fingerprint();resetSaveFingerprint=()=>{observed=fingerprint()};queueAutosave=()=>{if(recovering||projectSwitchBusy||projectRecoveryError||!projectSession.id)return;const next=fingerprint();if(next!==observed){observed=next;autosave.schedule()}};
  for(const event of ['input','change','click'])document.addEventListener(event,()=>queueMicrotask(queueAutosave));
- document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!projectSwitchBusy&&projectSession.id&&!projectRecoveryError)autosave.flush()});window.addEventListener('pagehide',()=>{if(!projectSwitchBusy&&projectSession.id&&!projectRecoveryError)autosave.flush()});
+ document.addEventListener('visibilitychange',()=>{
+   if(document.visibilityState==='hidden'&&!projectSwitchBusy&&projectSession.id&&!projectRecoveryError){
+     queueAutosave();void autosave.flush();
+   }
+  });
+  window.addEventListener('pagehide',()=>{if(!projectSwitchBusy&&projectSession.id&&!projectRecoveryError){queueAutosave();void autosave.flush()}});
+  window.addEventListener('fep-native-pause',()=>{if(!projectSwitchBusy&&projectSession.id&&!projectRecoveryError){queueAutosave();void autosave.flush()}});
+  // Touch interactions can finish immediately before Android is sent to the background.
+  document.addEventListener('pointerup',()=>queueMicrotask(queueAutosave));
 
  const initialDocument=cleanDocument(projectSnapshot());initialDocument.elements=[];delete initialDocument.productZones;delete initialDocument.zoneSchema;delete initialDocument.freeDocument;
  const transition=async(fn)=>{if(recording||photoBusy||zoneBusy)throw Error('Termina o cancela la exportación antes de cambiar de proyecto');if(projectSwitchBusy)throw Error('Espera al cambio de proyecto');projectSwitchBusy=true;recovering=true;++importGeneration;const controls=[...document.querySelectorAll('button,input,select')].filter(n=>!n.closest('#projectsDialog')).map(n=>[n,n.disabled]);controls.forEach(([n])=>n.disabled=true);try{if(projectSession.id&&!projectRecoveryError&&!await autosave.flush())throw Error('No se pudo guardar el proyecto actual. Exporta un respaldo antes de cambiar');autosave.cancel();return await fn()}finally{resetSaveFingerprint();recovering=false;projectSwitchBusy=false;controls.forEach(([n,v])=>n.disabled=v)}};
