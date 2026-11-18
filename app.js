@@ -553,7 +553,7 @@ $('quickCenter').onclick=()=>quickFit('center');$('quickContain').onclick=()=>qu
 
 // Franja de impresión: su ancho ocupa una porción conocida del perímetro.
 // Son valores de geometría para el prototipo y deben calibrarse por modelo real.
-const circumferenceCm={mug:26,mug_enamel:26,mug_heart:26,tumbler:25.5};
+const circumferenceCm={mug:26,mug_enamel:26,tumbler:25.5};
 let printArc=0;
 const DEFAULT_PRINT_ROTATION_DEG=270;
 let printRotationDeg=DEFAULT_PRINT_ROTATION_DEG;
@@ -658,11 +658,7 @@ if($('showGuides').checked) for (const theta of [-printArc/2+THREE.MathUtils.deg
 }
 if(isMugProduct(p)){
   // Asa clásica en forma de D suavemente ovalada, unida a la cara derecha.
-  const handlePoints=p==='mug_heart'?[
-    [r-.015,h*.24],[r+.15,h*.42],[r+.38,h*.32],[r+.50,h*.45],
-    [r+.77,h*.43],[r+.88,h*.22],[r+.77,-h*.04],[r+.55,-h*.28],
-    [r+.30,-h*.43],[r+.08,-h*.30],[r-.015,-h*.22]
-  ]:[
+  const handlePoints=[
     [r-.015,h*.345],[r+.19,h*.39],[r+.52,h*.34],
     [r+.68,h*.16],[r+.71,0],[r+.68,-h*.17],
     [r+.53,-h*.34],[r+.21,-h*.38],[r-.015,-h*.345]
