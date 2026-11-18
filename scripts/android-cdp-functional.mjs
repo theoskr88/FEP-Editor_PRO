@@ -83,6 +83,24 @@ try{
   rows:document.querySelectorAll('#layerList > *').length
  })).then(x=>x?.count!==previous&&x.rows>0?x:null));
  record('import_png_as_layer','PASS',imported);
+ // Persist and verify the imported layer, close the Android process, and reopen.
+ const saved=await evalFn(async()=>typeof window.__fepSaveAndVerify==='function'&&await window.__fepSaveAndVerify());
+ if(saved!==true)throw Error('La importación no quedó guardada y verificada en la base local');
+ record('project_saved_and_verified','PASS',{count:imported.count});
+ socket.close();
+ await sleep(500);
+ adb('forward','--remove','tcp:9222');
+ adb('shell','am','force-stop','com.fep.editorpro');
+ await sleep(900);
+ adb('shell','am','start','-W','-n','com.fep.editorpro/.MainActivity');
+ await sleep(12000);
+ await connect();
+ const restored=await until(()=>evalFn(()=>({
+  count:document.getElementById('layerCount')?.textContent,
+  status:document.getElementById('autosaveStatus')?.textContent,
+  native:window.FEP_NATIVE?.isNative===true
+ })).then(x=>x?.native&&x?.count===imported.count&&/Guardado/.test(x?.status||'')?x:null)),35000);
+ record('project_survives_android_force_stop_and_reopen','PASS',restored);
  const png=await evalFn(async()=>{
   const c=document.getElementById('designCanvas');
   const blob=await new Promise((ok,fail)=>c.toBlob(b=>b?ok(b):fail(Error('PNG vacío')),'image/png'));
