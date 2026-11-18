@@ -373,7 +373,7 @@ $('projectFile').onchange=async ev=>{
  if(f.size>ASSET_LIMITS.projectBytes&&raw.zoneSchema!==1)throw Error('Proyecto de una zona demasiado grande (máximo 30 MB)');const prepared=await prepareProject(raw);if(allProjectLayers(prepared.data).some(e=>e.type==='sticker'))await deadline(stickerReady,8000,'No respondió el motor de stickers');if(generation!==importGeneration)return;if(JSON.stringify(projectSnapshot())!==before)throw Error('El documento cambió durante la importación; vuelve a abrir el archivo');applyPreparedProject(prepared)
  }catch(error){notify('No se pudo abrir el proyecto: '+error.message)}
 };
-async async function saveBlob(blob,name){
+async function saveBlob(blob,name){
  if(!(blob instanceof Blob)||!blob.size)throw Error('No se puede guardar un archivo vacío');
  const lower=String(name).toLowerCase();
  if(lower.endsWith('.png'))validatePngBytes(await blob.arrayBuffer());
