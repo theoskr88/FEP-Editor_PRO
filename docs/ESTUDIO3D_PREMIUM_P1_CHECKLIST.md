@@ -30,6 +30,15 @@ Base preservada: `desarrollo/android-cierre-c` (commit `482abe7a1b745d9e68f7d060
 - [ ] Comprobar cámara, varias fotos, MP4 360 y galería tras cambiar materiales.
 - [ ] Probar sin Internet y comprobar respuesta del visor durante 10 minutos.
 
+## Validación en teléfono — 18 de noviembre de 2026
+**Estado: aprobado por pruebas manuales, 7/7 controles.**
+
+El usuario confirmó: dos estudios premium; los cuatro acabados; reversión a acabado original; vistas derecha y posterior; guardar, cerrar y reabrir manteniendo ajustes; PNG y PDF sin alterar impresión; cámara, imágenes y video 360°.
+
+**CI:** compilación Android Premium `44335004399` exitosa. El diagnóstico anterior `44335019259` marcó fallo al intentar verificar guardado inmediatamente después de importar; la app cargó en emulador y la importación pasó. Se corrigió exclusivamente el sincronismo y la información diagnóstica del test en commit `e4224fc7`, sin modificar el funcionamiento aprobado de la aplicación. Nueva verificación en GitHub Actions pendiente de resultado.
+
+**Protección:** conservar rama `desarrollo/android-cierre-c` y no fusionar ni publicar automáticamente. Premium P1 queda aceptado por prueba física, no declarado publicado en producción.
+
 ## Pendiente para fases posteriores
 - Nuevos productos GLB propios, con plantilla física calibrada y licencias verificadas.
 - Biblioteca de fondos fotográficos originales y fotografía propia del usuario.
