@@ -1,4 +1,4 @@
-name: FEP Editor PRO Android (experimental)
+name: FEP Editor PRO Premium 3D (Android CI)
 concurrency:
   group: fep-editor-android-c11
   cancel-in-progress: true
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - desarrollo/android-cierre-c
+      - desarrollo/estudio3d-premium-p1
     paths:
       - 'capacitor.config.json'
       - 'scripts/build-mobile-web.py'
@@ -49,7 +49,7 @@ jobs:
           node --check app.js
           node --check src/photo-tools.js
           node --check src/photo-import-mobile.js
-          node --test tests/photo-tools.test.mjs tests/photo-import-mobile.test.mjs tests/android-project-reopen.test.mjs
+          node --test tests/photo-tools.test.mjs tests/photo-import-mobile.test.mjs tests/android-project-reopen.test.mjs tests/premium-3d.test.mjs
       - name: Prepare bundled offline web assets
         shell: bash
         run: |
