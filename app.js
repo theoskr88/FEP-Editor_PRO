@@ -34,7 +34,9 @@ let recovering=true,stickerController,stickerPainter,stickerGeometry,stickerRead
 if(!window.__fepUI){try{window.__fepUI=(await import('./src/interface.js?v=fep-6a4c2734f7b31778')).initInterface()}catch{}}
 const ui=window.__fepUI||{refresh(){}};
 const $ = x=>document.getElementById(x); const canvas=$('designCanvas'),ctx=canvas.getContext('2d');
+const {snapCoordinate,moveLayerPrecisely,printPreflight}=await import('./src/premium-p4.js');
 let dragStart=null,gestureHistory=false,importGeneration=0;
+let precisionSnapEnabled=false;
 let documentWidth=20,documentHeight=8.5,editorMode='product',freeDesign=normalizeFreeDesign(),freeController,vectorController,creativeController;
 let projectManager,projectLibrary,projectSession,projectSwitchBusy=false,projectRecoveryError=false,resetSaveFingerprint=()=>{};
 let queueAutosave=()=>{},preferredGuides=$('showGuides').checked;
@@ -181,6 +183,7 @@ function draw(){
     if(['image','sticker','shape','vector'].includes(elements[selected]?.type)){ctx.setLineDash([]);ctx.fillStyle='#0c91a3';ctx.fillRect(b.x+b.w-9,b.y+b.h-9,18,18);ctx.strokeStyle='#fff';ctx.strokeRect(b.x+b.w-9,b.y+b.h-9,18,18)}
     ctx.restore();
   }
+  if(precisionSnapEnabled){ctx.save();ctx.strokeStyle='rgba(12,145,163,.5)';ctx.lineWidth=1;ctx.setLineDash([7,6]);ctx.beginPath();ctx.moveTo(canvas.width/2,0);ctx.lineTo(canvas.width/2,canvas.height);ctx.moveTo(0,canvas.height/2);ctx.lineTo(canvas.width,canvas.height/2);ctx.stroke();ctx.restore()}
   paintDesign(textureCtx,textureCanvas.width,textureCanvas.height);
   if(editorMode==='product'){if(finishMode==='glitter'||isWrappedProduct($('product').value))updateGlitterArtwork();updateTexture()}
   if($('mirrorPreview'))refreshIndividualPreview();
@@ -217,8 +220,10 @@ canvas.addEventListener('pointermove',ev=>{
     draw();updateImageControls();return;
   }
   if(!dragging||selected<0)return;
-  elements[selected].x=Math.max(0,Math.min(1,dragStart.x+(p.x-dragStart.px)/canvas.width));
-  elements[selected].y=Math.max(0,Math.min(1,dragStart.y+(p.y-dragStart.py)/canvas.height));draw();
+  const candidateX=Math.max(0,Math.min(1,dragStart.x+(p.x-dragStart.px)/canvas.width));
+  const candidateY=Math.max(0,Math.min(1,dragStart.y+(p.y-dragStart.py)/canvas.height));
+  elements[selected].x=precisionSnapEnabled?snapCoordinate(candidateX):candidateX;
+  elements[selected].y=precisionSnapEnabled?snapCoordinate(candidateY):candidateY;draw();
 });
 function stopCanvasInteraction(){dragging=false;resizing=false;resizeStart=null;updateImageControls()}
 canvas.addEventListener('pointerup',stopCanvasInteraction);
@@ -923,6 +928,43 @@ window.__estudioPrintAPI={renderZoneCanvas, renderToExportCanvas, cmPrint, pngWi
 
 for(const id of ['delete','applyText','quickCenter','quickContain','quickCover']){
  const button=$(id),handler=button.onclick;if(handler)button.onclick=ev=>{if(elements[selected]?.locked){notify('La capa está bloqueada.');return}handler(ev)};
+}
+
+
+// P4 precision and accessible phone controls. Guides are never printed.
+{
+ const panel=document.createElement('div');panel.id='p4PrecisionPanel';panel.className='control-card p4-panel';
+ const heading=document.createElement('h3');heading.textContent='Precisión y controles táctiles';
+ const label=document.createElement('label');label.className='check-line';
+ const snap=document.createElement('input');snap.type='checkbox';snap.id='p4Snap';label.append(snap,document.createTextNode(' Guías magnéticas de centro y bordes'));
+ snap.onchange=()=>{precisionSnapEnabled=snap.checked;draw()};
+ const row=document.createElement('div');row.className='field-pair';
+ function field(id,name){const l=document.createElement('label');l.textContent=name;const i=document.createElement('input');i.id=id;i.type='number';i.step='0.1';i.min='0';l.append(i);row.append(l);return i}
+ const xField=field('p4X','Centro X (cm)'),yField=field('p4Y','Centro Y (cm)');
+ const read=()=>{const e=elements[selected];if(!e||e.type==='glitter'){xField.value='';yField.value='';return}xField.value=(e.x*documentWidth).toFixed(2);yField.value=(e.y*documentHeight).toFixed(2)};
+ const apply=document.createElement('button');apply.type='button';apply.textContent='Aplicar posición exacta';
+ apply.onclick=()=>{try{if(selected<0)throw Error('Selecciona una capa');const e=elements[selected];const next=moveLayerPrecisely(e,{xCm:Number(xField.value),yCm:Number(yField.value),widthCm:documentWidth,heightCm:documentHeight});addHistory();e.x=next.x;e.y=next.y;draw();read();notify('Posición exacta aplicada')}catch(error){notify(error.message)}};
+ const nudge=document.createElement('div');nudge.className='p4-nudge';
+ for(const [symbol,dx,dy,name] of [['←',-1,0,'izquierda'],['↑',0,-1,'arriba'],['↓',0,1,'abajo'],['→',1,0,'derecha']]){
+  const b=document.createElement('button');b.type='button';b.textContent=symbol;b.title='Mover 1 mm';b.setAttribute('aria-label','Mover '+name+' 1 mm');
+  b.onclick=()=>{const e=elements[selected];if(!e||e.locked||e.type==='glitter'){notify('Selecciona una capa editable');return}addHistory();e.x=Math.max(0,Math.min(1,e.x+dx*.1/documentWidth));e.y=Math.max(0,Math.min(1,e.y+dy*.1/documentHeight));draw();read()};nudge.append(b);
+ }
+ const hint=document.createElement('p');hint.className='hint';hint.textContent='Selecciona una capa, ajusta el centro en centímetros o muévela 1 mm por pulsación.';
+ panel.append(heading,label,row,apply,nudge,hint);$('panel-design').append(panel);
+ canvas.addEventListener('pointerup',read);$('layerList')?.addEventListener('click',()=>requestAnimationFrame(read));panel.addEventListener('focusin',read,{once:true});
+}
+{
+ const panel=document.createElement('div');panel.className='control-card p4-panel';panel.id='p4PrintPreflight';
+ const title=document.createElement('h3');title.textContent='Comprobación antes de imprimir';
+ const button=document.createElement('button');button.type='button';button.textContent='Revisar tamaño y resolución';
+ const status=document.createElement('p');status.className='hint';status.id='p4PrintStatus';status.setAttribute('role','status');
+ button.onclick=()=>{try{
+  const images=elements.filter(e=>e.type==='image'&&e.visible!==false).map((e,i)=>{const img=getImage(e),f=imageFractions(e);return {name:String(i+1),pixelW:img?.naturalWidth??0,pixelH:img?.naturalHeight??0,widthCm:f.fw*documentWidth,heightCm:f.fh*documentHeight}});
+  const result=printPreflight({widthCm:documentWidth,heightCm:documentHeight,pixelBudget:window.FEP_NATIVE?.isNative?4_000_000:40_000_000,images});
+  status.textContent=result.canExport?'Salida estimada: '+result.outputW+' × '+result.outputH+' px · '+result.dpi+' ppp. '+(result.warnings.join(' ')||'Sin advertencias de resolución detectadas.'):'Advertencia: el trabajo excede la exportación segura. Divide el diseño en zonas.';
+  status.dataset.state=result.canExport?'ready':'error';
+ }catch(error){status.textContent=error.message;status.dataset.state='error'}};
+ panel.append(title,button,status);$('panel-print').append(panel);
 }
 
 function readGlitterControls(){return glitterControls.current()}
