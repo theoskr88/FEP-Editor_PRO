@@ -25,3 +25,18 @@ function recordGlitter(options){const operations=[],ctx=new Proxy({},{get:(_,key
 test('irregular printable flakes use paths instead of square particle fills',()=>{const ops=recordGlitter({});assert.equal(ops.filter(o=>o[0]==='fillRect').length,1);assert(ops.filter(o=>o[0]==='lineTo').length>1000);assert.deepEqual(recordGlitter({}),ops)});
 test('normal and roughness maps align identical deterministic flake geometry',()=>{const geometry=opts=>recordGlitter(opts).filter(o=>['beginPath','moveTo','lineTo','closePath'].includes(o[0]));assert.deepEqual(geometry({material:true,map:'normal'}),geometry({material:true,map:'roughness'}))});
 test('LRU tile reuse is stable and evicts allocated canvases at its cap',()=>{const ctx=new Proxy({},{get:()=>()=>{},set:()=>true});const c=createGlitterCache({width:512,height:256,limit:2,createCanvas:()=>({width:0,height:0,getContext:()=>ctx})});const gold=c.get({palette:'gold',size:8});assert.equal(c.get({palette:'gold',size:8}),gold);assert.equal(c.stats().generations,1);c.get({palette:'blue',size:8});c.get({palette:'pink',size:8});assert.equal(c.stats().entries,2);assert.equal(gold.width,1);c.clear();assert.equal(c.stats().entries,0)});
+
+// Premium P3: photography sizing and safe migration of withdrawn prototype.
+const {normalizeMockup}=await import('../src/mockup-settings.js');
+test('mockup photo defaults to previously approved crop mode',()=>assert.equal(normalizeMockup().backgroundPhotoFit,'cover'));
+test('mockup photo framing retains full-image option through project normalization',()=>{
+ const {data}=normalizeProject({version:2,elements:[text],mockup:{backgroundPhotoFit:'contain'}});
+ assert.equal(data.mockup.backgroundPhotoFit,'contain');
+ assert.equal(normalizeProject(data).data.mockup.backgroundPhotoFit,'contain');
+});
+test('invalid photographic framing is rejected before changing project',()=>assert.throws(()=>normalizeMockup({backgroundPhotoFit:'unknown'}),/fondo fotográfico/));
+test('withdrawn heart-handle mug safely migrates without deleting layers',()=>{
+ const {data,warnings}=normalizeProject({version:2,product:'mug_heart',elements:[text]});
+ assert.equal(data.product,'mug');assert.deepEqual(data.elements,[text]);
+ assert.match(warnings.join(' '),/asa de corazón/);
+});
