@@ -3,7 +3,6 @@ export const PRODUCT_PROFILES=[
  {id:'mug',name:'Taza cerámica 11 oz',printCm:[20,8.5],kind:'legacy',circumferenceCm:26},
  {id:'tumbler',name:'Vaso térmico',printCm:[23,21],kind:'legacy',circumferenceCm:25.5},
  {id:'mug_enamel',name:'Taza esmaltada · borde de color (prototipo)',printCm:[20,8.5],kind:'legacy',circumferenceCm:26,calibration:'visual; confirmar dimensiones del producto físico'},
- {id:'mug_heart',name:'Taza · asa corazón (prototipo)',printCm:[20,8.5],kind:'legacy',circumferenceCm:26,calibration:'visual; confirmar dimensiones del producto físico'},
  {id:'shirt',name:'Polera · cuatro zonas',printCm:[30,35],kind:'glb',url:'./vendor/shirt-zones.glb?v=fep-6a4c2734f7b31778',gltfURL:'./vendor/shirt-zones.gltf?v=fep-6a4c2734f7b31778',worldScale:4.5,multiZone:true,license:'CC0-1.0'},
  {id:'tote',name:'Bolsa de tela · dos caras',printCm:[28,30],kind:'glb',url:'./vendor/tote-zones.glb?v=fep-6a4c2734f7b31778',gltfURL:'./vendor/tote-zones.gltf?v=fep-6a4c2734f7b31778',worldScale:5.5,multiZone:true,license:'CC0-1.0'},
  {id:'notebook',name:'Libreta · portada y contraportada',printCm:[15,21],kind:'glb',url:'./vendor/notebook-zones.glb?v=fep-6a4c2734f7b31778',gltfURL:'./vendor/notebook-zones.gltf?v=fep-6a4c2734f7b31778',worldScale:12,multiZone:true,license:'CC0-1.0'},
@@ -16,7 +15,7 @@ export const PRODUCT_VARIANTS={original:{name:'Original',roughness:null,metalnes
 export const profileById=id=>PRODUCT_PROFILES.find(p=>p.id===id);
 export function profileVariant(value='original'){if(typeof value!=='string'||!Object.hasOwn(PRODUCT_VARIANTS,value))throw Error('Variante de material no disponible');return value}
 
-export const WRAPPED_PRODUCTS=new Set(['mug','mug_enamel','mug_heart','tumbler']);
-export const MUG_PRODUCTS=new Set(['mug','mug_enamel','mug_heart']);
+export const WRAPPED_PRODUCTS=new Set(['mug','mug_enamel','tumbler']);
+export const MUG_PRODUCTS=new Set(['mug','mug_enamel']);
 export const isWrappedProduct=id=>WRAPPED_PRODUCTS.has(id);
 export const isMugProduct=id=>MUG_PRODUCTS.has(id);
