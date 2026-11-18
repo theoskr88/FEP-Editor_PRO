@@ -42,8 +42,7 @@ jobs:
           test -d "${ANDROID_HOME:-/usr/local/lib/android/sdk}"
           test -x "${ANDROID_HOME:-/usr/local/lib/android/sdk}/platform-tools/adb"
           echo "Android SDK: ${ANDROID_HOME}"
-      # Test builds only: reuse the same Android debug certificate between workflow runs.
-      # Release builds must use a private, separately managed signing key.
+      # Reused debug key for internal tests, never a commercial release signature.
       - name: Restore persistent Android debug signing key
         uses: actions/cache@v4
         with:
@@ -90,56 +89,14 @@ jobs:
           npx cap add android
           cp scripts/android-native/*.java android/app/src/main/java/com/fep/editorpro/
           npx cap sync android
-          # Monotonic versionCode for Android upgrades; never downgrade the APK.
+          # Keep increasing internal Android versionCode across builds.
           python3 - <<'PY'
           from pathlib import Path
           import os,re
           path=Path('android/app/build.gradle')
           value=path.read_text()
           code=1000+int(os.environ['GITHUB_RUN_NUMBER'])
-          updated,count=re.subn(r'(?m)^(\\s*versionCode\\s+)\\d+\\s*
-          import json
-          from pathlib import Path
-          path=Path('android/app/src/main/assets/capacitor.plugins.json')
-          if not path.is_file():
-              raise SystemExit('Plugin manifest missing: Capacitor plugins not installed')
-          plugins=json.loads(path.read_text())
-          registered={item.get('pkg') for item in plugins}
-          expected={'@capacitor/camera','@capacitor/app','@capacitor/filesystem','@capacitor/share'}
-          print('Registered plugins:', sorted(registered))
-          if not expected.issubset(registered):
-              raise SystemExit('Missing native plugins: '+', '.join(sorted(expected-registered)))
-          PY
-          python3 scripts/android-native/patch-manifest.py
-          grep -q 'android.media.action.IMAGE_CAPTURE' android/app/src/main/AndroidManifest.xml
-          grep -q 'android.intent.action.GET_CONTENT' android/app/src/main/AndroidManifest.xml
-      - name: Compile Android debug APK
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd android
-          chmod +x gradlew
-          ./gradlew --no-daemon assembleDebug 2>&1 | tee ../android-build.log
-      - name: Verify APK and checksum
-        shell: bash
-        run: |
-          set -euo pipefail
-          apk=android/app/build/outputs/apk/debug/app-debug.apk
-          test -s "$apk"
-          unzip -l "$apk" | grep -q 'classes.dex'
-          unzip -l "$apk" | grep -q 'AndroidManifest.xml'
-          sha256sum "$apk" > app-debug.apk.sha256
-      - name: Upload debug APK and logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: fep-editor-pro-android-debug
-          if-no-files-found: warn
-          path: |
-            android/app/build/outputs/apk/debug/app-debug.apk
-            app-debug.apk.sha256
-            android-build.log
-,lambda m:m.group(1)+str(code),value)
+          updated,count=re.subn(r'(?m)^(\s*versionCode\s+)\d+\s*$',lambda m:m.group(1)+str(code),value)
           if count!=1:
               raise SystemExit('Cannot uniquely update Android versionCode')
           path.write_text(updated)
