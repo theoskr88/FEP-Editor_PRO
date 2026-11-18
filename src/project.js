@@ -39,6 +39,7 @@ export function normalizeProject(input){
  data.mockup=normalizeMockup(data.mockup,data.viewerBackground);
  data.mode=data.mode||'product';data.freeDesign=normalizeFreeDesign(data.freeDesign);
  data.version=2;data.finishMode=['standard','glitter'].includes(data.finishMode)?data.finishMode:'standard';
+ if(data.product==='mug_heart')warnings.push('La taza con asa de corazón ya no está disponible. Se abrió como taza cerámica estándar, conservando el diseño y las capas.');
  data.product=profileById(data.product)?data.product:'mug';data.profileVariant=profileVariant(data.profileVariant);
  data.width??=20;data.height??=8.5;
  if(data.width/data.height>100||data.width/data.height<.01)throw Error('Proporción inválida');
