@@ -619,6 +619,15 @@ if(isMugProduct(p)){
     [r-.13,-h/2+.12],[0,-h/2+.12]
   ];
   addGeo(new THREE.LatheGeometry(profile.map(([x,y])=>new THREE.Vector2(x,y)),160),plain);
+  if(sceneSettings.pieceColorsEnabled||p==='mug_enamel'){
+    const edgeColor=sceneSettings.pieceColorsEnabled?sceneSettings.pieceColors.rim:'#253e63';
+    const rimMaterial=new THREE.MeshPhysicalMaterial({color:edgeColor,roughness:p==='mug_enamel'?.29:.22,metalness:p==='mug_enamel'?.15:0,clearcoat:.5});
+    addGeo(new THREE.TorusGeometry(r-.032,.025,10,112),rimMaterial,0,h/2-.008,0,Math.PI/2);
+  }
+  if(sceneSettings.pieceColorsEnabled){
+    const insideMaterial=new THREE.MeshPhysicalMaterial({color:sceneSettings.pieceColors.interior,roughness:.26,clearcoat:.52,side:THREE.DoubleSide});
+    addGeo(new THREE.CylinderGeometry(r-.094,r-.104,h-.34,96,1,true),insideMaterial,0,.065,0);
+  }
 }else{
   addGeo(new THREE.CylinderGeometry(r,r,h,128,1,true),plain);
 }
@@ -635,16 +644,19 @@ if(finishMode==='glitter'){
  const glossMat=new THREE.MeshPhysicalMaterial({map:glitterTexture,normalMap:glitterNormalTexture,normalScale:new THREE.Vector2(props.normalStrength,props.normalStrength),roughnessMap:glitterRoughTexture,alphaMap:glitterMaskTexture,transparent:true,opacity:1,roughness:props.roughness,metalness:props.metalness,clearcoat:props.clearcoat,clearcoatRoughness:props.clearcoatRoughness,iridescence:props.iridescence||0,iridescenceIOR:1.3,iridescenceThicknessRange:[120,400],depthWrite:false,side:THREE.FrontSide});glossMat.userData.glitterSurface='overlay';
  const sparkles=addGeo(new THREE.CylinderGeometry(r+.024,r+.024,h-.29,128,1,true,-printArc/2,printArc),glossMat);
  sparkles.rotation.y=THREE.MathUtils.degToRad(printRotationDeg);
- // Artwork remains above the coating; the inverse alpha mask protects photos and text.
-}
-// Indicadores de ambos límites: quedan fuera del PNG para impresión.
-if($('showGuides').checked) for (const theta of [-printArc/2+THREE.MathUtils.degToRad(printRotationDeg),printArc/2+THREE.MathUtils.degToRad(printRotationDeg)]) {
-  const points=[];
-  for(let i=0;i<=20;i++){
-    const yy=-(h-.30)/2+i*(h-.30)/20;
-    points.push(new THREE.Vector3((r+.019)*Math.sin(theta),yy,(r+.019)*Math.cos(theta)));
-  }
-  const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:0x21bad0}));
+ // Artwork remains above the coating; the inverse alp  const handlePoints=p==='mug_heart'?[
+    [r-.015,h*.24],[r+.15,h*.42],[r+.38,h*.32],[r+.50,h*.45],
+    [r+.77,h*.43],[r+.88,h*.22],[r+.77,-h*.04],[r+.55,-h*.28],
+    [r+.30,-h*.43],[r+.08,-h*.30],[r-.015,-h*.22]
+  ]:[
+    [r-.015,h*.345],[r+.19,h*.39],[r+.52,h*.34],
+    [r+.68,h*.16],[r+.71,0],[r+.68,-h*.17],
+    [r+.53,-h*.34],[r+.21,-h*.38],[r-.015,-h*.345]
+  ];
+  const handlePath=new THREE.CatmullRomCurve3(handlePoints.map(([x,y])=>new THREE.Vector3(x,y,0)),false,'centripetal');
+  const handleMat=sceneSettings.pieceColorsEnabled?
+    new THREE.MeshPhysicalMaterial({color:sceneSettings.pieceColors.handle,roughness:.24,clearcoat:.65}):plain;
+  addGeo(new THREE.TubeGeometry(handlePath,100,.106,20,false),handleMat);rGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:0x21bad0}));
   modelRoot.add(line);
 }
 if(isMugProduct(p)){
