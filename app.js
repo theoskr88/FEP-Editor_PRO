@@ -483,7 +483,7 @@ function jpegWithDpi(buffer,dpi=300){
 }
 // PDF independiente del diálogo de impresión: tamaño de página = tamaño del lienzo.
 function whiteCanvas(source){const c=document.createElement('canvas');c.width=source.width;c.height=source.height;const x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);x.drawImage(source,0,0);return c}
-async async function pdfAtPhysicalSize(canvas,wCm,hCm){
+async function pdfAtPhysicalSize(canvas,wCm,hCm){
   const original=canvas;if(zoneProduct)canvas=whiteCanvas(canvas);
   const jpg=new Uint8Array(await (await canvasBlob(canvas,'image/jpeg',.98)).arrayBuffer());
   if(canvas!==original)canvas.width=canvas.height=1;
