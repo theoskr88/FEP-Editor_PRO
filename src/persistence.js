@@ -5,7 +5,7 @@ export function openDocumentStore(indexedDB=globalThis.indexedDB){
   write(document){return new Promise((ok,bad)=>{const tx=db.transaction(STORE,'readwrite'),store=tx.objectStore(STORE),r=store.get('current');let changed=false,failure;r.onsuccess=()=>{try{const old=r.result;if(old&&JSON.stringify(old.document)===JSON.stringify(document))return;if(old)store.put(old,'previous');store.put({document,savedAt:Date.now()},'current');changed=true}catch(error){failure=error;tx.abort()}};tx.oncomplete=()=>ok(changed);tx.onabort=()=>bad(failure||tx.error||Error('No se pudo guardar'));tx.onerror=()=>{};})},close:()=>db.close()
  })}});
 }
-export function createAutosave({store,snapshot,status,delay=700}){
+export function createAutosave({store,snapshot,status,delay=250}){
  let timer,revision=0,queue=Promise.resolve();
  function flush(){clearTimeout(timer);const ownRevision=++revision;let document;try{document=store.capture?store.capture(snapshot()):snapshot()}catch(error){status('error',error);return Promise.resolve(false)}status('saving');
   queue=queue.catch(()=>{}).then(()=>store.write(document)).then(()=>{if(ownRevision===revision)status('saved');return true},error=>{status('error',error);return false});return queue;
