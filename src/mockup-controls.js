@@ -1,7 +1,7 @@
 import {createSceneLibrary} from './mockup-scenes.js?v=fep-6a4c2734f7b31778';
 import {normalizeMockup,MOCKUP_PRESETS,CAMERA_PRESETS,LIGHT_STYLES,PREMIUM_FINISHES} from './mockup-settings.js?v=fep-6a4c2734f7b31778';
 export function createMockupControls({state,context,patch,notify}){
- const get=id=>document.getElementById(id);let library,environment,pending,owner;const normalMaps=new Map(),floorMaps=new Map();let photoTexture=null,photoKey=null,photoRequest=0;
+ const get=id=>document.getElementById(id);let library,environment,pending,owner;const normalMaps=new Map(),floorMaps=new Map();let photoTexture=null,photoKey=null,photoRequest=0,photoPending=Promise.resolve();
  for(const[id,preset]of Object.entries(MOCKUP_PRESETS)){const old=[...get('scenePreset').options].find(o=>o.value===id);if(old)old.textContent=preset.name;else get('scenePreset').append(new Option(preset.name,id))}
  if(![...get('sceneCamera').options].some(o=>o.value==='print'))get('sceneCamera').append(new Option('Zona impresa','print'));
  for(const [id,label] of [['right','Lateral derecho'],['back','Posterior']]){
@@ -89,15 +89,17 @@ export function createMockupControls({state,context,patch,notify}){
   const previous=photoTexture;photoTexture=null;
   if(previous)previous.dispose();
   const textureLoader=new THREE.TextureLoader();
-  textureLoader.load(url,loaded=>{
-   if(id!==photoRequest||!state().backgroundPhotoEnabled||state().backgroundPhoto!==url){loaded.dispose();return}
+  photoPending=new Promise(resolve=>textureLoader.load(url,loaded=>{
+   if(id!==photoRequest||!state().backgroundPhotoEnabled||state().backgroundPhoto!==url){loaded.dispose();resolve();return}
    loaded.colorSpace=THREE.SRGBColorSpace;
    photoTexture=loaded;
    if(c.scene===owner)c.scene.background=loaded;
    c.renderer.render(c.scene,c.camera);
+   resolve();
   },undefined,()=>{
    if(id===photoRequest){photoKey=null;notify('No se pudo cargar el fondo fotográfico; se conserva el color original')}
-  });
+   resolve();
+  }));
  }
  function sync(){const s=state();photoEnabled.checked=s.backgroundPhotoEnabled;photoEnabled.disabled=!s.backgroundPhoto;photoClear.disabled=!s.backgroundPhoto;finishSelector.value=s.premiumFinish;
  pieceToggle.checked=s.pieceColorsEnabled;
@@ -114,5 +116,5 @@ const values={scenePreset:s.preset,sceneLighting:s.lightStyle,sceneShadowStrengt
   c.modelRoot?.traverse(mesh=>{if(!mesh.isMesh)return;mesh.castShadow=s.shadows;mesh.receiveShadow=s.shadows;for(const m of(Array.isArray(mesh.material)?mesh.material:[mesh.material])){if(!m.isMeshStandardMaterial||m.userData.glitterSurface||m.map===c.texture||m.map===c.physicalArtTexture)continue;if(!m.userData.fepBase)m.userData.fepBase={roughness:m.roughness,metalness:m.metalness,normalMap:m.normalMap,normalScale:m.normalScale.clone()};const base=m.userData.fepBase,next=s.bodyTexture==='none'?base.normalMap:texture(THREE,s.bodyTexture,true);if(!!next!==!!m.normalMap)m.needsUpdate=true;m.normalMap=next;const finish=PREMIUM_FINISHES[s.premiumFinish]||PREMIUM_FINISHES.original;m.roughness=s.roughness??finish.roughness??base.roughness;m.metalness=finish.metalness??base.metalness;m.normalScale.copy(base.normalScale);if(s.bodyTexture!=='none')m.normalScale.setScalar(.12)}});
   if(camera){if(s.camera==='print'&&c.focusPrint)c.focusPrint();else c.camera.position.set(...CAMERA_PRESETS[s.camera]);c.controls.target.set(0,0,0);c.controls.update();c.fitView?.()}c.renderer.render(c.scene,c.camera);
  }
- return {refresh,sync,ready:()=>pending||Promise.resolve()};
+ return {refresh,sync,ready:()=>Promise.all([pending||Promise.resolve(),photoPending]).then(()=>{})};
 }
