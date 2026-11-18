@@ -1,5 +1,6 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { App } from '@capacitor/app';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 
@@ -67,3 +68,10 @@ window.FEP_NATIVE={
     cancel:()=>Video.cancel()
   }
 };
+
+// Trigger an early local database flush when Android backgrounds the activity.
+if(isNative){
+  const pause=()=>window.dispatchEvent(new Event('fep-native-pause'));
+  App.addListener('pause',pause).catch(error=>console.warn('FEP Android pause listener:',error));
+  App.addListener('appStateChange',state=>{if(!state.isActive)pause()}).catch(()=>{});
+}
