@@ -3,6 +3,14 @@ import {pdfPrintJob} from './src/print-pdf.js?v=fep-6a4c2734f7b31778';
 import {imageInfo} from './src/assets.js?v=fep-6a4c2734f7b31778';
 /* Plancha de impresión — V0.9.0, independiente del visor 3D. */
 const el=id=>document.getElementById(id);
+const sheetPixelLimit=()=>window.FEP_NATIVE?.isNative?4_000_000:40_000_000;
+const maxImagePixels=()=>window.FEP_NATIVE?.isNative?16_000_000:PRINT_LIMITS.totalImagePixels;
+function sheetDpi(w,h){
+ const pixelsAt300=w*h/(2.54*2.54)*90000;
+ const dpi=Math.min(300,Math.floor(300*Math.sqrt(sheetPixelLimit()/pixelsAt300)));
+ if(dpi<90)throw Error('La hoja supera el límite seguro de exportación en este dispositivo');
+ return dpi;
+}
 const presets={A4:[21,29.7],Carta:[21.59,27.94],Oficio:[21.6,33],A3:[29.7,42],A2:[42,59.4]};
 let items=[],selected=-1,drag=null,objectCount=0,previewScale=1,currentPage=0,exportBusy=false,disabledBefore=[];
 const preview=el('sheetPreview'),pc=preview.getContext('2d');
@@ -23,7 +31,7 @@ function selectItem(i){selected=i;const item=items[i];el('sheetSelectedName').te
  for(const [field,key] of [['sheetX','x'],['sheetY','y'],['sheetW','w'],['sheetH','h']]){el(field).disabled=!item;el(field).value=item?Number(item[key].toFixed(4)):'';}
  for(const id of ['sheetDuplicate','sheetCopiesAdd','sheetRotate','sheetRemove'])el(id).disabled=!item;
  draw();}
-function addItem(item){const unique=new Map(items.map(v=>[v.url,v.img.naturalWidth*v.img.naturalHeight]));if([...unique.values()].reduce((a,b)=>a+b,0)+item.img.naturalWidth*item.img.naturalHeight>PRINT_LIMITS.totalImagePixels){URL.revokeObjectURL(item.url);throw Error('El trabajo supera 80 megapíxeles de imágenes distintas')}if(items.length>=PRINT_LIMITS.items){URL.revokeObjectURL(item.url);throw Error('Máximo 500 piezas por trabajo')}let position;try{position=findSpace(item)}catch(e){URL.revokeObjectURL(item.url);throw e}item.x=position.x;item.y=position.y;items.push(item);selectItem(items.length-1);
+function addItem(item){const unique=new Map(items.map(v=>[v.url,v.img.naturalWidth*v.img.naturalHeight]));if([...unique.values()].reduce((a,b)=>a+b,0)+item.img.naturalWidth*item.img.naturalHeight>maxImagePixels()){URL.revokeObjectURL(item.url);throw Error('El trabajo supera el límite seguro de imágenes de este dispositivo')}if(items.length>=PRINT_LIMITS.items){URL.revokeObjectURL(item.url);throw Error('Máximo 500 piezas por trabajo')}let position;try{position=findSpace(item)}catch(e){URL.revokeObjectURL(item.url);throw e}item.x=position.x;item.y=position.y;items.push(item);selectItem(items.length-1);
  const {w,h}=dims();if(item.x+item.w>w||item.y+item.h>h)msg('La pieza no cabe en esta hoja: usa un papel mayor u organiza las piezas.',true);else msg('Pieza añadida a la plancha: '+item.name);}
 function paint(out,drawSelection=false,page=currentPage){const {w,h,margin,bleed,marks}=dims();const sx=out.canvas.width/w,sy=out.canvas.height/h;
  out.fillStyle='#ffffff';out.fillRect(0,0,out.canvas.width,out.canvas.height);
@@ -39,33 +47,75 @@ function paint(out,drawSelection=false,page=currentPage){const {w,h,margin,bleed
 }
 function draw(){const {w,h}=dims();try{printSettings(dims())}catch(e){msg(e.message,true);el('sheetQuality').textContent=e.message;el('sheetQualityPanel').querySelector('summary').textContent='Verificación · error de medidas';return;}const pages=Math.max(1,...items.map(v=>(v.page||0)+1));currentPage=Math.min(currentPage,pages-1);const pageSelect=el('sheetPage');pageSelect.replaceChildren(...Array.from({length:pages},(_,i)=>new Option(`Hoja ${i+1} de ${pages}`,i)));pageSelect.value=currentPage;
  const max=950;previewScale=Math.min(max/w,max/h);preview.width=Math.max(1,Math.round(w*previewScale));preview.height=Math.max(1,Math.round(h*previewScale));paint(pc,true);
- el('sheetDimensions').textContent=`${fmt(w)} × ${fmt(h)} cm · ${items.length} pieza(s) · 300 ppp en archivo de salida`;const quality=printQuality(items,dims());el('sheetQualityPanel').querySelector('summary').textContent=`Verificación · ${quality.errors.length} error(es) · ${quality.warnings.length} aviso(s)`;el('sheetQualityPanel').dataset.state=quality.errors.length?'error':quality.warnings.length?'warning':'ready';el('sheetQuality').replaceChildren(...[...quality.errors,...quality.warnings].slice(0,30).map(text=>{const n=document.createElement('p');n.textContent=text;return n}));if(!quality.errors.length&&!quality.warnings.length)el('sheetQuality').textContent='Medidas y separación correctas · resolución de origen ≥ 300 ppp.';
+ el('sheetDimensions').textContent=`${fmt(w)} × ${fmt(h)} cm · ${items.length} pieza(s) · resolución adaptativa (verifica exportación)`;const quality=printQuality(items,dims());el('sheetQualityPanel').querySelector('summary').textContent=`Verificación · ${quality.errors.length} error(es) · ${quality.warnings.length} aviso(s)`;el('sheetQualityPanel').dataset.state=quality.errors.length?'error':quality.warnings.length?'warning':'ready';el('sheetQuality').replaceChildren(...[...quality.errors,...quality.warnings].slice(0,30).map(text=>{const n=document.createElement('p');n.textContent=text;return n}));if(!quality.errors.length&&!quality.warnings.length)el('sheetQuality').textContent='Medidas y separación correctas · resolución de origen ≥ 300 ppp.';
 }
 function checkExport(){const quality=printQuality(items,dims());if(quality.errors.length){msg(quality.errors[0],true);return false}return true}
 function fullCanvas(page=currentPage){
-  const {w,h}=printSettings(dims()),W=Math.round(w/2.54*300),H=Math.round(h/2.54*300);
-  if(W*H>40e6)throw Error('La hoja supera el límite seguro de 40 millones de píxeles');
-  const normal=document.createElement('canvas');normal.width=W;normal.height=H;
-  paint(normal.getContext('2d',{willReadFrequently:true}),false,page);
-  if(!el('sheetMirrorMode').checked)return normal;
+ const {w,h}=printSettings(dims()),dpi=sheetDpi(w,h),W=Math.round(w/2.54*dpi),H=Math.round(h/2.54*dpi);
+ if(W*H>sheetPixelLimit())throw Error('La hoja supera el límite seguro de píxeles del dispositivo');
+ const normal=document.createElement('canvas');normal.width=W;normal.height=H;
+ try {
+  const ctx=normal.getContext('2d',{willReadFrequently:true});
+  if(!ctx)throw Error('No se pudo preparar el lienzo de impresión');
+  paint(ctx,false,page);
+  if(!el('sheetMirrorMode').checked)return {canvas:normal,dpi};
   const reflected=document.createElement('canvas');reflected.width=W;reflected.height=H;
-  const ctx=reflected.getContext('2d',{willReadFrequently:true});ctx.translate(W,0);ctx.scale(-1,1);
-  ctx.drawImage(normal,0,0);normal.width=normal.height=1;
-  return reflected;
+  try {
+   const x=reflected.getContext('2d',{willReadFrequently:true});
+   if(!x)throw Error('No se pudo preparar el espejo de impresión');
+   x.translate(W,0);x.scale(-1,1);x.drawImage(normal,0,0);
+   return {canvas:reflected,dpi};
+  }catch(e){reflected.width=reflected.height=1;throw e}
+ }finally{
+  if(el('sheetMirrorMode').checked)normal.width=normal.height=1;
+ }
 }
-function download(blob,name){const api=window.__estudioPrintAPI;if(!api)throw Error('El editor todavía no terminó de cargar');api.saveBlob(blob,name)}
+function download(blob,name){
+ const api=window.__estudioPrintAPI;
+ if(!api)throw Error('El editor todavía no terminó de cargar');
+ return api.saveBlob(blob,name);
+}
 const blob=(c,type,quality)=>new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(Error('No pudo generarse el archivo')),type,quality));
-async function exportFile(type){if(exportBusy||!checkExport())return;exportBusy=true;setExportButtons(true);
- try{const api=window.__estudioPrintAPI,{w,h}=dims(),c=type==='job'?null:fullCanvas(),basename=`plancha_${w}x${h}cm_300ppp_${(el('sheetMirrorMode').checked?'espejo':'normal')}`;
-  if(type==='job'){const pages=[];let bytes=0;for(let page=0;page<Math.max(...items.map(v=>(v.page||0)+1));page++){const canvas=fullCanvas(page),jpeg=new Uint8Array(await(await blob(canvas,'image/jpeg',.97)).arrayBuffer());bytes+=jpeg.byteLength;if(bytes>100e6)throw Error('El PDF supera 100 MB');pages.push({jpeg,width:canvas.width,height:canvas.height});canvas.width=canvas.height=1;msg(`Preparando PDF · hoja ${page+1}`);await new Promise(r=>setTimeout(r,0))}download(pdfPrintJob(pages,w,h),basename+'_trabajo.pdf')}
-  else if(type==='png'){const raw=await blob(c,'image/png');download(api.pngWithDpi(await raw.arrayBuffer()),basename+'.png')}
-  else if(type==='jpg'){const raw=await blob(c,'image/jpeg',.97);download(api.jpegWithDpi(await raw.arrayBuffer()),basename+'.jpg')}
-  else download(await api.pdfAtPhysicalSize(c,w,h),basename+'.pdf');
-  msg('Plancha exportada con las medidas y resolución configuradas.');
- }catch(e){msg('No se pudo exportar: '+e.message,true)}finally{exportBusy=false;setExportButtons(false)}
+async function exportFile(type){
+ if(exportBusy||!checkExport())return;exportBusy=true;setExportButtons(true);
+ let c=null;
+ try{
+  const api=window.__estudioPrintAPI,{w,h}=dims(),dpi=sheetDpi(w,h),base=`plancha_${w}x${h}cm_${dpi}ppp_${el('sheetMirrorMode').checked?'espejo':'normal'}`;
+  let saved=false;
+  if(type==='job'){
+   const pages=[],count=Math.max(1,...items.map(v=>(v.page||0)+1));
+   let bytes=0;
+   for(let page=0;page<count;page++){
+    const rendered=fullCanvas(page),pageCanvas=rendered.canvas;
+    try{
+     const jpeg=new Uint8Array(await (await blob(pageCanvas,'image/jpeg',.97)).arrayBuffer());
+     bytes+=jpeg.byteLength;
+     if(bytes>100e6)throw Error('El PDF supera 100 MB');
+     pages.push({jpeg,width:pageCanvas.width,height:pageCanvas.height});
+    }finally{pageCanvas.width=pageCanvas.height=1}
+    msg(`Preparando PDF · hoja ${page+1}`);
+    await new Promise(r=>setTimeout(r,0));
+   }
+   saved=await download(pdfPrintJob(pages,w,h),base+'_trabajo.pdf');
+  }else{
+   c=fullCanvas().canvas;
+   if(type==='png'){
+    const raw=await blob(c,'image/png');
+    saved=await download(api.pngWithDpi(await raw.arrayBuffer(),dpi),base+'.png');
+   }else if(type==='jpg'){
+    const raw=await blob(c,'image/jpeg',.97);
+    saved=await download(api.jpegWithDpi(await raw.arrayBuffer(),dpi),base+'.jpg');
+   }else if(type==='pdf'){
+    saved=await download(await api.pdfAtPhysicalSize(c,w,h),base+'.pdf');
+   }else throw Error('Formato desconocido');
+  }
+  if(saved)msg(`Plancha guardada: ${w} × ${h} cm a ${dpi} ppp. Para imprimir usa escala 100 %.`);
+  else msg('Guardado cancelado. No se creó un archivo.',true);
+ }catch(e){msg('No se pudo exportar: '+e.message,true)}
+ finally{if(c)c.width=c.height=1;exportBusy=false;setExportButtons(false)}
 }
 function setExportButtons(busy){if(busy){disabledBefore=[...el('sheetOverlay').querySelectorAll('input,select,button')].map(node=>[node,node.disabled]);for(const [node]of disabledBefore)node.disabled=true}else{for(const [node,disabled]of disabledBefore)node.disabled=disabled;disabledBefore=[]}}
-async function addExternal(file){if(file.size>25*1024*1024)throw Error('El archivo supera 25 MB');const bytes=await file.arrayBuffer(),info=imageInfo(bytes,{side:11812,pixels:PRINT_LIMITS.pixels});if(info.type!==file.type)throw Error('El contenido de la imagen no coincide con su formato');const unique=new Map(items.map(v=>[v.url,v.img.naturalWidth*v.img.naturalHeight]));if([...unique.values()].reduce((a,b)=>a+b,0)+info.pixels>PRINT_LIMITS.totalImagePixels)throw Error('El trabajo supera 80 megapíxeles de imágenes distintas');const declared=readPrintDpi(bytes,file.type),dpi=declared||{x:300,y:300};
+async function addExternal(file){if(file.size>25*1024*1024)throw Error('El archivo supera 25 MB');const bytes=await file.arrayBuffer(),info=imageInfo(bytes,{side:11812,pixels:PRINT_LIMITS.pixels});if(info.type!==file.type)throw Error('El contenido de la imagen no coincide con su formato');const unique=new Map(items.map(v=>[v.url,v.img.naturalWidth*v.img.naturalHeight]));if([...unique.values()].reduce((a,b)=>a+b,0)+info.pixels>maxImagePixels())throw Error('El trabajo supera el límite seguro de imágenes');const declared=readPrintDpi(bytes,file.type),dpi=declared||{x:300,y:300};
  const obj=await photo(file,file.name,info.width/dpi.x*2.54,info.height/dpi.y*2.54);obj.assumedDpi=!declared;if(obj.img.naturalWidth===info.height&&obj.img.naturalHeight===info.width&&info.width!==info.height)[obj.w,obj.h]=[obj.h,obj.w];addItem(obj);if(obj.assumedDpi)msg('Imagen sin resolución física declarada: se asumieron 300 ppp. Verifica sus cm.',true);}
 // Un arte actual se incorpora directamente desde el editor original y conserva tamaño físico.
 el('sheetAddCurrent').onclick=async()=>{try{const api=window.__estudioPrintAPI;if(!api)throw Error('Aún no está listo el editor');const {w,h}=api.cmPrint();const art=api.renderToExportCanvas();const b=await blob(art,'image/png');addItem(await photo(b,`Diseño actual ${w} × ${h} cm`,w,h));}catch(e){msg(e.message,true)}};
@@ -92,7 +142,7 @@ el('sheetPng').onclick=()=>exportFile('png');el('sheetJpg').onclick=()=>exportFi
 // No es posible seleccionar una impresora USB/Wi-Fi directamente desde un sitio público.
 el('sheetPrint').onclick=async()=>{if(!checkExport())return;
  const popup=window.open('','_blank');if(!popup){msg('El navegador bloqueó la ventana de impresión; habilita ventanas emergentes.',true);return;}
- try{const c=fullCanvas(),{w,h}=dims(),data=c.toDataURL('image/png');
+ try{const {canvas:c,dpi}=fullCanvas(),{w,h}=dims(),data=c.toDataURL('image/png');c.width=c.height=1;
  popup.document.open();popup.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Plancha ${w} x ${h} cm</title><style>@page{size:${w}cm ${h}cm;margin:0}html,body{margin:0;padding:0;width:${w}cm;height:${h}cm}img{display:block;width:${w}cm;height:${h}cm;max-width:none;max-height:none}@media screen{body{background:#ddd;padding:15px}img{box-shadow:0 0 12px #666}}</style></head><body><img id="printImage" src="${data}" alt="Plancha lista para imprimir"><script>const img=document.getElementById('printImage');img.onload=()=>setTimeout(()=>window.print(),250);<\/script></body></html>`);popup.document.close();msg('Se abrió el diálogo de impresión. Selecciona impresora, tamaño de hoja y escala 100 %.');
  }catch(e){popup.close();msg('No se pudo preparar la impresión: '+e.message,true)}
 };
@@ -101,4 +151,4 @@ selectItem(-1);draw();
 el('sheetMirrorMode').checked=true;el('sheetMirrorMode').addEventListener('change',()=>msg('Espejo: '+(el('sheetMirrorMode').checked?'activado':'desactivado')+'. El lienzo sigue normal.'));
 
 // Atomic batch from independent editor zones. Artwork only; no scene pixels.
-window.__fepSheetAPI={async addZones(docs){if(exportBusy)throw Error('Espera a que termine la exportación');if(items.length+docs.length>PRINT_LIMITS.items)throw Error('Máximo 500 piezas');const unique=new Map(items.map(v=>[v.url,v.img.naturalWidth*v.img.naturalHeight])),pixels=docs.reduce((n,d)=>n+Math.round(d.width/2.54*300)*Math.round(d.height/2.54*300),0);if([...unique.values()].reduce((a,b)=>a+b,0)+pixels>PRINT_LIMITS.totalImagePixels)throw Error('El trabajo supera 80 megapíxeles');const prepared=[];exportBusy=true;setExportButtons(true);try{for(const doc of docs){const canvas=window.__estudioPrintAPI.renderZoneCanvas(doc),b=await blob(canvas,'image/png');canvas.width=canvas.height=1;prepared.push(await photo(b,doc.name,doc.width,doc.height))}for(const item of prepared){const p=findSpace(item);item.x=p.x;item.y=p.y;items.push(item)}selectItem(items.length-1);msg('Zonas incorporadas. Elige papel y ordena automáticamente.')}catch(e){for(const item of prepared)if(!items.includes(item))URL.revokeObjectURL(item.url);throw e}finally{exportBusy=false;setExportButtons(false)}}};
+window.__fepSheetAPI={async addZones(docs){if(exportBusy)throw Error('Espera a que termine la exportación');if(items.length+docs.length>PRINT_LIMITS.items)throw Error('Máximo 500 piezas');const unique=new Map(items.map(v=>[v.url,v.img.naturalWidth*v.img.naturalHeight])),pixels=docs.reduce((n,d)=>{const px=d.width*d.height/(2.54*2.54)*90000,limit=window.FEP_NATIVE?.isNative?4_000_000:40_000_000,dpi=Math.min(300,Math.floor(300*Math.sqrt(limit/px)));if(dpi<90)throw Error('La zona supera el límite seguro de exportación');return n+Math.round(d.width/2.54*dpi)*Math.round(d.height/2.54*dpi)},0);if([...unique.values()].reduce((a,b)=>a+b,0)+pixels>maxImagePixels())throw Error('El trabajo supera el límite seguro de imágenes');const prepared=[];exportBusy=true;setExportButtons(true);try{for(const doc of docs){const canvas=window.__estudioPrintAPI.renderZoneCanvas(doc),b=await blob(canvas,'image/png');canvas.width=canvas.height=1;prepared.push(await photo(b,doc.name,doc.width,doc.height))}for(const item of prepared){const p=findSpace(item);item.x=p.x;item.y=p.y;items.push(item)}selectItem(items.length-1);msg('Zonas incorporadas. Elige papel y ordena automáticamente.')}catch(e){for(const item of prepared)if(!items.includes(item))URL.revokeObjectURL(item.url);throw e}finally{exportBusy=false;setExportButtons(false)}}};
