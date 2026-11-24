@@ -14,14 +14,13 @@ for folder in ("src", "vendor"):
 # Native Android embeds assets and uses its WebView. Do not install the browser SW.
 index = target / "index.html"
 text = index.read_text(encoding="utf-8")
-needle = '<script type="module" src="./src/offline.js?v=fep-6a4c2734f7b31778"></script>'
-if text.count(needle) != 1:
+import re
+text, n_sw = re.subn(r'<script type="module" src="\\./src/offline\\.js\\?v=fep-[a-f0-9]{16}"></script>', '', text)
+if n_sw != 1:
     raise SystemExit("Unexpected index.html; native SW suppression must be reviewed")
-text = text.replace(needle, "")
-boot = '<script defer src="./src/bootstrap.js?v=fep-6a4c2734f7b31778"></script>'
-if text.count(boot) != 1:
+text, n_boot = re.subn(r'(<script defer src="\\./src/bootstrap\\.js\\?v=fep-[a-f0-9]{16}"></script>)', r'<script src="./fep-native.js"></script>\\1', text)
+if n_boot != 1:
     raise SystemExit("Missing bootstrap insertion point")
-text = text.replace(boot, '<script src="./fep-native.js"></script>' + boot)
 index.write_text(text, encoding="utf-8")
 assert (target / "src/bootstrap.js").is_file()
 assert (target / "vendor/three.module.js").is_file()
