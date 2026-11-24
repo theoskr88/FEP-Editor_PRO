@@ -400,7 +400,8 @@ function syncTextileMaps(product=zoneProduct){if(!textileMaps||!product||!produc
 function zoneExportDpi(doc){
  const limit=window.FEP_NATIVE?.isNative?4000000:40000000;
  const pixelsAt300=doc.width*doc.height/(2.54*2.54)*90000;
- const dpi=Math.min(300,Math.floor(300*Math.sqrt(limit/pixelsAt300)));
+ let dpi=Math.min(300,Math.floor(300*Math.sqrt(limit/pixelsAt300)));
+ while(dpi>0&&Math.round(doc.width/2.54*dpi)*Math.round(doc.height/2.54*dpi)>limit)dpi--;
  if(dpi<90)throw Error('La zona supera el límite seguro de exportación en este dispositivo');
  return dpi;
 }
