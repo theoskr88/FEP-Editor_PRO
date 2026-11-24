@@ -61,6 +61,24 @@ jobs:
       - name: Install JavaScript test dependencies
         shell: bash
         run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Finalize offline asset hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/finalize-offline.py
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          manifest=json.loads(Path('offline-manifest.json').read_text())
+          assert manifest['build'].startswith('fep-')
+          assert len(manifest['files'])>0
+          print('Offline bundle manifest:',manifest['build'],len(manifest['files']))
+          PY
+      - name: Run full Node unit regression suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test
       - name: Check photo tools and editor JavaScript
         shell: bash
         run: |
@@ -144,3 +162,4 @@ jobs:
             android/app/build/outputs/apk/debug/app-debug.apk
             app-debug.apk.sha256
             android-build.log
+            offline-manifest.json
