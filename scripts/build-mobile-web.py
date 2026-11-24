@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Prepare offline-ready static assets for Capacitor without changing web production."""
 from pathlib import Path
+import re
 import shutil
+
 root = Path(__file__).resolve().parents[1]
 target = root / "mobile-www"
 if target.exists():
@@ -11,17 +13,23 @@ for name in ("index.html", "app.js", "plancha.js"):
     shutil.copy2(root / name, target / name)
 for folder in ("src", "vendor"):
     shutil.copytree(root / folder, target / folder)
-# Native Android embeds assets and uses its WebView. Do not install the browser SW.
+
+# Native Android bundles local assets and must NOT register the browser service worker.
 index = target / "index.html"
-text = index.read_text(encoding="utf-8")
-import re
-text, n_sw = re.subn(r'<script type="module" src="\\./src/offline\\.js\\?v=fep-[a-f0-9]{16}"></script>', '', text)
-if n_sw != 1:
+html = index.read_text(encoding="utf-8")
+html, sw_count = re.subn(
+    r'<script type="module" src="\./src/offline\.js\?v=fep-[a-f0-9]{16}"></script>',
+    "",
+    html,
+)
+if sw_count != 1:
     raise SystemExit("Unexpected index.html; native SW suppression must be reviewed")
-text, n_boot = re.subn(r'(<script defer src="\\./src/bootstrap\\.js\\?v=fep-[a-f0-9]{16}"></script>)', r'<script src="./fep-native.js"></script>\\1', text)
-if n_boot != 1:
+
+bootstrap = r'(<script defer src="\./src/bootstrap\.js\?v=fep-[a-f0-9]{16}"></script>)'
+html, boot_count = re.subn(bootstrap, r'<script src="./fep-native.js"></script>\1', html)
+if boot_count != 1:
     raise SystemExit("Missing bootstrap insertion point")
-index.write_text(text, encoding="utf-8")
+index.write_text(html, encoding="utf-8")
 assert (target / "src/bootstrap.js").is_file()
 assert (target / "vendor/three.module.js").is_file()
 print("Capacitor web assets copied:", len(list(target.rglob("*"))), "entries")
