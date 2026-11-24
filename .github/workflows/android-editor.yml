@@ -1,4 +1,4 @@
-name: FEP Editor PRO — Android Premium P4
+name: FEP Editor PRO — Android Premium P5
 concurrency:
   group: fep-editor-android-${{ github.ref }}
   cancel-in-progress: true
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - desarrollo/estudio3d-premium-p4
+      - desarrollo/estudio3d-premium-p5
     paths:
       - 'capacitor.config.json'
       - 'scripts/build-mobile-web.py'
@@ -85,9 +85,11 @@ jobs:
           set -euo pipefail
           node --check app.js
           node --check src/premium-p4.js
+          node --check src/premium-p5.js
+          node --check scripts/native-bridge-entry.js
           node --check src/photo-tools.js
           node --check src/photo-import-mobile.js
-          node --test tests/premium-p4.test.mjs tests/core.test.mjs tests/photo-tools.test.mjs tests/photo-import-mobile.test.mjs tests/android-project-reopen.test.mjs tests/premium-3d.test.mjs tests/premium-3d-p2.test.mjs
+          node --test tests/premium-p5.test.mjs tests/premium-p4.test.mjs tests/core.test.mjs tests/photo-tools.test.mjs tests/photo-import-mobile.test.mjs tests/android-project-reopen.test.mjs tests/premium-3d.test.mjs tests/premium-3d-p2.test.mjs
       - name: Prepare bundled offline web assets
         shell: bash
         run: |
@@ -117,8 +119,57 @@ jobs:
           updated,count=re.subn(r'(?m)^([ \t]*versionCode[ \t]+)\d+[ \t]*$',lambda m:m.group(1)+str(code),value)
           if count != 1:
               raise SystemExit('Cannot uniquely update Android versionCode')
+          value=updated
+          updated,count=re.subn(r'(?m)^([ \\t]*versionName[ \\t]+)[\"\\'][^\"\\']+[\"\\'][ \\t]*
+          PY
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          path=Path('android/app/src/main/assets/capacitor.plugins.json')
+          if not path.is_file():
+              raise SystemExit('Plugin manifest missing: Capacitor plugins not installed')
+          plugins=json.loads(path.read_text())
+          registered={item.get('pkg') for item in plugins}
+          expected={'@capacitor/camera','@capacitor/app','@capacitor/filesystem','@capacitor/share'}
+          print('Registered plugins:', sorted(registered))
+          if not expected.issubset(registered):
+              raise SystemExit('Missing native plugins: '+', '.join(sorted(expected-registered)))
+          PY
+          python3 scripts/android-native/patch-manifest.py
+          grep -q 'android.media.action.IMAGE_CAPTURE' android/app/src/main/AndroidManifest.xml
+          grep -q 'android.intent.action.GET_CONTENT' android/app/src/main/AndroidManifest.xml
+      - name: Compile Android debug APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd android
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug 2>&1 | tee ../android-build.log
+      - name: Verify APK and checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=android/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$apk"
+          unzip -l "$apk" | grep -q 'classes.dex'
+          unzip -l "$apk" | grep -q 'AndroidManifest.xml'
+          sha256sum "$apk" > app-debug.apk.sha256
+      - name: Upload debug APK and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fep-editor-pro-android-debug
+          if-no-files-found: warn
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            app-debug.apk.sha256
+            android-build.log
+            offline-manifest.json
+,lambda m:m.group(1)+'"0.9.5-p5"',value)
+          if count != 1:
+              raise SystemExit('Cannot uniquely update Android versionName')
           path.write_text(updated)
-          print('Android versionCode:',code)
+          print('Android versionCode:',code,'versionName: 0.9.5-p5')
           PY
           python3 - <<'PY'
           import json
