@@ -17,7 +17,9 @@ export function printPreflight({widthCm,heightCm,pixelBudget=4_000_000,images=[]
  if(dpi<300)warnings.push('La resolución de salida se limitará a '+dpi+' ppp por memoria disponible.');
  for(const image of images){
   if(!image||!Number.isFinite(image.pixelW)||!Number.isFinite(image.pixelH)||!Number.isFinite(image.widthCm)||!Number.isFinite(image.heightCm)||image.widthCm<=0||image.heightCm<=0)continue;
-  const effective=Math.min(image.pixelW/image.widthCm,image.pixelH/image.heightCm)*2.54;
+  const cropW=Array.isArray(image.crop)&&Number.isFinite(image.crop[2])&&image.crop[2]>0&&image.crop[2]<=1?image.crop[2]:1;
+  const cropH=Array.isArray(image.crop)&&Number.isFinite(image.crop[3])&&image.crop[3]>0&&image.crop[3]<=1?image.crop[3]:1;
+  const effective=Math.min((image.pixelW*cropW)/image.widthCm,(image.pixelH*cropH)/image.heightCm)*2.54;
   if(effective<150)warnings.push('Imagen '+(image.name||'sin nombre')+': '+Math.round(effective)+' ppp efectivos. Riesgo de pixelación.');
   else if(effective<300)warnings.push('Imagen '+(image.name||'sin nombre')+': '+Math.round(effective)+' ppp efectivos (menos de 300).');
  }
