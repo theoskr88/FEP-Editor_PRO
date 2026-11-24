@@ -169,82 +169,118 @@ function draw(){
 }
 function bounds(e){if(e?.type==='text'&&(e.typography||e.gradient))return creativeTextBounds(ctx,e,canvas.width,canvas.height);if(e?.type==='vector')return vectorBounds(e,canvas.width,canvas.height);if(e?.type==='shape')return shapeBounds(e,canvas.width,canvas.height);if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
 function pos(ev){const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/canvas.width,r.height/canvas.height),w=canvas.width*scale,h=canvas.height*scale;return{x:(ev.clientX-r.left-(r.width-w)/2)/scale,y:(ev.clientY-r.top-(r.height-h)/2)/scale}}
+function isEditableCanvasLayer(e){return !!e&&e.visible!==false&&!e.locked&&e.type!=='glitter'}
+function findTopEditableLayerAt(p){
+ for(let i=elements.length-1;i>=0;i--){
+  if(!isEditableCanvasLayer(elements[i]))continue;
+  const b=bounds(elements[i]);if(p.x>=b.x&&p.x<=b.x+b.w&&p.y>=b.y&&p.y<=b.y+b.h)return i;
+ }
+ return -1;
+}
+function layerPinchMetrics(e){
+ if(e.type==='text')return {kind:'text',size:e.size};
+ if(e.type==='image'){const f=imageFractions(e);return {kind:'box',fw:f.fw,fh:f.fh}}
+ if(e.type==='sticker'){const f=stickerGeometry.stickerFractions(e,canvas.width,canvas.height);return {kind:'box',fw:f.fw,fh:f.fh}}
+ if(e.type==='shape'||e.type==='vector')return {kind:'box',fw:e.widthFrac,fh:e.heightFrac};
+ return null;
+}
+function clearCanvasGesture(){
+ pinchGesture=null;dragging=false;resizing=false;dragStart=null;resizeStart=null;gestureHistory=false;updateImageControls();
+}
 canvas.addEventListener('pointerdown',ev=>{
-  if(ev.pointerType==='touch')canvasPointers.set(ev.pointerId,pos(ev));
-  if(canvasPointers.size===2){
-    const e=elements[selected];
-    if(e?.type==='image'&&!e.locked&&e.visible!==false){
-      const points=[...canvasPointers.values()],f=imageFractions(e);
-      pinchGesture={ids:[...canvasPointers.keys()],distance:Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y),fw:f.fw,fh:f.fh,layer:e};
-      dragging=false;resizing=false;dragStart=null;resizeStart=null;
-      for(const id of pinchGesture.ids)try{canvas.setPointerCapture(id)}catch{}
-      ev.preventDefault();return;
-    }
+ if(ev.pointerType==='touch')canvasPointers.set(ev.pointerId,pos(ev));
+ if(canvasPointers.size>2){clearCanvasGesture();return}
+ if(canvasPointers.size===2){
+  const points=[...canvasPointers.values()];
+  const midpoint={x:(points[0].x+points[1].x)/2,y:(points[0].y+points[1].y)/2};
+  // Never change the artwork by pinching a selected layer elsewhere on the screen.
+  const hit=[midpoint,...points].map(findTopEditableLayerAt).find(i=>i>=0);
+  if(hit!==undefined)selected=hit;
+  const e=elements[selected],metrics=isEditableCanvasLayer(e)&&hit!==undefined?layerPinchMetrics(e):null;
+  const distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);
+  if(metrics&&distance>=4){
+   pinchGesture={ids:[...canvasPointers.keys()],distance,midpoint,origX:e.x,origY:e.y,metrics,layer:e};
+   dragging=false;resizing=false;dragStart=null;resizeStart=null;
+   for(const id of pinchGesture.ids)try{canvas.setPointerCapture(id)}catch{}
+   loadSelectedTextIntoInputs();updateImageControls();draw();ev.preventDefault();return;
   }
-  if(dragging||resizing)return;const p=pos(ev);resizing=false;resizeStart=null;gestureHistory=false;
-  // El cuadro inferior derecho cambia el tamaño de una imagen seleccionada.
-  if(selected>=0&&['image','sticker','shape','vector'].includes(elements[selected]?.type)&&!elements[selected].locked){
-    const b=bounds(elements[selected]);const hit=15*canvas.width/Math.max(1,canvas.getBoundingClientRect().width);
-    if(Math.abs(p.x-(b.x+b.w))<=hit&&Math.abs(p.y-(b.y+b.h))<=hit){
-      resizing=true;resizeStart={x:p.x,y:p.y,w:['sticker','shape','vector'].includes(elements[selected].type)?elements[selected].widthFrac*canvas.width:b.w,h:['sticker','shape','vector'].includes(elements[selected].type)?elements[selected].heightFrac*canvas.height:b.h};
-      canvas.setPointerCapture(ev.pointerId);return;
-    }
+  dragging=false;resizing=false;dragStart=null;resizeStart=null;return;
+ }
+ if(dragging||resizing)return;
+ const p=pos(ev);resizing=false;resizeStart=null;gestureHistory=false;
+ if(selected>=0&&['image','sticker','shape','vector'].includes(elements[selected]?.type)&&!elements[selected].locked){
+  const b=bounds(elements[selected]),hit=15*canvas.width/Math.max(1,canvas.getBoundingClientRect().width);
+  if(Math.abs(p.x-(b.x+b.w))<=hit&&Math.abs(p.y-(b.y+b.h))<=hit){
+   resizing=true;resizeStart={x:p.x,y:p.y,w:['sticker','shape','vector'].includes(elements[selected].type)?elements[selected].widthFrac*canvas.width:b.w,h:['sticker','shape','vector'].includes(elements[selected].type)?elements[selected].heightFrac*canvas.height:b.h};
+   canvas.setPointerCapture(ev.pointerId);return;
   }
-  selected=-1;
-  for(let i=elements.length-1;i>=0;i--){
-    if(elements[i].visible===false||elements[i].locked)continue;const b=bounds(elements[i]);if(p.x>=b.x&&p.x<=b.x+b.w&&p.y>=b.y&&p.y<=b.y+b.h){selected=i;break}
-  }
-  if(selected>=0){dragStart={px:p.x,py:p.y,x:elements[selected].x,y:elements[selected].y,pointerId:ev.pointerId};dragging=true;canvas.setPointerCapture(ev.pointerId)}
-  loadSelectedTextIntoInputs();updateImageControls();draw();
+ }
+ selected=findTopEditableLayerAt(p);
+ if(selected>=0){dragStart={px:p.x,py:p.y,x:elements[selected].x,y:elements[selected].y,pointerId:ev.pointerId};dragging=true;canvas.setPointerCapture(ev.pointerId)}
+ loadSelectedTextIntoInputs();updateImageControls();draw();
 });
 canvas.addEventListener('pointermove',ev=>{
-  const p=pos(ev);
-  if(canvasPointers.has(ev.pointerId))canvasPointers.set(ev.pointerId,p);
-  if(pinchGesture){
-    if(!pinchGesture.ids.includes(ev.pointerId)||pinchGesture.ids.some(id=>!canvasPointers.has(id)))return;
-    const [a,b]=pinchGesture.ids.map(id=>canvasPointers.get(id));
-    const distance=Math.hypot(a.x-b.x,a.y-b.y);
-    if(pinchGesture.distance<2||distance<2)return;
-    const factor=Math.max(.005/Math.max(pinchGesture.fw,pinchGesture.fh),Math.min(3/pinchGesture.fw,3/pinchGesture.fh,distance/pinchGesture.distance));
-    const fw=pinchGesture.fw*factor,fh=pinchGesture.fh*factor;
-    if(!canResizeLayer(pinchGesture.layer,fw,fh))return;
-    if(!gestureHistory){addHistory();gestureHistory=true}
-    pinchGesture.layer.widthFrac=fw;pinchGesture.layer.heightFrac=fh;delete pinchGesture.layer.scale;
-    draw();updateImageControls();ev.preventDefault();return;
+ const p=pos(ev);
+ if(canvasPointers.has(ev.pointerId))canvasPointers.set(ev.pointerId,p);
+ if(canvasPointers.size>2)return;
+ if(pinchGesture){
+  if(!pinchGesture.ids.includes(ev.pointerId)||pinchGesture.ids.some(id=>!canvasPointers.has(id)))return;
+  const [a,b]=pinchGesture.ids.map(id=>canvasPointers.get(id));
+  const distance=Math.hypot(a.x-b.x,a.y-b.y);
+  if(pinchGesture.distance<4||distance<4)return;
+  const factor=distance/pinchGesture.distance;
+  const e=pinchGesture.layer;
+  const metrics=pinchGesture.metrics;
+  let nextSize,nextFw,nextFh;
+  if(metrics.kind==='text')nextSize=Math.max(12,Math.min(500,metrics.size*factor));
+  else {
+   const safeFactor=Math.max(.005/Math.max(metrics.fw,metrics.fh),Math.min(3/metrics.fw,3/metrics.fh,factor));
+   nextFw=metrics.fw*safeFactor;nextFh=metrics.fh*safeFactor;
+   if(!canResizeLayer(e,nextFw,nextFh))return;
   }
-  if(!dragging&&!resizing)return;
-  if(dragging&&ev.pointerId!==dragStart.pointerId)return;
-  if(!gestureHistory){addHistory();gestureHistory=true;}
-  if(resizing&&selected>=0){
-    const e=elements[selected];const old=resizeStart;
-    let w=Math.max(8,old.w+2*(p.x-old.x));let h=Math.max(8,old.h+2*(p.y-old.y));
-    if($('keepImageRatio').checked){const factor=Math.max(.02,w/old.w);w=old.w*factor;h=old.h*factor}
-    const limit=Math.min(1,3*canvas.width/w,3*canvas.height/h);if(!canResizeLayer(e,w*limit/canvas.width,h*limit/canvas.height))return;e.widthFrac=w*limit/canvas.width;e.heightFrac=h*limit/canvas.height;delete e.scale;
-    draw();updateImageControls();return;
-  }
-  if(!dragging||selected<0)return;
-  const candidateX=Math.max(0,Math.min(1,dragStart.x+(p.x-dragStart.px)/canvas.width));
-  const candidateY=Math.max(0,Math.min(1,dragStart.y+(p.y-dragStart.py)/canvas.height));
-  elements[selected].x=precisionSnapEnabled?snapCoordinate(candidateX):candidateX;
-  elements[selected].y=precisionSnapEnabled?snapCoordinate(candidateY):candidateY;draw();
+  const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+  const x=Math.max(0,Math.min(1,pinchGesture.origX+(mx-pinchGesture.midpoint.x)/canvas.width));
+  const y=Math.max(0,Math.min(1,pinchGesture.origY+(my-pinchGesture.midpoint.y)/canvas.height));
+  if(!gestureHistory){addHistory();gestureHistory=true}
+  if(metrics.kind==='text')e.size=nextSize;
+  else {e.widthFrac=nextFw;e.heightFrac=nextFh;delete e.scale}
+  e.x=x;e.y=y;draw();updateImageControls();ev.preventDefault();return;
+ }
+ if(canvasPointers.size===2)return;
+ if(!dragging&&!resizing)return;
+ if(dragging&&ev.pointerId!==dragStart.pointerId)return;
+ if(!gestureHistory){addHistory();gestureHistory=true}
+ if(resizing&&selected>=0){
+  const e=elements[selected],old=resizeStart;
+  let w=Math.max(8,old.w+2*(p.x-old.x)),h=Math.max(8,old.h+2*(p.y-old.y));
+  if($('keepImageRatio').checked){const factor=Math.max(.02,w/old.w);w=old.w*factor;h=old.h*factor}
+  const limit=Math.min(1,3*canvas.width/w,3*canvas.height/h);
+  if(!canResizeLayer(e,w*limit/canvas.width,h*limit/canvas.height))return;
+  e.widthFrac=w*limit/canvas.width;e.heightFrac=h*limit/canvas.height;delete e.scale;draw();updateImageControls();return;
+ }
+ if(!dragging||selected<0)return;
+ const candidateX=Math.max(0,Math.min(1,dragStart.x+(p.x-dragStart.px)/canvas.width));
+ const candidateY=Math.max(0,Math.min(1,dragStart.y+(p.y-dragStart.py)/canvas.height));
+ elements[selected].x=precisionSnapEnabled?snapCoordinate(candidateX):candidateX;
+ elements[selected].y=precisionSnapEnabled?snapCoordinate(candidateY):candidateY;draw();
 });
 function stopCanvasInteraction(ev){
-  if(ev&&canvasPointers.has(ev.pointerId))canvasPointers.delete(ev.pointerId);
-  if(pinchGesture){
-    if(!ev||pinchGesture.ids.includes(ev.pointerId)){pinchGesture=null;dragging=false;resizing=false;dragStart=null;resizeStart=null;updateImageControls()}
-    return;
-  }
-  if(dragStart&&ev&&dragStart.pointerId!==ev.pointerId)return;
-  dragging=false;resizing=false;resizeStart=null;updateImageControls();
+ if(ev){
+  canvasPointers.delete(ev.pointerId);
+  try{if(canvas.hasPointerCapture(ev.pointerId))canvas.releasePointerCapture(ev.pointerId)}catch{}
+ }
+ if(pinchGesture){if(!ev||pinchGesture.ids.includes(ev.pointerId))clearCanvasGesture();return}
+ if(dragStart&&ev&&dragStart.pointerId!==ev.pointerId)return;
+ clearCanvasGesture();
 }
 canvas.addEventListener('pointerup',stopCanvasInteraction);
 canvas.addEventListener('pointercancel',stopCanvasInteraction);
 canvas.addEventListener('wheel',ev=>{
-  if(selected<0||elements[selected].locked||elements[selected].type==='glitter')return;ev.preventDefault();addHistory();
+  if(selected<0||elements[selected].locked||elements[selected].type==='glitter')return;ev.preventDefault();
   const e=elements[selected],k=ev.deltaY<0?1.08:.92;
-  if(e.type==='text')e.size=Math.max(12,Math.min(500,e.size*k));
+  if(e.type==='text'){addHistory();e.size=Math.max(12,Math.min(500,e.size*k))}
   else {
-    const f=['shape','vector'].includes(e.type)?{fw:e.widthFrac,fh:e.heightFrac}:e.type==='sticker'?stickerGeometry.stickerFractions(e,canvas.width,canvas.height):imageFractions(e);const fw=Math.max(.005,Math.min(3,f.fw*k)),fh=Math.max(.005,Math.min(3,f.fh*k));if(!canResizeLayer(e,fw,fh))return;e.widthFrac=fw;
+    const f=['shape','vector'].includes(e.type)?{fw:e.widthFrac,fh:e.heightFrac}:e.type==='sticker'?stickerGeometry.stickerFractions(e,canvas.width,canvas.height):imageFractions(e);const fw=Math.max(.005,Math.min(3,f.fw*k)),fh=Math.max(.005,Math.min(3,f.fh*k));if(!canResizeLayer(e,fw,fh))return;addHistory();e.widthFrac=fw;
     e.heightFrac=fh;delete e.scale;
     updateImageControls();
   }
@@ -361,7 +397,21 @@ function focusZone(){const def=zonesFor(zoneProduct).find(z=>z.id===productZones
 function openZoneProduct(product,id){++importGeneration;const previous=zoneProduct;captureZone();const fresh=!productZones[product],g=productZones[product]??=emptyZones(product);if(fresh&&elements.length&&!previous)g.zones[g.active].elements=copyElements();if(id&&!zonesFor(product).some(z=>z.id===id))throw Error('Zona no disponible');g.active=id||g.active;zoneProduct=product;const z=g.zones[g.active];elements=z.elements;const past=zoneHistories.get(product+':'+g.active);history=past?.history||[];redoStack=past?.redoStack||[];selected=past?.selected??-1;$('widthCm').value=z.width;$('heightCm').value=z.height;documentWidth=z.width;documentHeight=z.height;updateDimensions();refreshSelectedLabel();syncZoneUI();if(previous!==product||!modelRoot?.children.length)buildModel();focusZone();updateRotationToolbar();queueAutosave();}
 function paintZone(target,w,h,doc){paintDesign(target,w,h,{source:doc.elements,pageWidth:doc.width,pageHeight:doc.height,referenceWidth:zoneCanvasWidth(doc.width,doc.height),transparent:true})}
 function syncTextileMaps(product=zoneProduct){if(!textileMaps||!product||!productZones[product])return;captureZone();textileMaps.update(product,productZones[product],$('productColor').value,paintZone)}
-function renderZoneCanvas(doc,mirror=false){const c=document.createElement('canvas');c.width=Math.round(doc.width/2.54*300);c.height=Math.round(doc.height/2.54*300);if(c.width*c.height>40e6)throw Error('La zona supera 40 megapíxeles a 300 ppp');paintZone(c.getContext('2d',{willReadFrequently:true}),c.width,c.height,doc);return mirror?mirrorFinishedImage(c):c}
+function zoneExportDpi(doc){
+ const limit=window.FEP_NATIVE?.isNative?4000000:40000000;
+ const pixelsAt300=doc.width*doc.height/(2.54*2.54)*90000;
+ const dpi=Math.min(300,Math.floor(300*Math.sqrt(limit/pixelsAt300)));
+ if(dpi<90)throw Error('La zona supera el límite seguro de exportación en este dispositivo');
+ return dpi;
+}
+function renderZoneCanvas(doc,mirror=false){
+ const dpi=zoneExportDpi(doc),limit=window.FEP_NATIVE?.isNative?4000000:40000000;
+ const c=document.createElement('canvas');
+ c.width=Math.round(doc.width/2.54*dpi);c.height=Math.round(doc.height/2.54*dpi);
+ if(c.width*c.height>limit)throw Error('La zona supera el límite seguro de píxeles');
+ paintZone(c.getContext('2d',{willReadFrequently:true}),c.width,c.height,doc);
+ return mirror?mirrorFinishedImage(c):c;
+}
 $('zoneSelect').onchange=()=>{if(!zoneBusy)openZoneProduct(zoneProduct,$('zoneSelect').value)};
 $('zoneCopy').onclick=()=>{try{captureZone();const g=productZones[zoneProduct],target=g.zones[$('zoneCopyTarget').value],source=g.zones[g.active];if(!target)throw Error('Selecciona destino');const additions=copyZoneLayers(source,target,copyElements);if(target.elements.length+additions.length>500)throw Error('Máximo 500 capas por zona');const all=Object.values(productZones).flatMap(g=>Object.values(g.zones).flatMap(z=>z.elements));enforceLayerBudget([...all,...additions,...(freeDocument?freeDocument.elements:[])]);const candidate=[...target.elements,...additions];validateProject({width:target.width,height:target.height,elements:candidate});const key=zoneProduct+':'+$('zoneCopyTarget').value,past=zoneHistories.get(key)||{history:[],redoStack:[],selected:-1};past.history.push(copyElements(target.elements));if(past.history.length>40)past.history.shift();past.redoStack=[];zoneHistories.set(key,past);target.elements=candidate;syncTextileMaps();renderer?.render(scene,camera);queueAutosave();notify('Diseño copiado como capas independientes; medidas físicas conservadas')}catch(e){notify(e.message)}};
 $('zoneExportAll').onclick=async()=>{if(zoneBusy||!zoneProduct)return;captureZone();zoneBusy=true;syncZoneUI();try{const product=zoneProduct,project=projectSnapshot(),mirror=getMirrorMode(),docs=Object.fromEntries(Object.entries(productZones[product].zones).map(([id,z])=>[id,{...z,elements:copyElements(z.elements)}])),files=[],manifest={product,dpi:300,mirror,zones:[]};for(const def of zonesFor(product)){const doc=docs[def.id],c=renderZoneCanvas(doc,mirror==='espejo'),raw=await canvasBlob(c,'image/png');files.push({name:def.id+'.png',data:pngWithDpi(await raw.arrayBuffer())});manifest.zones.push({id:def.id,widthCm:doc.width,heightCm:doc.height,filename:def.id+'.png'});c.width=c.height=1}files.push({name:'manifest.json',data:JSON.stringify(manifest,null,2)},{name:'proyecto-completo.json',data:JSON.stringify(project,null,2)});if(await saveBlob(await zipFiles(files),product+'-zonas-impresion.zip'))notify('Zonas guardadas · PNG transparentes a 300 ppp · sin escenario')}catch(e){notify('No se pudieron exportar las zonas: '+e.message)}finally{zoneBusy=false;syncZoneUI()}};
@@ -815,7 +865,7 @@ $('exportMockup').onclick=async()=>{
  finally{renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);camera.aspect=aspect;camera.updateProjectionMatrix();controls.enabled=enabled;if(show){$('showGuides').checked=true;buildModel()}photoBusy=false;resizeViewer();update3DControls();requestAnimationFrame(()=>resync3D({silent:true}))}
 };
 
-$('zoneViews').onclick=async()=>{if(!renderer||recording||photoBusy||zoneBusy||!zoneProduct)return;photoBusy=true;zoneBusy=true;update3DControls();const locked=[...document.querySelectorAll('button,input,select')].map(n=>[n,n.disabled]);for(const [n]of locked)n.disabled=true;const size=renderer.getSize(new THREE.Vector2()),ratio=renderer.getPixelRatio(),aspect=camera.aspect,position=camera.position.clone(),target=controls.target.clone(),enabled=controls.enabled,product=zoneProduct;try{controls.enabled=false;await waitForProduct();await sceneController.ready();const width=sceneSettings.photoWidth,height=Math.round(width*9/16),files=[];renderer.setPixelRatio(1);renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();for(const def of zonesFor(product)){camera.position.set(...def.camera);camera.lookAt(0,0,0);fitTextileView();renderer.render(scene,camera);files.push({name:def.id+'-mockup.png',data:await canvasBlob(renderer.domElement,'image/png')})}if(await saveBlob(await zipFiles(files),product+'-vistas-HD.zip'))notify('Vistas HD guardadas con todas las zonas diseñadas')}catch(error){notify('No se pudieron exportar las vistas: '+error.message)}finally{renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);camera.aspect=aspect;camera.updateProjectionMatrix();camera.position.copy(position);controls.target.copy(target);controls.enabled=enabled;photoBusy=false;zoneBusy=false;for(const [n,disabled]of locked)n.disabled=disabled;controls.update();resizeViewer();update3DControls()}};
+$('zoneViews').onclick=async()=>{if(!renderer||recording||photoBusy||zoneBusy||!zoneProduct)return;photoBusy=true;zoneBusy=true;update3DControls();const locked=[...document.querySelectorAll('button,input,select')].map(n=>[n,n.disabled]);for(const [n]of locked)n.disabled=true;const size=renderer.getSize(new THREE.Vector2()),ratio=renderer.getPixelRatio(),aspect=camera.aspect,position=camera.position.clone(),target=controls.target.clone(),enabled=controls.enabled,product=zoneProduct;try{controls.enabled=false;await waitForProduct();await sceneController.ready();const requestedWidth=sceneSettings.photoWidth,width=window.FEP_NATIVE?.isNative?Math.min(1920,requestedWidth):requestedWidth,height=Math.round(width*9/16),files=[];renderer.setPixelRatio(1);renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();for(const def of zonesFor(product)){camera.position.set(...def.camera);camera.lookAt(0,0,0);fitTextileView();renderer.render(scene,camera);files.push({name:def.id+'-mockup.png',data:await canvasBlob(renderer.domElement,'image/png')})}if(await saveBlob(await zipFiles(files),product+'-vistas-HD.zip'))notify('Vistas HD guardadas con todas las zonas diseñadas')}catch(error){notify('No se pudieron exportar las vistas: '+error.message)}finally{renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);camera.aspect=aspect;camera.updateProjectionMatrix();camera.position.copy(position);controls.target.copy(target);controls.enabled=enabled;photoBusy=false;zoneBusy=false;for(const [n,disabled]of locked)n.disabled=disabled;controls.update();resizeViewer();update3DControls()}};
 
 // V0.8: herramientas de exportación y presentación sin servidor ni pagos.
 $('viewerBackground').addEventListener('change',e=>{if(scene)scene.background=new THREE.Color(e.target.value)});
@@ -970,7 +1020,7 @@ for(const id of ['delete','applyText','quickCenter','quickContain','quickCover']
  const button=document.createElement('button');button.type='button';button.textContent='Revisar tamaño y resolución';
  const status=document.createElement('p');status.className='hint';status.id='p4PrintStatus';status.setAttribute('role','status');
  button.onclick=()=>{try{
-  const images=elements.filter(e=>e.type==='image'&&e.visible!==false).map((e,i)=>{const img=getImage(e),f=imageFractions(e);return {name:String(i+1),pixelW:img?.naturalWidth??0,pixelH:img?.naturalHeight??0,widthCm:f.fw*documentWidth,heightCm:f.fh*documentHeight}});
+  const images=elements.filter(e=>e.type==='image'&&e.visible!==false).map((e,i)=>{const img=getImage(e),f=imageFractions(e);return {name:String(i+1),pixelW:img?.naturalWidth??0,pixelH:img?.naturalHeight??0,widthCm:f.fw*documentWidth,heightCm:f.fh*documentHeight,crop:e.crop}});
   const result=printPreflight({widthCm:documentWidth,heightCm:documentHeight,pixelBudget:window.FEP_NATIVE?.isNative?4_000_000:40_000_000,images});
   status.textContent=result.canExport?'Salida estimada: '+result.outputW+' × '+result.outputH+' px · '+result.dpi+' ppp. '+(result.warnings.join(' ')||'Sin advertencias de resolución detectadas.'):'Advertencia: el trabajo excede la exportación segura. Divide el diseño en zonas.';
   status.dataset.state=result.canExport?'ready':'error';
