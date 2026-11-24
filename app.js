@@ -24,6 +24,7 @@ import {createGlitterControls} from './src/glitter-controls.js?v=fep-6a4c2734f7b
 import {prepareProject} from './src/imports.js?v=fep-6a4c2734f7b31778';
 import {prepareImageFile,enforceDocumentBudget as enforceLayerBudget,ASSET_LIMITS} from './src/assets.js?v=fep-6a4c2734f7b31778';
 import {normalizePhoto} from './src/photo-import-mobile.js';
+import {initPremiumP5} from './src/premium-p5.js';
 import {drawWatermark} from './src/photo-tools.js';
 import {validatePngBytes,validatePdfBytes} from './src/export-integrity.js';
 import {openDocumentStore,createAutosave} from './src/persistence.js?v=fep-6a4c2734f7b31778';
@@ -1130,3 +1131,5 @@ async function loadStickers(){
 
 // Called by the explicit offline update button, after durable local persistence.
 window.__fepFlushForUpdate=()=>recording||photoBusy||zoneBusy||projectSwitchBusy||projectRecoveryError||!autosave?Promise.resolve(false):projectSession.id?autosave.flush():Promise.resolve(true);
+// P5 shell enhancements: preserve existing editor and project functions.
+initPremiumP5({get:$,ui,notify});
