@@ -92,6 +92,17 @@ add('label','hexagon','Marco hexagonal','M30 10H90L113 45L90 80H30L7 45Z',box);
 add('label','notch','Etiqueta con muescas','M12 14H107L100 29L107 44L100 59L107 76H12L19 59L12 44L19 29Z',box);
 add('label','medallion','Medallón oval',[path(ellipse(60,45,49,35)),path(ellipse(60,45,42,28),'none')],box);
 add('label','ribbon-fold','Cinta plegada',[path('M8 27H30V15H90V27H113L102 47L113 68H89V76H30V68H8L19 47Z')],box);
+// P5: original vectors, locally bundled for sublimation. No external assets.
+add('decor','gift','Regalo',[path('M24 36H96V80H24Z'),path('M18 29H102V39H18Z'),path('M55 30H65V80H55Z','accent'),path('M57 28Q27 28 31 12Q35 1 57 28M63 28Q93 28 89 12Q85 1 63 28','none')]);
+add('decor','balloon','Globo de fiesta',[path('M60 12C34 12 26 34 34 52Q43 71 60 71Q78 70 86 52C94 34 85 12 60 12Z'),path('M55 70L60 79L65 70M60 80Q78 82 61 88','none')]);
+add('decor','sunburst','Rayos decorativos',[path('M60 3V16M60 74V88M13 45H28M92 45H107M25 12L34 23M86 67L97 78M25 78L36 67M86 23L97 12','none'),path(ellipse(60,45,25,25),'accent')]);
+add('decor','checkmark','Sello aprobado',[path('M60 6L72 14L87 12L95 26L110 34L104 50L110 67L94 73L87 85L70 81L60 88L46 80L29 85L25 71L10 65L17 47L10 31L27 25L31 11L48 14Z'),path('M33 46L50 62L88 29','none')]);
+add('nature','cactus','Cactus decorativo',[path('M45 80V37Q45 15 60 15Q75 15 75 37V80Z'),path('M45 56H31Q20 56 20 43V31M75 63H91Q103 63 103 48V37','none'),path('M42 80H79V86H42Z','accent')]);
+add('nature','cherry','Cerezas',[path('M61 38Q62 16 81 12M61 38Q56 20 38 15','none'),path(ellipse(46,61,17,19)),path(ellipse(78,61,17,19),'accent')]);
+add('label','price-tag','Etiqueta de precio',[path('M15 16H78L110 45L78 76H15Z'),path(ellipse(89,45,5,5),'white',false)],{x:23,y:30,w:51,h:27});
+add('label','badge-round','Sello circular',[path(ellipse(60,45,40,40)),path(ellipse(60,45,32,32),'none')],{x:34,y:30,w:52,h:30});
+add('label','banner-fork','Cinta para nombre',[path('M10 25H110L98 46L110 67H10L23 46Z')],{x:26,y:30,w:69,h:30});
+add('label','circle-outline','Marco circular',[path(ellipse(60,45,40,40),'none'),path(ellipse(60,45,32,32),'none')],{x:37,y:28,w:46,h:34});
 export const stickers=Object.freeze(list);
 const byId=new Map(stickers.map(s=>[s.id,s]));
 export const getSticker=id=>byId.get(id);
