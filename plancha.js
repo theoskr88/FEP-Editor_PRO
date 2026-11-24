@@ -7,7 +7,8 @@ const sheetPixelLimit=()=>window.FEP_NATIVE?.isNative?4_000_000:40_000_000;
 const maxImagePixels=()=>window.FEP_NATIVE?.isNative?16_000_000:PRINT_LIMITS.totalImagePixels;
 function sheetDpi(w,h){
  const pixelsAt300=w*h/(2.54*2.54)*90000;
- const dpi=Math.min(300,Math.floor(300*Math.sqrt(sheetPixelLimit()/pixelsAt300)));
+ let dpi=Math.min(300,Math.floor(300*Math.sqrt(sheetPixelLimit()/pixelsAt300)));
+ while(dpi>0&&Math.round(w/2.54*dpi)*Math.round(h/2.54*dpi)>sheetPixelLimit())dpi--;
  if(dpi<90)throw Error('La hoja supera el límite seguro de exportación en este dispositivo');
  return dpi;
 }
