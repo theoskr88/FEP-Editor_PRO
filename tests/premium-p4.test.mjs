@@ -5,3 +5,18 @@ test('P4 positioning uses physical cm, preserves layer props, clamps edges and d
 test('P4 rejects locked layer and invalid dimensions',()=>{assert.throws(()=>moveLayerPrecisely({type:'text',locked:true},{xCm:1,yCm:1,widthCm:20,heightCm:8}),/editable/);assert.throws(()=>printPreflight({widthCm:0,heightCm:20}),/Medidas/)});
 test('P4 print readiness stays safe under Android budget and warns when downsampled',()=>{const result=printPreflight({widthCm:30,heightCm:35,pixelBudget:4_000_000});assert(result.dpi<=300);assert(result.dpi>=90);assert(result.outputW*result.outputH<=4_100_000);assert(result.warnings.length>0)});
 test('P4 warns when source photo effective resolution is poor, not when sufficient',()=>{const low=printPreflight({widthCm:10,heightCm:10,pixelBudget:40_000_000,images:[{name:'1',pixelW:200,pixelH:200,widthCm:10,heightCm:10}]});assert(low.warnings.some(x=>x.includes('pixelación')));const high=printPreflight({widthCm:10,heightCm:10,pixelBudget:40_000_000,images:[{name:'2',pixelW:2000,pixelH:2000,widthCm:10,heightCm:10}]});assert.equal(high.warnings.length,0)});
+
+test('P4 preflight contabiliza área realmente recortada',()=>{
+ const base={widthCm:10,heightCm:10,pixelBudget:40_000_000};
+ const image={name:'recortada',pixelW:1500,pixelH:1500,widthCm:10,heightCm:10};
+ assert.equal(printPreflight({...base,images:[image]}).warnings.length,0);
+ const result=printPreflight({...base,images:[{...image,crop:[.25,.25,.25,.25]}]});
+ assert(result.warnings.some(w=>w.includes('pixelación')));
+});
+test('P4 conserva salida Android dentro del presupuesto físico',()=>{
+ for(const [widthCm,heightCm] of [[20,8.5],[29.7,42],[35,45]]){
+  const result=printPreflight({widthCm,heightCm,pixelBudget:4_000_000});
+  assert(result.outputW*result.outputH<=4_000_000);
+  assert(result.dpi>=90);
+ }
+});
