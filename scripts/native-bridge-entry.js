@@ -20,6 +20,7 @@ const mimeOf=name=>name.endsWith('.png')?'image/png':name.endsWith('.jpg')?'imag
 const safeName=name=>String(name).replace(/[\\/\x00-\x1F]/g,'_').slice(0,120)||'fep-archivo';
 window.FEP_NATIVE={
   isNative,
+  async getAppInfo(){return isNative?App.getInfo():null},
   async saveBlob(blob,name){
     if(!isNative)throw Error('Solo Android');
     if(!(blob instanceof Blob)||!blob.size)throw Error('Archivo vacío');
