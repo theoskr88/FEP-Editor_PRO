@@ -12,7 +12,8 @@ export function moveLayerPrecisely(layer,{xCm,yCm,widthCm,heightCm}){
 export function printPreflight({widthCm,heightCm,pixelBudget=4_000_000,images=[]}={}){
  if(!Number.isFinite(widthCm)||!Number.isFinite(heightCm)||widthCm<=0||heightCm<=0||!Number.isFinite(pixelBudget)||pixelBudget<=0)throw Error('Medidas de impresión inválidas');
  const pixelsAt300=widthCm*heightCm/(2.54*2.54)*90000;
- const dpi=Math.min(300,Math.floor(300*Math.sqrt(pixelBudget/pixelsAt300)));
+ let dpi=Math.min(300,Math.floor(300*Math.sqrt(pixelBudget/pixelsAt300)));
+ while(dpi>0&&Math.round(widthCm/2.54*dpi)*Math.round(heightCm/2.54*dpi)>pixelBudget)dpi--;
  const warnings=[];
  if(dpi<300)warnings.push('La resolución de salida se limitará a '+dpi+' ppp por memoria disponible.');
  for(const image of images){
