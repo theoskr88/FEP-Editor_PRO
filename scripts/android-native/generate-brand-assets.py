@@ -93,6 +93,21 @@ if official.is_file():
             resized.thumbnail((round(size*.84),round(size*.84)),Image.Resampling.LANCZOS)
             base.alpha_composite(resized,((size-resized.width)//2,(size-resized.height)//2))
             base.save(folder/name,optimize=True)
+    # Adaptive Android 12+ icon must also use the official artwork, not the old vector.
+    adaptive_foreground=Image.new("RGBA",(432,432),(0,0,0,0))
+    cropped=symbol.copy()
+    cropped.thumbnail((265,265),Image.Resampling.LANCZOS)
+    adaptive_foreground.alpha_composite(cropped,((432-cropped.width)//2,(432-cropped.height)//2))
+    target=root/"drawable-nodpi"/"fep_official_foreground.png"
+    target.parent.mkdir(parents=True,exist_ok=True)
+    adaptive_foreground.save(target,optimize=True)
+    for name in ("ic_launcher.xml","ic_launcher_round.xml"):
+        (adaptive/name).write_text("""<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+ <background android:drawable="@drawable/fep_launcher_background"/>
+ <foreground android:drawable="@drawable/fep_official_foreground"/>
+</adaptive-icon>
+""")
     # Full official logotype, centered on white: both orientations.
     for folder,size in (("drawable",(1080,1920)),("drawable-land",(1920,1080))):
         splash=root/folder/"splash.png"
