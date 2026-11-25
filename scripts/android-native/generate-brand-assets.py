@@ -63,4 +63,7 @@ for name in ('ic_launcher.xml','ic_launcher_round.xml'):
  <foreground android:drawable="@drawable/fep_launcher_foreground"/>
 </adaptive-icon>
 ''')
+for splash in root.rglob('splash.png'):
+    splash.write_bytes(png_bytes(512))
+# Resource png is regenerated on every Android build; no third-party artwork.
 print("FEP original Android launcher resources generated (5 densities + adaptive)")
