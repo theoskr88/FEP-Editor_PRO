@@ -1,4 +1,4 @@
-name: FEP Editor PRO — Android Premium P5
+name: FEP Editor PRO — Android Premium P6 audit
 concurrency:
   group: fep-editor-android-${{ github.ref }}
   cancel-in-progress: true
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - desarrollo/estudio3d-premium-p5
+      - desarrollo/estudio3d-premium-p6-auditoria
     paths:
       - 'capacitor.config.json'
       - 'scripts/build-mobile-web.py'
@@ -48,6 +48,23 @@ jobs:
         with:
           path: ~/.android/debug.keystore
           key: fep-editor-pro-android-debug-key-v1
+      # A stable debug keystore can be provided via Repository Secrets across branches.
+      # No secret means a branch-local testing signature; NEVER assume in-place upgrade.
+      - name: Load stable Android test keystore when configured
+        shell: bash
+        env:
+          TEST_KEYSTORE_BASE64: ${{ secrets.ANDROID_TEST_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -n "$TEST_KEYSTORE_BASE64" ]; then
+            mkdir -p "$HOME/.android"
+            printf '%s' "$TEST_KEYSTORE_BASE64" | base64 --decode > "$HOME/.android/debug.keystore"
+            chmod 600 "$HOME/.android/debug.keystore"
+            keytool -list -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey >/dev/null
+            echo "Stable debug signing certificate loaded from secrets."
+          else
+            echo "::warning::No shared test certificate configured: builds across branches can have different signatures. Back up projects before reinstalling."
+          fi
       - name: Initialize signing certificate if missing
         shell: bash
         run: |
@@ -86,10 +103,12 @@ jobs:
           node --check app.js
           node --check src/premium-p4.js
           node --check src/premium-p5.js
+          node --check src/premium-p6.js
+          node --check src/creative-controls.js
           node --check scripts/native-bridge-entry.js
           node --check src/photo-tools.js
           node --check src/photo-import-mobile.js
-          node --test tests/premium-p5.test.mjs tests/premium-p4.test.mjs tests/core.test.mjs tests/photo-tools.test.mjs tests/photo-import-mobile.test.mjs tests/android-project-reopen.test.mjs tests/premium-3d.test.mjs tests/premium-3d-p2.test.mjs
+          node --test tests/premium-p6.test.mjs tests/premium-p5.test.mjs tests/premium-p4.test.mjs tests/core.test.mjs tests/photo-tools.test.mjs tests/photo-import-mobile.test.mjs tests/android-project-reopen.test.mjs tests/premium-3d.test.mjs tests/premium-3d-p2.test.mjs
       - name: Prepare bundled offline web assets
         shell: bash
         run: |
@@ -120,11 +139,11 @@ jobs:
           if count != 1:
               raise SystemExit('Cannot uniquely update Android versionCode')
           value=updated
-          updated,count=re.subn(r'(?m)^([ \t]*versionName[ \t]+).+$',lambda m:m.group(1)+'"0.9.5-p5"',value)
+          updated,count=re.subn(r'(?m)^([ \t]*versionName[ \t]+).+$',lambda m:m.group(1)+'"0.9.6-p6"',value)
           if count != 1:
               raise SystemExit('Cannot uniquely update Android versionName')
           path.write_text(updated)
-          print('Android versionCode:',code,'versionName: 0.9.5-p5')
+          print('Android versionCode:',code,'versionName: 0.9.6-p6')
           PY
           python3 - <<'PY'
           import json
@@ -149,6 +168,56 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew --no-daemon assembleDebug 2>&1 | tee ../android-build.log
+      - name: Build signed release APK and Play App Bundle when secrets exist
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASS: ${{ secrets.ANDROID_KEY_PASS }}
+        run: |
+          set -euo pipefail
+          if [ -z "$ANDROID_KEYSTORE_BASE64$ANDROID_KEYSTORE_PASS$ANDROID_KEY_ALIAS$ANDROID_KEY_PASS" ]; then
+            echo "Release signing not configured; debug APK only."
+            exit 0
+          fi
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ] || [ -z "$ANDROID_KEYSTORE_PASS" ] || [ -z "$ANDROID_KEY_ALIAS" ] || [ -z "$ANDROID_KEY_PASS" ]; then
+            echo "::error::Partial release signing configuration. Supply all four secrets."
+            exit 1
+          fi
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/fep-release.keystore
+          chmod 600 android/app/fep-release.keystore
+          keytool -list -keystore android/app/fep-release.keystore -storepass "$ANDROID_KEYSTORE_PASS" -alias "$ANDROID_KEY_ALIAS" >/dev/null
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('android/app/build.gradle')
+          content=p.read_text()
+          content += """
+          android {
+              signingConfigs {
+                  fepProduction {
+                      storeFile file('fep-release.keystore')
+                      storePassword System.getenv('ANDROID_KEYSTORE_PASS')
+                      keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                      keyPassword System.getenv('ANDROID_KEY_PASS')
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.fepProduction
+                  }
+              }
+          }
+          """
+          p.write_text(content)
+          PY
+          cd android
+          ./gradlew --no-daemon assembleRelease bundleRelease 2>&1 | tee ../android-release-build.log
+          cd ..
+          test -s android/app/build/outputs/apk/release/app-release.apk
+          test -s android/app/build/outputs/bundle/release/app-release.aab
+          sha256sum android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/bundle/release/app-release.aab > release-checksums.sha256
+          rm -f android/app/fep-release.keystore
       - name: Verify APK and checksum
         shell: bash
         run: |
@@ -158,6 +227,17 @@ jobs:
           unzip -l "$apk" | grep -q 'classes.dex'
           unzip -l "$apk" | grep -q 'AndroidManifest.xml'
           sha256sum "$apk" > app-debug.apk.sha256
+      - name: Upload signed release artifacts if configured
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fep-editor-pro-p6-signed-release
+          if-no-files-found: ignore
+          path: |
+            android/app/build/outputs/apk/release/app-release.apk
+            android/app/build/outputs/bundle/release/app-release.aab
+            release-checksums.sha256
+            android-release-build.log
       - name: Upload debug APK and logs
         if: always()
         uses: actions/upload-artifact@v4
