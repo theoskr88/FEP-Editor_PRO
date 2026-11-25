@@ -5,6 +5,7 @@ import {createProjectManager} from './src/project-manager.js?v=fep-6a4c2734f7b31
 import {zonesFor,emptyZones,zoneCanvasWidth,copyZoneLayers,allProjectLayers} from './src/zones.js?v=fep-6a4c2734f7b31778';
 import {createTextileMaps} from './src/textile-materials.js?v=fep-6a4c2734f7b31778';
 import {zipFiles} from './src/zip-store.js?v=fep-6a4c2734f7b31778';
+import {readFepLibraryZip} from './src/zip-read.js';
 import {encodeVideoFrames} from './src/video-frames.js?v=fep-6a4c2734f7b31778';
 import {normalizeMockup} from './src/mockup-settings.js?v=fep-6a4c2734f7b31778';
 import {createMockupControls} from './src/mockup-controls.js?v=fep-6a4c2734f7b31778';
@@ -1113,6 +1114,36 @@ try{
  const open=async(id,removeId)=>transition(async()=>{if(removeId){await projectLibrary.remove(removeId);if(removeId!==projectSession.id)return;await projectSession.activate(null);showSaveStatus('Sin proyecto abierto');const list=await projectLibrary.summaries();id=list[0]?.id||null}if(!id){await projectSession.activate(null);showSaveStatus('Sin proyecto abierto');return}const record=await projectLibrary.get(id);if(!record)throw Error('Proyecto no encontrado');const prepared=await prepare(record.document);await applyActivated(prepared,id,record.revision);window.__fepBoot?.stage('storage','ready');showSaveStatus('saved');$('startScreen').close()});
  const create=async name=>transition(async()=>{const prepared=await prepare(initialDocument);const id=await projectLibrary.create(prepared.data,name);await applyActivated(prepared,id,1);await autosave.flush();$('startScreen').showModal()});
  const importProject=async file=>localOperation.run('Abriendo respaldo',async({signal,progress})=>{if(file.size>100000000)throw Error('El respaldo supera 100 MB');const raw=JSON.parse(await file.text());if(signal.aborted)throw new DOMException('Importación cancelada','AbortError');if(raw.format==='fep-project'&&raw.version!==1)throw Error('Versión de respaldo no compatible');if(raw.digest&&raw.digest!==await documentDigest(raw.document))throw Error('El respaldo está dañado: no coincide su integridad');const prepared=await prepare(raw.format==='fep-project'?raw.document:raw,{signal,onProgress:progress});if(signal.aborted)throw new DOMException('Importación cancelada','AbortError');return transition(async()=>{const id=await projectLibrary.create(prepared.data,raw.format==='fep-project'?raw.name:file.name.replace(/\.json$/i,''));await applyActivated(prepared,id,1);await autosave.flush();$('startScreen').close()})});
+ const importLibraryZip=async file=>localOperation.run('Restaurando biblioteca ZIP',async({signal,progress})=>{
+  if(file.size>100*1024*1024)throw Error('ZIP demasiado grande para restaurar de forma segura en Android (máximo 100 MB)');
+  const {manifest,files}=await readFepLibraryZip(file);
+  const existing=await projectLibrary.summaries();
+  if(existing.length+manifest.count>100)throw Error('El dispositivo contiene '+existing.length+' proyectos. No se pueden restaurar '+manifest.count+' sin superar 100.');
+  // Validate the entire archive BEFORE writing a single project.
+  for(let i=0;i<manifest.projects.length;i++){
+   if(signal.aborted)throw new DOMException('Restauración cancelada','AbortError');
+   const entry=manifest.projects[i],raw=JSON.parse(files.get(entry.file));
+   if(raw.format!=='fep-project'||raw.version!==1||!raw.document||raw.digest!==entry.digest)throw Error('Contenido de respaldo incompatible: '+entry.name);
+   if(await documentDigest(raw.document)!==entry.digest)throw Error('Integridad incorrecta: '+entry.name);
+   validateProject(raw.document);
+   progress?.({done:i+1,total:manifest.count,phase:'Verificando ZIP'});
+  }
+  if(!confirm('Restaurar '+manifest.count+' proyectos como copias nuevas? Los existentes se conservarán.'))return;
+  const created=[];
+  try{
+   for(let i=0;i<manifest.projects.length;i++){
+    if(signal.aborted)throw new DOMException('Restauración cancelada','AbortError');
+    const entry=manifest.projects[i],raw=JSON.parse(files.get(entry.file));
+    const prepared=await prepare(raw.document,{signal,onProgress:progress});
+    const id=await projectLibrary.create(prepared.data,raw.name||entry.name);
+    created.push(id);progress?.({done:i+1,total:manifest.count,phase:'Restaurando proyectos'});
+   }
+  }catch(error){
+   for(const id of created){try{await projectLibrary.remove(id)}catch{}}
+   throw Error('No se completó la restauración. Se intentó revertir cualquier copia parcial. '+error.message);
+  }
+  notify('Restaurados '+created.length+' proyectos como copias nuevas. Tus proyectos originales siguen intactos.');
+ });
  const exportProject=async id=>{if(id===projectSession.id&&!projectRecoveryError&&!await autosave.flush())throw Error('No se pudo guardar antes del respaldo');const [record,meta]=await Promise.all([projectLibrary.get(id),projectLibrary.catalog(id)]);const name=meta?.name||'Proyecto';const saved=await saveBlob(new Blob([JSON.stringify({format:'fep-project',version:1,name,digest:await documentDigest(record.document),document:record.document})],{type:'application/json'}),name+'.json');if(!saved)throw Error('No se guardó el respaldo del proyecto')};
  const exportAllProjects=async()=>{
   if(projectSession.id&&!projectRecoveryError&&(!autosave||!await autosave.flush()))throw Error('No se pudo guardar el proyecto activo. No se exportó una copia incompleta.');
@@ -1137,7 +1168,7 @@ try{
  };
  const recover=async id=>transition(async()=>{const entries=await projectLibrary.history(id);if(!entries.length)throw Error('No hay respaldos válidos para recuperar');const choice=prompt('Selecciona un respaldo (1–'+entries.length+'):\n'+entries.map((e,i)=>(i+1)+'. '+(e.savedAt?new Date(e.savedAt).toLocaleString():'Versión anterior')).join('\n'),'1');if(choice===null)return;const index=Number(choice)-1;if(!Number.isInteger(index)||!entries[index])throw Error('Respaldo no válido');const prepared=await prepare(entries[index].document);const restored=await projectLibrary.restore(id,entries[index].index);await applyActivated(prepared,id,restored.revision);window.__fepBoot?.stage('storage','ready');showSaveStatus('saved');$('startScreen').close()});
  const duplicateProject=async id=>{if(id===projectSession.id&&!await autosave.flush())throw Error('No se pudo guardar antes de duplicar');return projectLibrary.duplicate(id)};
- projectManager=createProjectManager({duplicateProject,library:projectLibrary,session:projectSession,open,create,importProject,exportProject,exportAllProjects,recover,notify});$('myProjects').onclick=()=>{projectManager.show();$('projectMenu').open=false};
+ projectManager=createProjectManager({duplicateProject,library:projectLibrary,session:projectSession,open,create,importProject,importLibraryZip,exportProject,exportAllProjects,recover,notify});$('myProjects').onclick=()=>{projectManager.show();$('projectMenu').open=false};
  $('restorePrevious').onclick=()=>recover(projectSession.id).catch(error=>notify('No se pudo recuperar: '+error.message));
 
 }catch(error){window.__fepBoot?.stage('storage','failed',error);showSaveStatus('error',error);$('restorePrevious').title='Almacenamiento local no disponible'}
