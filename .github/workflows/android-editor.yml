@@ -75,6 +75,15 @@ jobs:
           fi
           keytool -list -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey >/dev/null
           chmod 600 "$HOME/.android/debug.keystore"
+      - name: Report debug signing certificate fingerprint
+        shell: bash
+        run: |
+          set -euo pipefail
+          keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey > /tmp/fep-signature-info.txt
+          fingerprint="$(sed -n 's/^[[:space:]]*SHA256:[[:space:]]*//p' /tmp/fep-signature-info.txt | head -n 1)"
+          test -n "$fingerprint"
+          printf 'Debug certificate SHA256: %s\n' "$fingerprint" | tee debug-signing-fingerprint.txt
+          echo "::notice::Compare the SHA256 fingerprint with the previous APK before attempting an in-place update."
       - name: Install JavaScript test dependencies
         shell: bash
         run: npm ci --ignore-scripts --no-audit --no-fund
@@ -257,3 +266,4 @@ jobs:
             app-debug.apk.sha256
             android-build.log
             offline-manifest.json
+            debug-signing-fingerprint.txt
