@@ -1,6 +1,12 @@
+import {CREATIVE_TEMPLATES} from './creative.js?v=fep-6a4c2734f7b31778';
 export function createCreativeControls({state,apply,template,notify}){
  const get=id=>document.getElementById(id);let last;
  const run=fn=>{try{fn()}catch(error){notify(error.message)}};
+ // The data module owns the complete template catalogue, preventing stale HTML.
+ const templateSelect=get('creativeTemplate'),previous=templateSelect.value;
+ templateSelect.replaceChildren(...Object.entries(CREATIVE_TEMPLATES).map(([id,entry])=>new Option(entry.name,id)));
+ if(Object.hasOwn(CREATIVE_TEMPLATES,previous))templateSelect.value=previous;
+
  get('creativeRepeat').onchange=()=>get('repeatOptions').hidden=!get('creativeRepeat').checked;get('creativeGradientOn').onchange=()=>get('gradientOptions').hidden=!get('creativeGradientOn').checked;
  get('creativeApply').onclick=()=>run(()=>{const s=state(),e=s.elements[s.selected];if(!e)throw Error('Selecciona una capa');const patch={};if(['text','shape','vector'].includes(e.type))patch.gradient=get('creativeGradientOn').checked?{to:get('creativeGradientTo').value,angle:Number(get('creativeGradientAngle').value)}:null;
   if(e.type==='text')patch.typography={font:get('creativeFont').value,weight:get('creativeWeight').value,tracking:Number(get('creativeTracking').value),arc:Number(get('creativeArc').value),strokeWidth:Number(get('creativeStroke').value),strokeColor:get('creativeStrokeColor').value,shadow:get('creativeShadow').checked};
