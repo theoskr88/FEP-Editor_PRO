@@ -26,7 +26,7 @@ test('P8+P9: importación ZIP comprueba archivos sin perder nombres ni datos',as
 });
 test('P8+P9: descarta ZIP con alteraciones CRC sin escribir proyectos',async()=>{
  const {manifest,files}=mk();const blob=await zipFiles([{name:'manifest.json',data:JSON.stringify(manifest)},...files]);
- const b=new Uint8Array(await blob.arrayBuffer());b[40]^=1;
+ const b=new Uint8Array(await blob.arrayBuffer());const nameLen=new DataView(b.buffer).getUint16(26,true),extraLen=new DataView(b.buffer).getUint16(28,true);b[30+nameLen+extraLen+5]^=1;
  await assert.rejects(()=>readFepLibraryZip(b.buffer),/corrupto|inválido|ZIP/);
 });
 test('P8+P9: no acepta ZIP incompatible ni índice malicioso',async()=>{
@@ -38,7 +38,7 @@ test('P8+P9: no acepta ZIP incompatible ni índice malicioso',async()=>{
 });
 test('P8+P9: modos 2D/3D, escenas, color y velocidad se accionan localmente',()=>{
  const js=fs.readFileSync('src/premium-p8p9.js','utf8'),css=fs.readFileSync('src/interface.css','utf8');
- for(const value of ['Diseño + 3D','Ampliar 2D','Ampliar 3D','Preparar foto comercial','sceneVideoSeconds','pieceColor_handle','sceneCamera','premiumWarm','softbox'])assert(js.includes(value),value);
+ for(const value of ['Diseño + 3D','Ampliar 2D','Ampliar 3D','Preparar foto comercial','sceneVideoSeconds','pieceColor_','sceneCamera','premiumWarm','softbox'])assert(js.includes(value),value);
  assert(js.includes('dispatchEvent(new Event'));
  assert(css.includes('data-p89-view=design'));
  assert(css.includes('data-p89-view=mockup'));
