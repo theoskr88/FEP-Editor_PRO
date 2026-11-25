@@ -65,5 +65,27 @@ export function initIntegratedWorkspace({get,notify}){
   notify('Estudio Pro listo. Revisa el producto y exporta desde Escena → Exportar.');
  };
  get('panel-scene')?.querySelector('[data-p7-scene="background"]')?.prepend(studio);
+
+ // Mug3D parity: one-touch independent rim/handle/interior palettes.
+ const mugColors=document.createElement('div');mugColors.id='p89MugColors';mugColors.className='p89-mug-colors';mugColors.setAttribute('aria-label','Paletas de la taza');
+ const mugTitle=document.createElement('strong');mugTitle.textContent='Colores de asa, borde e interior';mugColors.append(mugTitle);
+ const palettes=[['white','Blanco','#ffffff'],['black','Negro','#242424'],['mint','Menta','#79d8c2'],['rose','Rosa','#dd8fa1'],['gold','Dorado','#c6a15a']];
+ const product=get('product');
+ for(const [,label,color]of palettes){const b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.color=color;b.style.setProperty('--swatch',color);b.onclick=()=>{
+  const enabled=get('pieceColorsEnabled');
+  if(enabled&&!enabled.checked){enabled.checked=true;enabled.dispatchEvent(new Event('change',{bubbles:true}))}
+  for(const part of ['handle','rim','interior']){const input=get('pieceColor_'+part);if(input){input.value=color;input.dispatchEvent(new Event('input',{bubbles:true}))}}
+  notify('Color aplicado a la taza. El diseño imprimible no cambió.');
+ };mugColors.append(b)}
+ const syncColors=()=>{mugColors.hidden=!['mug','mug_enamel'].includes(product?.value)};
+ product?.addEventListener('change',syncColors);syncColors();
+ get('panel-scene')?.querySelector('[data-p7-scene="background"]')?.append(mugColors);
+ // Mug3D parity: speed is the actual persisted duration of a full 360° video.
+ const spin=document.createElement('div');spin.className='p89-spin-preset';spin.id='p89SpinPresets';
+ const spinLabel=document.createElement('strong');spinLabel.textContent='Velocidad del giro 360°';spin.append(spinLabel);
+ const seconds=get('sceneVideoSeconds');
+ for(const [duration,name] of [[3,'Rápido'],[6,'Normal'],[12,'Lento']]){const b=document.createElement('button');b.type='button';b.textContent=name;b.onclick=()=>{if(!seconds)return;seconds.value=duration;seconds.dispatchEvent(new Event('change',{bubbles:true}))};spin.append(b)}
+ get('panel-scene')?.querySelector('[data-p7-scene="export"]')?.append(spin);
+
  return {setMode};
 }
