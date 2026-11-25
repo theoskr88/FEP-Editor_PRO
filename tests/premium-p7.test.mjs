@@ -54,3 +54,26 @@ test('P7 accepts ordinary large phone photographs by normalizing before strict a
  assert(normalize.includes('maxPixels=4000000'));
  assert(path.includes('backgroundPhotoEnabled:true'));
 });
+
+
+test('P7 soft studio light preserves old scenes and supplies a new preset',async()=>{
+ const {normalizeMockup,LIGHT_STYLES}=await import('../src/mockup-settings.js');
+ assert(LIGHT_STYLES.softbox);
+ assert(LIGHT_STYLES.softbox.fill>LIGHT_STYLES.neutral.fill);
+ assert.equal(normalizeMockup({lightStyle:'softbox'}).lightStyle,'softbox');
+ assert.equal(normalizeMockup({lightStyle:'custom'}).lightStyle,'custom');
+ const control=fs.readFileSync('src/mockup-controls.js','utf8');
+ assert(control.includes("Softbox · estudio suave"));
+});
+test('P7 four typography styles use existing offline font with no automatic layer mutation',async()=>{
+ const {TEXT_STYLES}=await import('../src/premium-p7-typography.js');
+ assert.equal(Object.keys(TEXT_STYLES).length,4);
+ for(const v of Object.values(TEXT_STYLES)){
+  assert(v.size>=20&&v.size<=180);
+  assert(/^#[0-9a-f]{6}$/i.test(v.color));
+ }
+ const code=fs.readFileSync('src/premium-p7-typography.js','utf8');
+ assert(code.includes("get('fontSize').value"));
+ assert(code.includes("get('textColor').value"));
+ assert(!code.includes("get('applyText').click()"));
+});
