@@ -14,6 +14,7 @@ export function validateProject(data){
   if(!e||!['text','image','glitter','sticker','shape','vector'].includes(e.type)||!Number.isFinite(e.x)||!Number.isFinite(e.y)||Math.abs(e.x)>10||Math.abs(e.y)>10)throw Error('Capa inválida');
   if(e.type==='text'&&(typeof e.text!=='string'||e.text.length>1000||!Number.isFinite(e.size)||e.size<=0||e.size>500))throw Error('Texto inválido');
   if(e.type==='image'&&(typeof e.data!=='string'||e.data.length>15_000_000||!/^data:image\/(png|jpeg|webp);base64,/.test(e.data)))throw Error('Imagen no compatible');
+  if(e.type==='image'&&e.rotation!==undefined&&(!Number.isFinite(e.rotation)||Math.abs(e.rotation)>180))throw Error('Rotación de fotografía fuera de -180° a 180°');
   if(e.type==='sticker')validateStickerLayer(e);if(e.type==='shape')validateShape(e);if(e.type==='vector')validateVector(e);
   for(const key of ['widthFrac','heightFrac','scale'])if(e[key]!==undefined&&(!Number.isFinite(e[key])||e[key]<=0||e[key]>3))throw Error('Tamaño de imagen inválido');
   if(e.glitter!==undefined&&(!e.glitter||typeof e.glitter!=='object'||Array.isArray(e.glitter)))throw Error('Parámetros glitter inválidos');
