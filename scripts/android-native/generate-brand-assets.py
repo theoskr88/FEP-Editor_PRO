@@ -67,3 +67,41 @@ for splash in root.rglob('splash.png'):
     splash.write_bytes(png_bytes(512))
 # Resource png is regenerated on every Android build; no third-party artwork.
 print("FEP original Android launcher resources generated (5 densities + adaptive)")
+
+
+# Official FEP Editor PRO logo, user supplied. The original image is never modified.
+# It can be uploaded to src/brand/logo-fep-editor-pro.png with the branding package.
+# Keep the legacy generator for previous source snapshots until the official file is present.
+official=Path("src/brand/logo-fep-editor-pro.png")
+if official.is_file():
+    from PIL import Image
+    from io import BytesIO
+    original=Image.open(official).convert("RGBA")
+    if original.width<500 or original.height<300:
+        raise SystemExit("El logo FEP oficial tiene resolución insuficiente")
+    symbol=original.crop((
+        round(original.width*930/1448),
+        round(original.height*250/1086),
+        round(original.width*1380/1448),
+        round(original.height*715/1086),
+    ))
+    for density,size in (("mdpi",48),("hdpi",72),("xhdpi",96),("xxhdpi",144),("xxxhdpi",192)):
+        folder=root/("mipmap-"+density)
+        for name in ("ic_launcher.png","ic_launcher_round.png"):
+            base=Image.new("RGBA",(size,size),(12,32,62,255))
+            resized=symbol.copy()
+            resized.thumbnail((round(size*.84),round(size*.84)),Image.Resampling.LANCZOS)
+            base.alpha_composite(resized,((size-resized.width)//2,(size-resized.height)//2))
+            base.save(folder/name,optimize=True)
+    # Full official logotype, centered on white: both orientations.
+    for folder,size in (("drawable",(1080,1920)),("drawable-land",(1920,1080))):
+        splash=root/folder/"splash.png"
+        splash.parent.mkdir(parents=True,exist_ok=True)
+        bg=Image.new("RGB",size,"white")
+        artwork=original.convert("RGB")
+        artwork.thumbnail((round(size[0]*.86),round(size[1]*.5)),Image.Resampling.LANCZOS)
+        bg.paste(artwork,((size[0]-artwork.width)//2,(size[1]-artwork.height)//2))
+        bg.save(splash,optimize=True)
+    print("Logotipo oficial FEP Editor PRO aplicado a íconos y splash Android")
+else:
+    print("ATENCIÓN: src/brand/logo-fep-editor-pro.png no está en el repositorio; se mantiene el ícono provisional")
