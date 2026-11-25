@@ -122,7 +122,7 @@ export function createMockupControls({state,context,patch,notify}){
   }));
  }
  function sync(){const s=state();photoFit.value=s.backgroundPhotoFit;photoEnabled.checked=s.backgroundPhotoEnabled;
-  photoPreview.hidden=!s.backgroundPhoto;if(photoPreview.getAttribute('src')!==(s.backgroundPhoto||''))photoPreview.src=s.backgroundPhoto||'';
+  photoPreview.hidden=!s.backgroundPhoto;if(s.backgroundPhoto){if(photoPreview.getAttribute('src')!==s.backgroundPhoto)photoPreview.src=s.backgroundPhoto}else{photoPreview.removeAttribute('src');}
   if(!s.backgroundPhoto)photoStatus.textContent='Todavía no hay una fotografía de fondo.';
   else if(!s.backgroundPhotoEnabled)photoStatus.textContent='Foto guardada pero desactivada: activa «Mostrar fotografía».';photoEnabled.disabled=!s.backgroundPhoto;photoClear.disabled=!s.backgroundPhoto;finishSelector.value=s.premiumFinish;
  pieceToggle.checked=s.pieceColorsEnabled;
