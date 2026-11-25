@@ -175,7 +175,7 @@ jobs:
           python3 scripts/android-native/patch-manifest.py
           # The official artwork arrives as a PNG in src/brand. Only then install Pillow.
           # A local venv avoids altering the system Python environment on GitHub runners.
-          if [ -f src/brand/Logotipo FEP Editor Pro con Cubo Dorado.png ]; then
+          if [ -f "src/brand/Logotipo FEP Editor Pro con Cubo Dorado.png" ]; then
             python3 -m venv /tmp/fep-brand-venv
             /tmp/fep-brand-venv/bin/python -m pip install --quiet Pillow==11.3.0
             /tmp/fep-brand-venv/bin/python scripts/android-native/generate-brand-assets.py
