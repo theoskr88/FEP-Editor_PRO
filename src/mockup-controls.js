@@ -1,5 +1,6 @@
 import {createSceneLibrary} from './mockup-scenes.js?v=fep-6a4c2734f7b31778';
 import {imageInfo} from './assets.js?v=fep-6a4c2734f7b31778';
+import {normalizePhoto} from './photo-import-mobile.js?v=fep-6a4c2734f7b31778';
 import {normalizeMockup,MOCKUP_PRESETS,CAMERA_PRESETS,LIGHT_STYLES,PREMIUM_FINISHES} from './mockup-settings.js?v=fep-6a4c2734f7b31778';
 export function createMockupControls({state,context,patch,notify}){
  const get=id=>document.getElementById(id);let library,environment,pending,owner;const normalMaps=new Map(),floorMaps=new Map();let photoTexture=null,photoKey=null,photoRequest=0,photoPending=Promise.resolve();
@@ -64,10 +65,13 @@ export function createMockupControls({state,context,patch,notify}){
  photoInput.onchange=async()=>{
   const file=photoInput.files?.[0];photoInput.value='';if(!file)return;
   try{
-   if(file.size>12*1024*1024)throw Error('Imagen demasiado grande (máximo 12 MB)');
-   const info=imageInfo(new Uint8Array(await file.arrayBuffer()));
-   if(info.pixels>12_000_000)throw Error('Foto demasiado grande para fondo 3D: máximo 12 megapíxeles');
-   const url=URL.createObjectURL(file);
+   // A phone photo can be 12–50+ MP. Normalize before strict decoding.
+   // The original stays untouched; only a small local presentation JPEG is stored.
+   photoStatus.textContent='Preparando fotografía para el mockup…';
+   const prepared=await normalizePhoto(file);
+   const info=imageInfo(new Uint8Array(await prepared.arrayBuffer()));
+   if(info.pixels>4_000_000)throw Error('No se pudo reducir la fotografía a un tamaño seguro');
+   const url=URL.createObjectURL(prepared);
    let img;
    try{img=new Image();img.src=url;await img.decode()}
    finally{URL.revokeObjectURL(url)}
@@ -81,7 +85,7 @@ export function createMockupControls({state,context,patch,notify}){
    const jpeg=canvas.toDataURL('image/jpeg',.77);canvas.width=canvas.height=1;img.src='';
    if(jpeg.length>2_500_000)throw Error('El fondo excede el límite de tamaño');
    patch({backgroundPhoto:jpeg,backgroundPhotoEnabled:true,backgroundPhotoFit:fit});
-   photoStatus.textContent='Fotografía aplicada al fondo del mockup. Revisa ahora el visor 3D.';
+   photoStatus.textContent='Fotografía adaptada y aplicada al fondo del mockup. Revisa ahora el visor 3D.';
    notify('Foto de presentación aplicada: abre el visor 3D para comprobarla.');
   }catch(error){photoStatus.textContent='Error de fotografía: '+error.message;notify('No se pudo usar el fondo: '+error.message)}
  };
