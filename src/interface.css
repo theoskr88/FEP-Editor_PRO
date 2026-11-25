@@ -203,3 +203,12 @@ textarea{font:inherit;color:inherit;background:#101b28;border:1px solid #394a60;
  .editor-workspace[data-p89-view=mockup] #viewPanel.p6-floating{position:static!important;width:auto!important;max-height:none;box-shadow:none}
  .p89-exit-focus{bottom:calc(78px + env(safe-area-inset-bottom));right:10px;font-size:11px}
 }
+
+
+.p89-studio-btn{background:linear-gradient(120deg,#247367,#164d61);border:1px solid #7fd5c5;color:#ecfff9;border-radius:12px;padding:12px;min-height:50px;font-weight:750}
+.p89-mug-colors,.p89-spin-preset{display:flex;flex-wrap:wrap;gap:8px;border:1px solid #375469;background:#162938;border-radius:13px;padding:12px}
+.p89-mug-colors[hidden]{display:none!important}
+.p89-mug-colors strong,.p89-spin-preset strong{flex:0 0 100%;color:#d1e4ed;font-size:12px;margin-bottom:3px}
+.p89-mug-colors button{flex:1 1 72px;min-height:45px;border-radius:10px;border:1px solid #5a7382;color:#e9f9ff;background:linear-gradient(90deg,var(--swatch) 0 8px,#1d3545 8px)}
+.p89-spin-preset button{flex:1 1 72px;min-height:44px;border-radius:10px;border:1px solid #527387;background:#1e3a49;color:#e4f3fb}
+.p89-studio-btn:focus-visible,.p89-mug-colors button:focus-visible,.p89-spin-preset button:focus-visible{outline:3px solid #9beccc;outline-offset:2px}
