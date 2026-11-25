@@ -6,7 +6,7 @@ export function createSceneLibrary(THREE){
   if(textures.has(kind))return textures.get(kind);
   // Materiales locales tipo PBR: grano irregular, variaciones tonales y vetas no repetitivas.
   // Eliminar patrón de cuadrícula y tonos grises que parecían plástico.
-  const n=navigator.maxTouchPoints?512:768,c=document.createElement('canvas');c.width=c.height=n;
+  const lowMemory=Number(navigator.deviceMemory||8)<=4;const n=navigator.maxTouchPoints?(lowMemory?256:384):768,c=document.createElement('canvas');c.width=c.height=n;
   const x=c.getContext('2d'),image=x.createImageData(n,n),d=image.data;
   const fract=v=>v-Math.floor(v),noise=(px,py)=>fract(Math.sin(px*127.1+py*311.7)*43758.5453123);
   for(let y=0;y<n;y++)for(let px=0;px<n;px++){
