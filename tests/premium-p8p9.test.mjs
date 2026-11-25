@@ -63,3 +63,17 @@ test('P8+P9 cierre: no exportar ZIP que no sea restaurable y comprobar firma deb
  assert(workflow.includes('debug-signing-fingerprint.txt'));
  assert(workflow.includes('Debug certificate SHA256'));
 });
+
+test('P8+P9 logotipo oficial: splash web y recursos Android usan imagen original sin alterar proyectos',()=>{
+ const index=fs.readFileSync('index.html','utf8');
+ const script=fs.readFileSync('scripts/android-native/generate-brand-assets.py','utf8');
+ const workflow=fs.readFileSync('.github/workflows/android-editor.yml','utf8');
+ assert(index.includes('fepOfficialLaunch'));
+ assert(index.includes('./src/brand/logo-fep-editor-pro.png'));
+ assert(index.includes('setTimeout(remove,1550)'));
+ assert(script.includes('src/brand/logo-fep-editor-pro.png'));
+ assert(script.includes('fep_official_foreground.png'));
+ assert(script.includes('drawable-land'));
+ assert(workflow.includes('Pillow==11.3.0'));
+ assert(workflow.includes('Official FEP Editor PRO PNG missing'));
+});
