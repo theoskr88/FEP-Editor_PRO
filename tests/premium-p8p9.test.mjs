@@ -69,9 +69,9 @@ test('P8+P9 logotipo oficial: splash web y recursos Android usan imagen original
  const script=fs.readFileSync('scripts/android-native/generate-brand-assets.py','utf8');
  const workflow=fs.readFileSync('.github/workflows/android-editor.yml','utf8');
  assert(index.includes('fepOfficialLaunch'));
- assert(index.includes('./src/brand/logo-fep-editor-pro.png'));
+ assert(index.includes('./src/brand/Logotipo FEP Editor Pro con Cubo Dorado.png'));
  assert(index.includes('setTimeout(remove,1550)'));
- assert(script.includes('src/brand/logo-fep-editor-pro.png'));
+ assert(script.includes('src/brand/Logotipo FEP Editor Pro con Cubo Dorado.png'));
  assert(script.includes('fep_official_foreground.png'));
  assert(script.includes('drawable-land'));
  assert(workflow.includes('Pillow==11.3.0'));
