@@ -45,6 +45,6 @@ test('P6 offline pipeline and release signing are explicit and opt-in',()=>{
  assert(yaml.includes('ANDROID_TEST_KEYSTORE_BASE64'));
  assert(yaml.includes('ANDROID_KEYSTORE_BASE64'));
  assert(yaml.includes('bundleRelease'));
- assert(yaml.includes('desarrollo/estudio3d-premium-p6-auditoria'));
+ assert(yaml.includes('desarrollo/estudio3d-premium-p7-ux'));
  assert.equal(PRODUCT_PROFILES.length,10);
 });
