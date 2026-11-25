@@ -1,4 +1,4 @@
-name: FEP Editor PRO — Android Premium P6 audit
+name: FEP Editor PRO — Android Premium P7 UX
 concurrency:
   group: fep-editor-android-${{ github.ref }}
   cancel-in-progress: true
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - desarrollo/estudio3d-premium-p6-auditoria
+      - desarrollo/estudio3d-premium-p7-ux
     paths:
       - 'capacitor.config.json'
       - 'scripts/build-mobile-web.py'
@@ -104,11 +104,13 @@ jobs:
           node --check src/premium-p4.js
           node --check src/premium-p5.js
           node --check src/premium-p6.js
+          node --check src/premium-p7.js
+          node --check src/mockup-controls.js
           node --check src/creative-controls.js
           node --check scripts/native-bridge-entry.js
           node --check src/photo-tools.js
           node --check src/photo-import-mobile.js
-          node --test tests/premium-p6.test.mjs tests/premium-p5.test.mjs tests/premium-p4.test.mjs tests/core.test.mjs tests/photo-tools.test.mjs tests/photo-import-mobile.test.mjs tests/android-project-reopen.test.mjs tests/premium-3d.test.mjs tests/premium-3d-p2.test.mjs
+          node --test tests/premium-p7.test.mjs tests/premium-p6.test.mjs tests/premium-p5.test.mjs tests/premium-p4.test.mjs tests/core.test.mjs tests/photo-tools.test.mjs tests/photo-import-mobile.test.mjs tests/android-project-reopen.test.mjs tests/premium-3d.test.mjs tests/premium-3d-p2.test.mjs
       - name: Prepare bundled offline web assets
         shell: bash
         run: |
@@ -139,11 +141,11 @@ jobs:
           if count != 1:
               raise SystemExit('Cannot uniquely update Android versionCode')
           value=updated
-          updated,count=re.subn(r'(?m)^([ \t]*versionName[ \t]+).+$',lambda m:m.group(1)+'"0.9.6-p6"',value)
+          updated,count=re.subn(r'(?m)^([ \t]*versionName[ \t]+).+$',lambda m:m.group(1)+'"0.9.7-p7"',value)
           if count != 1:
               raise SystemExit('Cannot uniquely update Android versionName')
           path.write_text(updated)
-          print('Android versionCode:',code,'versionName: 0.9.6-p6')
+          print('Android versionCode:',code,'versionName: 0.9.7-p7')
           PY
           python3 - <<'PY'
           import json
