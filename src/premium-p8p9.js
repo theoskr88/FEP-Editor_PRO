@@ -11,9 +11,8 @@ export function initIntegratedWorkspace({get,notify}){
   // Never hide a product from the actual editor data or change selection/history.
   workspace.dataset.p89View=next;mode=next;
   for(const button of actions.querySelectorAll('button'))button.setAttribute('aria-pressed',String(button.dataset.mode===next));
-  if(next==='design')get('tab-design')?.click();
-  // Close the drawer only when switching to a dedicated presentation.
-  if(next==='mockup'&&get('toolsDock')?.dataset.open==='true')get('closeTools')?.click();
+  // Focus modes only change presentation; never open tools or alter the document.
+  if(next!=='both'&&get('toolsDock')?.dataset.open==='true')get('closeTools')?.click();
   window.__fepUI?.refresh?.();
   window.dispatchEvent(new Event('resize'));
  }
@@ -54,6 +53,17 @@ export function initIntegratedWorkspace({get,notify}){
   b.onclick=()=>{if(!scenePreset)return;scenePreset.value=id;scenePreset.dispatchEvent(new Event('change',{bubbles:true}))};
   scenePresets.append(b);
  }
- get('panel-scene')?.querySelector('[data-p7-scene="background"]')?.prepend(scenePresets);
+  get('panel-scene')?.querySelector('[data-p7-scene="background"]')?.prepend(scenePresets);
+ const studio=document.createElement('button');studio.type='button';studio.id='p89StudioReady';studio.className='p89-studio-btn';studio.textContent='Preparar foto comercial · Estudio Pro';
+ studio.title='Iluminación suave, ángulo tres cuartos y captura HD; no altera el archivo de impresión';
+ studio.onclick=()=>{
+  const lighting=get('sceneLighting'),quality=get('scenePhotoWidth');
+  if(scenePreset){scenePreset.value='premiumWarm';scenePreset.dispatchEvent(new Event('change',{bubbles:true}))}
+  if(lighting){lighting.value='softbox';lighting.dispatchEvent(new Event('change',{bubbles:true}))}
+  if(camera){camera.value='hero';camera.dispatchEvent(new Event('change',{bubbles:true}))}
+  if(quality){quality.value='1920';quality.dispatchEvent(new Event('change',{bubbles:true}))}
+  notify('Estudio Pro listo. Revisa el producto y exporta desde Escena → Exportar.');
+ };
+ get('panel-scene')?.querySelector('[data-p7-scene="background"]')?.prepend(studio);
  return {setMode};
 }
