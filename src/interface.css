@@ -174,3 +174,32 @@ textarea{font:inherit;color:inherit;background:#101b28;border:1px solid #394a60;
  .p5-shortcuts button{background:#1b3944;border-color:#3b5f6c;border-radius:9px;min-height:45px}
 }
 @media(max-width:375px){#canvasPanel .workspace-heading{grid-template-columns:minmax(0,1fr) 1fr 1fr}#canvasPanel .p6-heading-action{font-size:10px;padding:6px 4px}.brand strong{font-size:14px}.brand strong span{font-size:9px}}
+
+
+/* Premium P8+P9: fast live workflow. Existing controls remain reachable. */
+.p89-view-actions{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 10px;background:#101d29;border-bottom:1px solid #2d4656;flex-wrap:wrap}
+.p89-view-btn{flex:1;min-width:85px;min-height:37px;border:1px solid #34546a;border-radius:9px;background:#192e3d;color:#d0e0eb;font-size:11px;font-weight:650;padding:5px}
+.p89-view-btn[aria-pressed=true]{background:#205448;color:#92efd4;border-color:#66cbb2}
+.p89-focus-button{border-radius:9px;border:1px solid #35596b;background:#234052;color:#c1e8df;font-size:11px;padding:8px}
+.p89-sync-hint{padding:7px 11px;color:#9db7c4;font-size:11px;line-height:1.4}
+.p89-exit-focus{position:fixed;z-index:55;right:12px;bottom:calc(80px + env(safe-area-inset-bottom));border-radius:12px;background:#226355;color:white;padding:10px 13px;border:1px solid #7ee3bf}
+.p89-exit-focus[hidden]{display:none!important}
+.p89-scene-presets,.p89-camera-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:6px 2px}
+.p89-scene-presets button,.p89-camera-quick button{border:1px solid #4d7183;border-radius:10px;padding:10px 5px;min-height:43px;background:#19384b;color:#dcecef;font-size:12px;font-weight:650}
+.editor-workspace[data-p89-view=design] #viewPanel{display:none}
+.editor-workspace[data-p89-view=mockup] #canvasPanel{display:none}
+.editor-workspace[data-p89-view=design],.editor-workspace[data-p89-view=mockup]{grid-template-columns:var(--tools) minmax(0,1fr)}
+.editor-workspace[data-p89-view=design] #canvasPanel .canvas-stage{min-height:38dvh}
+.editor-workspace[data-p89-view=mockup] #viewPanel #viewer{min-height:48dvh}
+@media(max-width:900px){
+ .p89-view-actions{position:sticky;top:0;z-index:3;justify-content:space-between;padding:5px 7px;gap:5px}
+ .p89-view-btn{min-width:0;min-height:41px;font-size:10px}
+ .p89-sync-hint{font-size:10px;padding:6px 10px}
+ .p89-focus-button{font-size:10px;min-height:35px;padding:6px}
+ .editor-workspace[data-p89-view=design] #canvasPanel .canvas-stage{height:clamp(350px,64dvh,700px)}
+ .editor-workspace[data-p89-view=mockup] #viewPanel #viewer{height:clamp(390px,66dvh,750px);min-height:0}
+ .editor-workspace[data-p89-view=both] #canvasPanel .canvas-stage{height:clamp(230px,35dvh,350px)}
+ .editor-workspace[data-p89-view=both] #viewPanel #viewer{height:clamp(210px,33dvh,320px)}
+ .editor-workspace[data-p89-view=mockup] #viewPanel.p6-floating{position:static!important;width:auto!important;max-height:none;box-shadow:none}
+ .p89-exit-focus{bottom:calc(78px + env(safe-area-inset-bottom));right:10px;font-size:11px}
+}
