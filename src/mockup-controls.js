@@ -39,6 +39,8 @@ export function createMockupControls({state,context,patch,notify}){
  if(materialBody)materialBody.append(pieces);
  pieceToggle.onchange=()=>run(()=>patch({pieceColorsEnabled:pieceToggle.checked}));
 
+ const lightSelect=get('sceneLighting');
+ if(![...lightSelect.options].some(o=>o.value==='softbox'))lightSelect.add(new Option('Softbox · estudio suave','softbox'));
  get('sceneLighting').onchange=()=>run(()=>{const style=get('sceneLighting').value;if(style==='custom')patch({lightStyle:style});else patch({...LIGHT_STYLES[style],lightStyle:style})});
  const run=fn=>{try{fn()}catch(error){notify(error.message)}};
  get('scenePreset').onchange=()=>run(()=>{const id=get('scenePreset').value,p=MOCKUP_PRESETS[id];patch({preset:id,lightStyle:'custom',background:p.background,floor:p.floor,key:p.key,fill:p.fill,ambient:p.ambient,exposure:1,shadows:id!=='original'})});
