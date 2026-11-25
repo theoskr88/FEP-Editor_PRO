@@ -159,6 +159,9 @@ jobs:
               raise SystemExit('Missing native plugins: '+', '.join(sorted(expected-registered)))
           PY
           python3 scripts/android-native/patch-manifest.py
+          python3 scripts/android-native/generate-brand-assets.py
+          test -s android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          test -s android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
           grep -q 'android.media.action.IMAGE_CAPTURE' android/app/src/main/AndroidManifest.xml
           grep -q 'android.intent.action.GET_CONTENT' android/app/src/main/AndroidManifest.xml
       - name: Compile Android debug APK
