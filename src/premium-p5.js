@@ -17,7 +17,7 @@ export function initPremiumP5({get,ui,notify}){
 
  const dialog=document.createElement('dialog');
  dialog.id='p5AboutDialog';dialog.className='p5-about-dialog';
- dialog.innerHTML='<div class="p5-dialog-top"><h2>FEP Editor PRO</h2><button type="button" id="p5AboutClose" aria-label="Cerrar">Cerrar</button></div><p>Premium P5 · revisión de desarrollo</p><dl id="p5VersionFields"></dl><p class="p5-important">Los proyectos se guardan en este dispositivo. Antes de desinstalar o cambiar la firma de la APK, guarda una copia JSON y comprueba que se haya descargado.</p><div class="p5-dialog-actions"><button type="button" id="p5Backup">Guardar respaldo JSON</button><button type="button" id="p5Import">Restaurar desde JSON</button></div><p class="hint">El respaldo JSON corresponde al proyecto actual. Para respaldar varios proyectos, expórtalos individualmente desde Mis proyectos. No se han integrado pagos ni seguimiento en línea.</p>';
+ dialog.innerHTML='<div class="p5-dialog-top"><h2>FEP Editor PRO</h2><button type="button" id="p5AboutClose" aria-label="Cerrar">Cerrar</button></div><p>Premium P6 · revisión de auditoría</p><dl id="p5VersionFields"></dl><p class="p5-important">Los proyectos se guardan en este dispositivo. Antes de desinstalar o cambiar la firma de la APK, guarda una copia JSON y comprueba que se haya descargado.</p><div class="p5-dialog-actions"><button type="button" id="p5Backup">Guardar respaldo JSON</button><button type="button" id="p5Import">Restaurar desde JSON</button></div><p class="hint">El respaldo JSON corresponde al proyecto actual. Para respaldar varios proyectos, utiliza Exportar biblioteca ZIP desde Mis proyectos. No se han integrado pagos ni seguimiento en línea.</p>';
  document.body.append(dialog);
  const close=get('p5AboutClose'),backup=get('p5Backup'),restore=get('p5Import');
  close.onclick=()=>dialog.close();
@@ -40,7 +40,7 @@ export function initPremiumP5({get,ui,notify}){
   const shortcuts=document.createElement('nav');shortcuts.id='p5QuickActions';shortcuts.className='p5-shortcuts';shortcuts.setAttribute('aria-label','Acciones rápidas de diseño');
   const entries=[
    ['Fotografía',()=>get('imageFile')?.click()],
-   ['Texto',()=>get('addText')?.click()],
+   ['Texto',()=>{get('textTools').open=true;get('textValue')?.focus()}],
    ['Stickers',()=>{get('stickerTools').open=true;get('stickerLibrary').open=true;get('stickerSearch')?.focus()}],
    ['Plantillas',()=>{get('creativeTools').open=true;get('creativeTemplate')?.focus()}],
    ['Capas',()=>ui.activate?.('layers')]
