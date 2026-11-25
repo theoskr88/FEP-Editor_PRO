@@ -1126,7 +1126,7 @@ try{
    if(raw.format!=='fep-project'||raw.version!==1||!raw.document||raw.digest!==entry.digest)throw Error('Contenido de respaldo incompatible: '+entry.name);
    if(await documentDigest(raw.document)!==entry.digest)throw Error('Integridad incorrecta: '+entry.name);
    validateProject(raw.document);
-   progress?.({done:i+1,total:manifest.count,phase:'Verificando ZIP'});
+   progress?.(i+1,manifest.count);
   }
   if(!confirm('Restaurar '+manifest.count+' proyectos como copias nuevas? Los existentes se conservarán.'))return;
   const created=[];
@@ -1136,7 +1136,7 @@ try{
     const entry=manifest.projects[i],raw=JSON.parse(files.get(entry.file));
     const prepared=await prepare(raw.document,{signal,onProgress:progress});
     const id=await projectLibrary.create(prepared.data,raw.name||entry.name);
-    created.push(id);progress?.({done:i+1,total:manifest.count,phase:'Restaurando proyectos'});
+    created.push(id);progress?.(i+1,manifest.count);
    }
   }catch(error){
    for(const id of created){try{await projectLibrary.remove(id)}catch{}}
