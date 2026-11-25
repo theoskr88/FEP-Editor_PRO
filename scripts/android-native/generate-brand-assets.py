@@ -70,9 +70,9 @@ print("FEP original Android launcher resources generated (5 densities + adaptive
 
 
 # Official FEP Editor PRO logo, user supplied. The original image is never modified.
-# It can be uploaded to src/brand/logo-fep-editor-pro.png with the branding package.
+# It can be uploaded to src/brand/Logotipo FEP Editor Pro con Cubo Dorado.png with the branding package.
 # Keep the legacy generator for previous source snapshots until the official file is present.
-official=Path("src/brand/logo-fep-editor-pro.png")
+official=Path("src/brand/Logotipo FEP Editor Pro con Cubo Dorado.png")
 if official.is_file():
     from PIL import Image
     from io import BytesIO
@@ -119,4 +119,4 @@ if official.is_file():
         bg.save(splash,optimize=True)
     print("Logotipo oficial FEP Editor PRO aplicado a íconos y splash Android")
 else:
-    print("ATENCIÓN: src/brand/logo-fep-editor-pro.png no está en el repositorio; se mantiene el ícono provisional")
+    print("ATENCIÓN: src/brand/Logotipo FEP Editor Pro con Cubo Dorado.png no está en el repositorio; se mantiene el ícono provisional")
