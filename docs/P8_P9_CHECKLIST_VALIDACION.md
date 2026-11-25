@@ -1,6 +1,24 @@
 # FEP EDITOR PRO — P8 + P9 Integral — Checklist de validación Android
 
-Versión candidata: **0.9.9-p8p9**. Estado inicial: **pendiente de validación física**.
+Versión candidata: **0.9.9-p8p9**. **Validación funcional inicial aprobada por usuario: 12/12 pruebas**, informadas el 25-11-2026. No equivale a cierre de las verificaciones detalladas ni a aprobación comercial.
+
+## Validación funcional informada por el usuario — 25-11-2026
+- [x] Instalación de P8+P9 y versión visible 0.9.9-p8p9.
+- [x] Acceso a proyectos anteriores o restauración mediante ZIP (sin prueba diferenciada de ambos métodos).
+- [x] «Diseño + 3D» muestra ambos espacios.
+- [x] «Ampliar 2D» y «Ampliar 3D» funcionan sin pérdida de capas.
+- [x] La taza refleja cambios de diseño en tiempo real.
+- [x] Cámaras rápidas: frente, tres cuartos y zona impresa.
+- [x] «Estudio Pro» mejora la presentación visual.
+- [x] Colores de asa, borde e interior no afectan la impresión.
+- [x] Las velocidades de video 360° generan los archivos esperados.
+- [x] Fondo fotográfico funciona.
+- [x] PNG y PDF conservan dimensiones y espejo correctos.
+- [x] Modo avión y arranque sin errores.
+
+**No inferir de lo anterior:** actualización sin desinstalar (A02); restauración de ZIP corrupto/cancelado (A08-A09); firma estable (A13-A14); mediciones impresas reales (D01-D09); validación de todos los modelos (C01-C05); licencia/publicación (F01-F07). Permanecen por verificar.
+
+
 Reglas: no marcar una prueba aprobada por el hecho de que CI esté verde; prueba en dispositivo real y documenta evidencia. Mantener intactas P1–P7.
 
 Marca [x] al aprobar y anota modelo Android, versión, captura, archivo exportado o fallo. La app **no puede declararse lista para vender** mientras existan bloqueantes sin resolver.
