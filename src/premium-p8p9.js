@@ -6,6 +6,7 @@ export function initIntegratedWorkspace({get,notify}){
  const actions=document.createElement('div');actions.className='p89-view-actions';actions.setAttribute('aria-label','Modo de visualización');
  const modes=[['both','Diseño + 3D'],['design','Ampliar 2D'],['mockup','Ampliar 3D']];
  let mode='both';
+ workspace.dataset.p89View='both';
  function setMode(next){
   if(!['both','design','mockup'].includes(next))return;
   // Never hide a product from the actual editor data or change selection/history.
