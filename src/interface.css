@@ -139,7 +139,7 @@ textarea{font:inherit;color:inherit;background:#101b28;border:1px solid #394a60;
  .canvas-actions{gap:8px;padding:10px 12px}
  .canvas-actions>button{border-color:#345064;border-radius:12px;min-height:44px;font-size:11px;background:#1a2f3e}
  .workspace-caption{padding:5px 11px;font-size:10px;color:#9db1c4}
- .tools-dock{left:0;right:0;bottom:calc(69px + env(safe-area-inset-bottom));height:min(62dvh,620px);max-height:calc(100dvh - 140px);min-height:265px;border-radius:21px 21px 0 0;border:1px solid #37566a;border-bottom:0;background:#142333;box-shadow:0 -12px 35px #0008}
+ .tools-dock{left:0;right:0;bottom:calc(69px + env(safe-area-inset-bottom));height:clamp(290px,50dvh,510px);max-height:calc(100dvh - 220px);min-height:265px;border-radius:21px 21px 0 0;border:1px solid #37566a;border-bottom:0;background:#142333;box-shadow:0 -12px 35px #0008}
  .tools-dock[data-open=true]{transform:translateY(0)}
  .mobile-panel-header{min-height:51px;padding:12px 15px 7px;border-bottom:1px solid #2c4256;background:#172838}
  .mobile-panel-header>strong{font-size:17px;font-weight:720;letter-spacing:-.2px}
