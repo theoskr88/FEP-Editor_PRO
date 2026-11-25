@@ -77,3 +77,12 @@ test('P7 four typography styles use existing offline font with no automatic laye
  assert(code.includes("get('textColor').value"));
  assert(!code.includes("get('applyText').click()"));
 });
+
+test('P7 empty photo preview never requests app root as an image or flags an image as a runtime failure',()=>{
+ const scene=fs.readFileSync('src/mockup-controls.js','utf8');
+ assert(scene.includes("photoPreview.removeAttribute('src')"));
+ assert(!scene.includes("photoPreview.src=s.backgroundPhoto||''"));
+ const markup=fs.readFileSync('index.html','utf8');
+ assert(markup.includes("event.target?.tagName==='IMG'"));
+ assert(markup.includes("window.__fepBoot.stage('runtime','failed'"));
+});
