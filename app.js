@@ -1165,7 +1165,7 @@ try{
   // Keep the exported ZIP within the same 100 MiB budget accepted by the importer.
   // UTF-8 bytes (not JS string length) are what occupy space in this store-only ZIP.
   const enc=new TextEncoder();
-  const backupBytes=files.reduce((sum,file)=>sum+enc.encode(file.name).byteLength+enc.encode(file.data).byteLength+76,22);
+  const backupBytes=files.reduce((sum,file)=>sum+2*enc.encode(file.name).byteLength+enc.encode(file.data).byteLength+76,22);
   if(backupBytes>100*1024*1024)throw Error('La biblioteca supera 100 MB, límite de restauración segura. Exporta los proyectos individualmente antes de desinstalar.');
   const archive=await zipFiles(files);
   if(!await saveBlob(archive,'FEP_Editor_PRO_biblioteca_'+new Date().toISOString().slice(0,10)+'.zip'))throw Error('Guardado cancelado o fallido. Los proyectos originales se conservaron.');
