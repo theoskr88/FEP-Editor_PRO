@@ -105,6 +105,7 @@ jobs:
           node --check src/premium-p5.js
           node --check src/premium-p6.js
           node --check src/premium-p7.js
+          node --check src/premium-p7-typography.js
           node --check src/mockup-controls.js
           node --check src/creative-controls.js
           node --check scripts/native-bridge-entry.js
