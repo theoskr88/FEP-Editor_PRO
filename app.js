@@ -89,6 +89,7 @@ function updateImageControls(){
   const cm=imageCm(e);
   $('imageWidthCm').value=cm.w.toFixed(2);
   $('imageHeightCm').value=cm.h.toFixed(2);
+  if($('imageRotation'))$('imageRotation').value=String(e.rotation||0);
   if($('imageOpacity')){$('imageOpacity').value=String(Math.round((e.opacity??1)*100));$('imageOpacityValue').textContent=$('imageOpacity').value+'%'}
   $('imageSelectedStatus').textContent='Imagen seleccionada · ajusta las medidas en centímetros'+(cm.w>(Number($('widthCm').value)||20)||cm.h>(Number($('heightCm').value)||8.5)?' · aviso: excede el lienzo y se recortará al exportar':'');
 }
@@ -115,8 +116,9 @@ $('imageHeightCm').addEventListener('change',()=>{
 /* Edición fotográfica local: el recorte cambia únicamente la capa elegida y es reversible. */
 {
  const panel=$('imageSizePanel'),group=document.createElement('div');group.className='control-card';
- group.innerHTML='<label>Opacidad de la fotografía <input id="imageOpacity" type="range" min="0" max="100" value="100" step="1"></label><span id="imageOpacityValue" class="hint">100%</span><p class="hint">Puedes ampliar o reducir imágenes con dos dedos. Los fondos del mockup se gestionan por separado.</p>';
+ group.innerHTML='<label>Giro de la fotografía (°) <input id="imageRotation" type="number" min="-180" max="180" value="0" step="1"></label><label>Opacidad de la fotografía <input id="imageOpacity" type="range" min="0" max="100" value="100" step="1"></label><span id="imageOpacityValue" class="hint">100%</span><p class="hint">Puedes ampliar o reducir imágenes con dos dedos. Los fondos del mockup se gestionan por separado.</p>';
  panel.append(group);
+ $('imageRotation').onchange=()=>{const e=elements[selected],value=Number($('imageRotation').value);if(e?.type!=='image'||e.locked||!Number.isFinite(value)||value< -180||value>180){updateImageControls();return}if(value===Number(e.rotation||0))return;addHistory();e.rotation=value;draw();updateImageControls()};
  $('imageOpacity').oninput=event=>{$('imageOpacityValue').textContent=event.target.value+'%'};
  $('imageOpacity').onchange=event=>{const e=elements[selected];if(e?.type!=='image'||e.locked)return;addHistory();e.opacity=Number(event.target.value)/100;draw();updateImageControls()};
 }
@@ -134,6 +136,7 @@ function paintDesign(target,width,height,{transparent=!!zoneProduct||(editorMode
     if(e.type==='shape'){paintShape(target,e,width,height);target.restore();continue;}
     if(e.type==='sticker'){if(stickerPainter)stickerPainter(target,e,width,height);target.restore();continue;}
     target.translate(e.x*width,e.y*height);
+    if(e.type==='image')target.rotate((e.rotation||0)*Math.PI/180);
     if(e.type==='text'){
       target.font=`bold ${e.size*width/referenceWidth}px Arial`;
       target.textAlign='center';target.textBaseline='middle';target.fillStyle=e.color;
@@ -168,7 +171,7 @@ function draw(){
   if(editorMode==='product'){if(finishMode==='glitter'||isWrappedProduct($('product').value))updateGlitterArtwork();updateTexture()}
   if($('mirrorPreview'))refreshIndividualPreview();
 }
-function bounds(e){if(e?.type==='text'&&(e.typography||e.gradient))return creativeTextBounds(ctx,e,canvas.width,canvas.height);if(e?.type==='vector')return vectorBounds(e,canvas.width,canvas.height);if(e?.type==='shape')return shapeBounds(e,canvas.width,canvas.height);if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
+function bounds(e){if(e?.type==='text'&&(e.typography||e.gradient))return creativeTextBounds(ctx,e,canvas.width,canvas.height);if(e?.type==='vector')return vectorBounds(e,canvas.width,canvas.height);if(e?.type==='shape')return shapeBounds(e,canvas.width,canvas.height);if(e?.type==='sticker')return stickerGeometry.stickerBounds(e,canvas.width,canvas.height);if(!e)return{x:0,y:0,w:0,h:0};let w,h;if(e.type==='glitter')return{x:0,y:0,w:canvas.width,h:canvas.height};if(e.type==='text'){ctx.font=`bold ${e.size}px Arial`;w=Math.min(ctx.measureText(e.text).width,canvas.width*.9);h=e.size*1.25}else{let im=getImage(e);const f=imageFractions(e);w=f.fw*canvas.width;h=f.fh*canvas.height}if(e.type==='image'&&e.rotation){const r=e.rotation*Math.PI/180,ow=w,oh=h;w=Math.abs(ow*Math.cos(r))+Math.abs(oh*Math.sin(r));h=Math.abs(ow*Math.sin(r))+Math.abs(oh*Math.cos(r))}return {x:e.x*canvas.width-w/2,y:e.y*canvas.height-h/2,w,h}}
 function pos(ev){const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/canvas.width,r.height/canvas.height),w=canvas.width*scale,h=canvas.height*scale;return{x:(ev.clientX-r.left-(r.width-w)/2)/scale,y:(ev.clientY-r.top-(r.height-h)/2)/scale}}
 function isEditableCanvasLayer(e){return !!e&&e.visible!==false&&!e.locked&&e.type!=='glitter'}
 function findTopEditableLayerAt(p){
