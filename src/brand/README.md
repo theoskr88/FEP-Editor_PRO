@@ -2,7 +2,7 @@
 
 Logotipo aprobado: archivo original facilitado por los propietarios en esta conversación (FEP azul, cubo dorado, editor y lápiz, texto EDITOR PRO).
 
-**Ubicación obligatoria del archivo:** `src/brand/logo-fep-editor-pro.png`. Debe ser el PNG original, no una reinterpretación ni un gráfico geométrico. No guardar fuentes tipográficas de terceros.
+**Ubicación obligatoria del archivo:** `src/brand/Logotipo FEP Editor Pro con Cubo Dorado.png`. Debe ser el PNG original, no una reinterpretación ni un gráfico geométrico. No guardar fuentes tipográficas de terceros.
 
 La rama P8+P9 incluye:
 - Pantalla de entrada con el **logotipo completo**, visible brevemente después de abrir la WebView, sin alterar el editor.
