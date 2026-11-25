@@ -40,3 +40,17 @@ test('P7 mobile dock, canvas and accessibility keep real editor controls',()=>{
  const markup=fs.readFileSync('index.html','utf8');
  for(const id of ['designCanvas','viewPanel','toolsDock','scenePreset','exportMockup'])assert(markup.includes('id="'+id+'"'));
 });
+
+test('P7 accepts ordinary large phone photographs by normalizing before strict asset validation',()=>{
+ const controls=fs.readFileSync('src/mockup-controls.js','utf8');
+ const start=controls.indexOf('photoInput.onchange=async()=>');
+ const finish=controls.indexOf('for(const[id,key]of',start);
+ const path=controls.slice(start,finish);
+ assert(path.includes('await normalizePhoto(file)'));
+ assert(path.indexOf('await normalizePhoto(file)')<path.indexOf('imageInfo('));
+ assert(!path.includes('file.size>12*1024*1024'));
+ const normalize=fs.readFileSync('src/photo-import-mobile.js','utf8');
+ assert(normalize.includes('fitDimensions(width,height)'));
+ assert(normalize.includes('maxPixels=4000000'));
+ assert(path.includes('backgroundPhotoEnabled:true'));
+});
