@@ -1171,7 +1171,8 @@ try{
   // UTF-8 bytes (not JS string length) are what occupy space in this store-only ZIP.
   const enc=new TextEncoder();
   const backupBytes=files.reduce((sum,file)=>sum+2*enc.encode(file.name).byteLength+enc.encode(file.data).byteLength+76,22);
-  if(backupBytes>100*1024*1024)throw Error('La biblioteca supera 100 MB, límite de restauración segura. Exporta los proyectos individualmente antes de desinstalar.');
+  const restoreBudget=window.FEP_NATIVE?.isNative?60:100;
+  if(backupBytes>restoreBudget*1024*1024)throw Error('La biblioteca supera '+restoreBudget+' MB, límite seguro de restauración en este dispositivo. Exporta los proyectos individualmente antes de desinstalar.');
   const archive=await zipFiles(files);
   if(!await saveBlob(archive,'FEP_Editor_PRO_biblioteca_'+new Date().toISOString().slice(0,10)+'.zip'))throw Error('Guardado cancelado o fallido. Los proyectos originales se conservaron.');
   notify('Respaldo ZIP guardado: '+summaries.length+' proyectos verificados.');
