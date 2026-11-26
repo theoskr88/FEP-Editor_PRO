@@ -1116,13 +1116,13 @@ try{
  const importProject=async file=>localOperation.run('Abriendo respaldo',async({signal,progress})=>{if(file.size>100000000)throw Error('El respaldo supera 100 MB');const raw=JSON.parse(await file.text());if(signal.aborted)throw new DOMException('Importación cancelada','AbortError');if(raw.format==='fep-project'&&raw.version!==1)throw Error('Versión de respaldo no compatible');if(raw.digest&&raw.digest!==await documentDigest(raw.document))throw Error('El respaldo está dañado: no coincide su integridad');const prepared=await prepare(raw.format==='fep-project'?raw.document:raw,{signal,onProgress:progress});if(signal.aborted)throw new DOMException('Importación cancelada','AbortError');return transition(async()=>{const id=await projectLibrary.create(prepared.data,raw.format==='fep-project'?raw.name:file.name.replace(/\.json$/i,''));await applyActivated(prepared,id,1);await autosave.flush();$('startScreen').close()})});
  const importLibraryZip=async file=>localOperation.run('Restaurando biblioteca ZIP',async({signal,progress})=>{
   if(file.size>100*1024*1024)throw Error('ZIP demasiado grande para restaurar de forma segura en Android (máximo 100 MB)');
-  const {manifest,files}=await readFepLibraryZip(file);
+  const {manifest,readText}=await readFepLibraryZip(file,{lazy:true,maxBytes:window.FEP_NATIVE?.isNative?60*1024*1024:100*1024*1024});
   const existing=await projectLibrary.summaries();
   if(existing.length+manifest.count>100)throw Error('El dispositivo contiene '+existing.length+' proyectos. No se pueden restaurar '+manifest.count+' sin superar 100.');
   // Validate the entire archive BEFORE writing a single project.
   for(let i=0;i<manifest.projects.length;i++){
    if(signal.aborted)throw new DOMException('Restauración cancelada','AbortError');
-   const entry=manifest.projects[i],raw=JSON.parse(files.get(entry.file));
+   const entry=manifest.projects[i],raw=JSON.parse(await readText(entry.file));
    if(raw.format!=='fep-project'||raw.version!==1||!raw.document||raw.digest!==entry.digest)throw Error('Contenido de respaldo incompatible: '+entry.name);
    if(await documentDigest(raw.document)!==entry.digest)throw Error('Integridad incorrecta: '+entry.name);
    validateProject(raw.document);
@@ -1133,7 +1133,7 @@ try{
   try{
    for(let i=0;i<manifest.projects.length;i++){
     if(signal.aborted)throw new DOMException('Restauración cancelada','AbortError');
-    const entry=manifest.projects[i],raw=JSON.parse(files.get(entry.file));
+    const entry=manifest.projects[i],raw=JSON.parse(await readText(entry.file));
     const prepared=await prepare(raw.document,{signal,onProgress:progress});
     const id=await projectLibrary.create(prepared.data,raw.name||entry.name);
     created.push(id);progress?.(i+1,manifest.count);
