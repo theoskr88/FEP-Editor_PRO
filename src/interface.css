@@ -212,3 +212,13 @@ textarea{font:inherit;color:inherit;background:#101b28;border:1px solid #394a60;
 .p89-mug-colors button{flex:1 1 72px;min-height:45px;border-radius:10px;border:1px solid #5a7382;color:#e9f9ff;background:linear-gradient(90deg,var(--swatch) 0 8px,#1d3545 8px)}
 .p89-spin-preset button{flex:1 1 72px;min-height:44px;border-radius:10px;border:1px solid #527387;background:#1e3a49;color:#e4f3fb}
 .p89-studio-btn:focus-visible,.p89-mug-colors button:focus-visible,.p89-spin-preset button:focus-visible{outline:3px solid #9beccc;outline-offset:2px}
+
+
+/* RC1: no 3D in Free Design. Never allow focus mode to hide the only canvas. */
+body[data-mode="free"] .p89-view-actions{display:none!important}
+body[data-mode="free"] .p89-exit-focus{display:none!important}
+body[data-mode="free"] .editor-workspace #canvasPanel{display:block!important}
+body[data-mode="free"] .editor-workspace #viewPanel{display:none!important}
+/* Official brand artwork replaces the former geometric placeholder. */
+.brand-mark{position:relative;display:block;overflow:hidden;flex:none}
+.brand-mark img{position:absolute;display:block;width:auto;max-width:none;height:90px;left:-76px;top:-20px}
