@@ -46,9 +46,9 @@ test('P8+P9: modos 2D/3D, escenas, color y velocidad se accionan localmente',()=
 });
 test('P8+P9: respaldo ZIP se importa sin pisar proyectos existentes',()=>{
  const app=fs.readFileSync('app.js','utf8'),manager=fs.readFileSync('src/project-manager.js','utf8');
- assert(app.includes("readFepLibraryZip(file)"));
- assert(app.includes("projectLibrary.create(prepared.data"));
- assert(app.includes("projectLibrary.remove(id)"));
+ assert(app.includes('readFepLibraryZip(file,{lazy:true'));
+ assert(app.includes('projectLibrary.createRestored(prepared.data'));
+ assert(app.includes('projectLibrary.rollbackLibraryRestore()'));
  assert(app.includes("validateProject(raw.document)"));
  assert(manager.includes('projectsImportZip'));
  assert(manager.includes('projectsZipFile'));
@@ -70,10 +70,10 @@ test('P8+P9 logotipo oficial: splash web y recursos Android usan imagen original
  const workflow=fs.readFileSync('.github/workflows/android-editor.yml','utf8');
  assert(index.includes('fepOfficialLaunch'));
  assert(index.includes('./src/brand/Logotipo FEP Editor Pro con Cubo Dorado.png'));
- assert(index.includes('setTimeout(remove,1550)'));
+ assert(index.includes('setTimeout(remove,400)'));
  assert(script.includes('src/brand/Logotipo FEP Editor Pro con Cubo Dorado.png'));
  assert(script.includes('fep_official_foreground.png'));
  assert(script.includes('drawable-land'));
  assert(workflow.includes('Pillow==11.3.0'));
- assert(workflow.includes('Official FEP Editor PRO PNG missing'));
+ assert(workflow.includes('RC1 official splash check passed'));
 });
