@@ -122,7 +122,7 @@ jobs:
           node --check scripts/native-bridge-entry.js
           node --check src/photo-tools.js
           node --check src/photo-import-mobile.js
-          node --test tests/premium-p8p9.test.mjs tests/premium-p7.test.mjs tests/premium-p6.test.mjs tests/premium-p5.test.mjs tests/premium-p4.test.mjs tests/core.test.mjs tests/photo-tools.test.mjs tests/photo-import-mobile.test.mjs tests/android-project-reopen.test.mjs tests/premium-3d.test.mjs tests/premium-3d-p2.test.mjs
+          node --test tests/rc1-technical.test.mjs tests/premium-p8p9.test.mjs tests/premium-p7.test.mjs tests/premium-p6.test.mjs tests/premium-p5.test.mjs tests/premium-p4.test.mjs tests/core.test.mjs tests/photo-tools.test.mjs tests/photo-import-mobile.test.mjs tests/android-project-reopen.test.mjs tests/premium-3d.test.mjs tests/premium-3d-p2.test.mjs
       - name: Prepare bundled offline web assets
         shell: bash
         run: |
