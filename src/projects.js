@@ -20,6 +20,28 @@ export function openProjectLibrary(factory=globalThis.indexedDB,{validate=async 
   list:()=>transaction(['catalog'],'readonly',(tx,_,set)=>{const r=tx.objectStore('catalog').getAll();r.onsuccess=()=>set(r.result)}),
   activate:id=>transaction(['settings','projects'],'readwrite',(tx,get)=>{if(id===null){tx.objectStore('settings').put(null,'active');return}get('projects',id,record=>{if(!record)throw Error('El proyecto ya no existe; abre otro o importa un respaldo');tx.objectStore('settings').put(id,'active')})}),
   create:async(document,name,thumbnail='')=>{document=cleanDocument(document);await validate(document);const digest=await documentDigest(document),id=identifier();await transaction(['projects','catalog'],'readwrite',tx=>{tx.objectStore('projects').add({id,document,digest,revision:1,backups:[]},id);tx.objectStore('catalog').add(meta(id,name,document,thumbnail),id)});return id},
+  // RC1 restore journal: the project write and journal update share one
+  // IndexedDB transaction. A process kill leaves a journal that startup rolls back.
+  beginLibraryRestore:()=>transaction(['settings'],'readwrite',(tx,get)=>get('settings','pendingLibraryRestore',old=>{
+   if(old)throw Error('Hay una restauración anterior pendiente de recuperación');
+   tx.objectStore('settings').put({ids:[],startedAt:Date.now()},'pendingLibraryRestore');
+  })),
+  createRestored:async(document,name)=>{
+   document=cleanDocument(document);await validate(document);
+   const digest=await documentDigest(document),id=identifier();
+   await transaction(['projects','catalog','settings'],'readwrite',(tx,get)=>get('settings','pendingLibraryRestore',journal=>{
+    if(!journal||!Array.isArray(journal.ids))throw Error('No existe una restauración segura en curso');
+    tx.objectStore('projects').add({id,document,digest,revision:1,backups:[]},id);
+    tx.objectStore('catalog').add(meta(id,name,document),id);
+    tx.objectStore('settings').put({...journal,ids:[...journal.ids,id]},'pendingLibraryRestore');
+   }));
+   return id;
+  },
+  finishLibraryRestore:()=>transaction(['settings'],'readwrite',tx=>tx.objectStore('settings').delete('pendingLibraryRestore')),
+  rollbackLibraryRestore:()=>transaction(['projects','catalog','settings'],'readwrite',(tx,get)=>get('settings','pendingLibraryRestore',journal=>{
+   for(const id of journal?.ids||[]){tx.objectStore('projects').delete(id);tx.objectStore('catalog').delete(id)}
+   tx.objectStore('settings').delete('pendingLibraryRestore');
+  })),
   save:async(id,document,thumbnail='',expectedRevision)=>{document=cleanDocument(document);await validate(document);const digest=await documentDigest(document),base=await api.get(id);if(!base)throw Error('El proyecto ya no existe; exporta el diseño para conservarlo');if(expectedRevision!==undefined&&base.revision!==expectedRevision)throw Error('Otra pestaña cambió este proyecto. Exporta tu diseño y vuelve a abrirlo');return transaction(['projects','catalog'],'readwrite',(tx,get,set)=>get('projects',id,old=>{if(!old||old.revision!==base.revision)throw Error('El proyecto cambió durante el guardado. Vuelve a abrirlo');const same=JSON.stringify(old.document)===JSON.stringify(document);if(same&&old.digest){if(thumbnail)get('catalog',id,catalog=>{if(!catalog.thumbnail)tx.objectStore('catalog').put({...catalog,thumbnail},id)});set({changed:false,revision:old.revision});return}get('catalog',id,catalog=>{const backups=same?(old.backups||[]):[{document:old.document,digest:old.digest,savedAt:catalog.modifiedAt},...(old.backups|| (old.previous?[{document:old.previous}]:[]))].slice(0,3);tx.objectStore('projects').put({id,document,digest,backups,previous:backups[0]?.document,revision:old.revision+1},id);tx.objectStore('catalog').put({...meta(id,catalog.name,document,thumbnail||catalog.thumbnail,catalog.createdAt)},id);set({changed:true,revision:old.revision+1})})}))},
   history:async id=>{const record=await read('projects',id),entries=record?.backups||(record?.previous?[{document:record.previous}]:[]),valid=[];for(let index=0;index<entries.length;index++){try{await verify(entries[index]);valid.push({...entries[index],index})}catch{}}return valid},
   restore:async(id,index=0)=>{const old=await read('projects',id),entries=old?.backups||(old?.previous?[{document:old.previous}]:[]),entry=entries[index];await verify(entry);let currentValid=false;try{await verify(old);currentValid=true}catch{}const digest=await documentDigest(entry.document),backups=currentValid?[{document:old.document,digest:old.digest,savedAt:Date.now()},...entries.filter((_,i)=>i!==index)].slice(0,3):entries;return transaction(['projects','catalog'],'readwrite',(tx,get,set)=>get('projects',id,current=>{if(current.revision!==old.revision)throw Error('El proyecto cambió; vuelve a abrir el historial');tx.objectStore('projects').put({...current,document:entry.document,digest,backups,previous:backups[0]?.document,revision:current.revision+1,quarantine:current.document},id);get('catalog',id,c=>tx.objectStore('catalog').put({...c,modifiedAt:Date.now()},id));set({document:entry.document,revision:current.revision+1})}))},
