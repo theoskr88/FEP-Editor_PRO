@@ -57,7 +57,7 @@ test('P8+P9: respaldo ZIP se importa sin pisar proyectos existentes',()=>{
 
 test('P8+P9 cierre: no exportar ZIP que no sea restaurable y comprobar firma debug',()=>{
  const app=fs.readFileSync('app.js','utf8'),workflow=fs.readFileSync('.github/workflows/android-editor.yml','utf8');
- assert(app.includes('backupBytes>100*1024*1024'));
+ assert(app.includes('backupBytes>restoreBudget*1024*1024'));
  assert(app.includes('2*enc.encode(file.name).byteLength'));
  assert(app.includes('const archive=await zipFiles(files)'));
  assert(workflow.includes('debug-signing-fingerprint.txt'));
