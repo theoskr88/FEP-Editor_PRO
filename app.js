@@ -1059,6 +1059,8 @@ let documentStore,autosave;
 const startupControls=[...document.querySelectorAll('button,input,select')].filter(n=>!n.matches('[role=tab],[data-open-tool],#closeTools,#copyStartupReport,#retryStartup')).map(node=>[node,node.disabled]);startupControls.forEach(([node])=>node.disabled=true);
 try{
  projectLibrary=await openProjectLibrary();
+ // Repair a library restore interrupted by process termination before showing projects.
+ if(await projectLibrary.setting('pendingLibraryRestore')){await projectLibrary.rollbackLibraryRestore();notify('Se recuperó una restauración ZIP interrumpida; tus proyectos anteriores siguen intactos.');}
  const thumbnail=()=>{const c=document.createElement('canvas');c.width=240;c.height=160;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,240,160);const scale=Math.min(240/textureCanvas.width,160/textureCanvas.height);x.drawImage(textureCanvas,(240-textureCanvas.width*scale)/2,(160-textureCanvas.height*scale)/2,textureCanvas.width*scale,textureCanvas.height*scale);return c.toDataURL('image/webp',.8)};
  projectSession=createProjectSession(projectLibrary,{thumbnail});documentStore=projectSession;
  if(!await projectLibrary.setting('legacyMigrated')){const legacy=await openDocumentStore();try{const entries=[];for(const key of ['previous','current']){const old=await legacy.read(key);if(old){try{const prepared=await prepareProject(old.document);entries.push({document:prepared.data,name:'Recuperado · '+(key==='current'?'último proyecto':'versión anterior')})}catch(error){notify('Se conservó un guardado anterior que no se pudo migrar: '+error.message)}}}await projectLibrary.migrateLegacy(entries)}finally{legacy.close()}}
@@ -1129,20 +1131,23 @@ try{
    progress?.(i+1,manifest.count);
   }
   if(!confirm('Restaurar '+manifest.count+' proyectos como copias nuevas? Los existentes se conservarán.'))return;
-  const created=[];
+  await projectLibrary.beginLibraryRestore();
   try{
    for(let i=0;i<manifest.projects.length;i++){
     if(signal.aborted)throw new DOMException('Restauración cancelada','AbortError');
     const entry=manifest.projects[i],raw=JSON.parse(await readText(entry.file));
     const prepared=await prepare(raw.document,{signal,onProgress:progress});
-    const id=await projectLibrary.create(prepared.data,raw.name||entry.name);
-    created.push(id);progress?.(i+1,manifest.count);
+    await projectLibrary.createRestored(prepared.data,raw.name||entry.name);
+    progress?.(i+1,manifest.count);
    }
+   await projectLibrary.finishLibraryRestore();
   }catch(error){
-   for(const id of created){try{await projectLibrary.remove(id)}catch{}}
-   throw Error('No se completó la restauración. Se intentó revertir cualquier copia parcial. '+error.message);
+   try{await projectLibrary.rollbackLibraryRestore()}catch(rollbackError){
+    throw Error('Restauración interrumpida; se revertirá al abrir nuevamente. '+rollbackError.message);
+   }
+   throw Error('No se completó la restauración; las copias parciales fueron revertidas. '+error.message);
   }
-  notify('Restaurados '+created.length+' proyectos como copias nuevas. Tus proyectos originales siguen intactos.');
+  notify('Restaurados '+manifest.count+' proyectos como copias nuevas. Tus proyectos originales siguen intactos.');
  });
  const exportProject=async id=>{if(id===projectSession.id&&!projectRecoveryError&&!await autosave.flush())throw Error('No se pudo guardar antes del respaldo');const [record,meta]=await Promise.all([projectLibrary.get(id),projectLibrary.catalog(id)]);const name=meta?.name||'Proyecto';const saved=await saveBlob(new Blob([JSON.stringify({format:'fep-project',version:1,name,digest:await documentDigest(record.document),document:record.document})],{type:'application/json'}),name+'.json');if(!saved)throw Error('No se guardó el respaldo del proyecto')};
  const exportAllProjects=async()=>{
