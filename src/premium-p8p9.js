@@ -9,6 +9,8 @@ export function initIntegratedWorkspace({get,notify}){
  workspace.dataset.p89View='both';
  function setMode(next){
   if(!['both','design','mockup'].includes(next))return;
+  // Free-design mode deliberately has no 3D model; never hide its only canvas.
+  if(document.body.dataset.mode==='free'&&next==='mockup')next='both';
   // Never hide a product from the actual editor data or change selection/history.
   workspace.dataset.p89View=next;mode=next;
   for(const button of actions.querySelectorAll('button'))button.setAttribute('aria-pressed',String(button.dataset.mode===next));
@@ -23,6 +25,10 @@ export function initIntegratedWorkspace({get,notify}){
  header?.after(actions);
  const exit=document.createElement('button');exit.type='button';exit.className='p89-exit-focus';exit.textContent='Volver a diseño + 3D';exit.hidden=true;
  exit.onclick=()=>setMode('both');workspace.append(exit);
+ const keepFreeVisible=()=>{
+  if(document.body.dataset.mode==='free'&&mode==='mockup')setMode('both');
+ };
+ new MutationObserver(keepFreeVisible).observe(document.body,{attributes:true,attributeFilter:['data-mode']});
  const originalSetMode=setMode;
  function syncExit(){exit.hidden=mode==='both'}
  actions.addEventListener('click',syncExit);
